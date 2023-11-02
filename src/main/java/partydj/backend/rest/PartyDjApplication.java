@@ -1,4 +1,4 @@
-package com.partydj.partydj;
+package partydj.backend.rest;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,4 +9,5 @@ public class PartyDjApplication {
     public static void main(String[] args) {
         SpringApplication.run(PartyDjApplication.class, args);
     }
+
 }

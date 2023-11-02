@@ -1,4 +1,4 @@
-package com.partydj.partydj;
+package partydj.backend.rest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -3,7 +3,7 @@
 ## Database models:
 
 | Name               | Parameters                                                                            |
-| ------------------ | ------------------------------------------------------------------------------------- |
+|--------------------|---------------------------------------------------------------------------------------|
 | User               | email\*, username\*, password\*                                                       |
 | Party              | creator\* [userId], name\*, password                                                  |
 | SpotifyCredentials | owner\* [userId], token\*, refreshToken\*, state                                      |
@@ -15,13 +15,13 @@
 ### Home
 
 | Done | Name | Method | Path | Description           |
-| ---- | ---- | ------ | ---- | --------------------- |
+|------|------|--------|------|-----------------------|
 | [ ]  | Home | GET    | /    | Returns the home page |
 
 ### User
 
 | Done | Name     | Method | Path              | Description                   |
-| ---- | -------- | ------ | ----------------- | ----------------------------- |
+|------|----------|--------|-------------------|-------------------------------|
 | [ ]  | Register | GET    | /profile/register | Retruns the registration page |
 | [ ]  | Register | POST   | /profile/register | Validates the submitted data  |
 | [ ]  | Login    | GET    | /profile/login    | Retruns the login page        |
@@ -34,7 +34,7 @@
 ### Party
 
 | Done | Name          | Method | Path                   | Description                                       |
-| ---- | ------------- | ------ | ---------------------- | ------------------------------------------------- |
+|------|---------------|--------|------------------------|---------------------------------------------------|
 | [ ]  | Landing       | GET    | /party/landing         | Returns the create/join page                      |
 | [ ]  | Join          | GET    | /party/join            | Returns the party login page                      |
 | [ ]  | Join          | POST   | /party/join            | Validates the submitted data                      |
@@ -53,12 +53,15 @@
 ### SpotifyCredentials
 
 | Done | Name         | Method | Path                          | Description                                        |
-| ---- | ------------ | ------ | ----------------------------- | -------------------------------------------------- |
+|------|--------------|--------|-------------------------------|----------------------------------------------------|
 | [ ]  | Connect      | POST   | /platforms/spotify/connect    | Redirects the user to the Spotify login page       |
 | [ ]  | Connect      | _POST_ | /platforms/spotify/callback   | Spoitfy login page redirects users here            |
 | [ ]  | Disconnect   | POST   | /platforms/spotify/disconnect | Disconnects the Spotify from the user              |
 | [ ]  | GetToken     | GET    | /platforms/spotify/token      | Returns the user's Spotify token                   |
 | [ ]  | RefreshToken | PATCH  | /platforms/spotify/token      | Makes the backend refresh the user's Spotify token |
+
+[ ] Add cascade options for db relations.
+
 
 # FrontEnd
 
