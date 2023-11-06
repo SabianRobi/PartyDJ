@@ -33,4 +33,14 @@ public class RestResponseEntityExceptionHandler
                 .build();
         return handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
+
+    @ExceptionHandler(value = IllegalStateException.class)
+    protected  ResponseEntity<Object> handleConstraintViolationException(final IllegalStateException ex, final WebRequest request) {
+        final ErrorResponse responseBody = ErrorResponse.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error(ex.getMessage())
+                .build();
+        return handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.CONFLICT, request);
+    }
 }

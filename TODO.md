@@ -61,7 +61,7 @@
 | [ ]  | RefreshToken | PATCH  | /platforms/spotify/token      | Makes the backend refresh the user's Spotify token |
 
 [ ] Add cascade options for db relations.
-
+[ ] Encrypt passwords
 
 # FrontEnd
 
