@@ -4,17 +4,18 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.UserType;
 
 import java.util.Collection;
 
+@Getter
+@Setter
 @Entity
-@Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -42,23 +43,7 @@ public class User {
     @OneToOne
     private SpotifyCredential spotifyCredential;
 
-    @ManyToOne
-    private Party party;
-
-    @OneToMany
     @NotNull
+    @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Collection<Track> addedTracks;
-
-    @Builder
-    public User(int id, String email, String username, String password, UserType userType, PartyRole partyRole, SpotifyCredential spotifyCredential, Party party, Collection<Track> addedTracks) {
-        this.id = id;
-        this.email = email;
-        this.username = username;
-        this.password = password;
-        this.userType = userType;
-        this.partyRole = partyRole;
-        this.spotifyCredential = spotifyCredential;
-        this.party = party;
-        this.addedTracks = addedTracks;
-    }
 }

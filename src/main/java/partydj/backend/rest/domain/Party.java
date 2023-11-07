@@ -1,18 +1,16 @@
 package partydj.backend.rest.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.util.Collection;
 
+@Getter
+@Setter
 @Entity
-@Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Party {
     @Id
     @GeneratedValue
@@ -23,24 +21,12 @@ public class Party {
     private String spotifyDeviceId;
     private boolean waitingForTrack;
 
-    @OneToMany
-    private Collection<Track> queue;
+    @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Collection<Track> inQueueTracks;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Collection<Track> previousTracks;
 
     @OneToMany
     private Collection<User> users;
-
-    @Builder
-    public Party(int id, String name, String password, String spotifyDeviceId, boolean waitingForTrack, Collection<Track> queue, Collection<Track> previousTracks, Collection<User> users) {
-        this.id = id;
-        this.name = name;
-        this.password = password;
-        this.spotifyDeviceId = spotifyDeviceId;
-        this.waitingForTrack = waitingForTrack;
-        this.queue = queue;
-        this.previousTracks = previousTracks;
-        this.users = users;
-    }
 }
