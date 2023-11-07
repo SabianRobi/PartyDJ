@@ -21,4 +21,8 @@ public class PartyService {
     public Party findById(final int partyId) {
         return repository.findById(partyId);
     }
+
+    public boolean existsByName(final String name) {
+        return repository.existsByName(name);
+    }
 }
