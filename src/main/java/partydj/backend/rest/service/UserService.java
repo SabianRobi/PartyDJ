@@ -12,11 +12,7 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public User findById(int userId) {
-        return userRepository.findById(userId);
-    }
-
-    public User save(User user) {
+    public User save(final User user) {
         try {
             return userRepository.save(user);
         } catch (DataIntegrityViolationException ex) {
@@ -24,11 +20,19 @@ public class UserService {
         }
     }
 
-    public boolean existsByUsername(String username) {
+    public void delete(final User user) {
+        userRepository.delete(user);
+    }
+
+    public User findById(final int userId) {
+        return userRepository.findById(userId);
+    }
+
+    public boolean existsByUsername(final String username) {
         return userRepository.existsByUsername(username);
     }
 
-    public boolean existsByEmail(String email) {
+    public boolean existsByEmail(final String email) {
         return  userRepository.existsByEmail(email);
     }
 }
