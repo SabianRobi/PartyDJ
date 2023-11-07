@@ -11,7 +11,7 @@ public class UserValidator {
     @Autowired
     private UserService userService;
 
-    public void validateOnGet(User user) {
+    public void validateOnGetAndDelete(User user) {
         if (user == null) {
             throw new EntityNotFoundException("User does not exists.");
         }

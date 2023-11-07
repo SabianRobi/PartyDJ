@@ -32,10 +32,16 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public UserResponse get(@PathVariable final int userId) {
-        User user =  userService.findById(userId);
-        userValidator.validateOnGet(user);
-        return userTransformer.transformUserToUserResponse(user);
         User user = userService.findById(userId);
+        userValidator.validateOnGetAndDelete(user);
+        return userMapper.mapUserToUserResponse(user);
+    }
+
+    @DeleteMapping("/{userId}")
+    public UserResponse delete(@PathVariable final int userId) {
+        User user = userService.findById(userId);
+        userValidator.validateOnGetAndDelete(user);
+        userService.delete(user);
         return userMapper.mapUserToUserResponse(user);
     }
 }
