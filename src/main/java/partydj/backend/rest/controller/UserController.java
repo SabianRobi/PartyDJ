@@ -22,6 +22,7 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
+    // Register & update
     @PostMapping
     public UserResponse save(final SaveUserRequest userRequest) {
         User user = userMapper.mapUserRequestToUser(userRequest);
@@ -30,6 +31,7 @@ public class UserController {
         return userMapper.mapUserToUserResponse(savedUser);
     }
 
+    // Listing user infos
     @GetMapping("/{userId}")
     public UserResponse get(@PathVariable final int userId) {
         User user = userService.findById(userId);
@@ -37,6 +39,7 @@ public class UserController {
         return userMapper.mapUserToUserResponse(user);
     }
 
+    // Delete
     @DeleteMapping("/{userId}")
     public UserResponse delete(@PathVariable final int userId) {
         User user = userService.findById(userId);
