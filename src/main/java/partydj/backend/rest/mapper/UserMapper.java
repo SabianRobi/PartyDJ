@@ -1,4 +1,4 @@
-package partydj.backend.rest.transformer;
+package partydj.backend.rest.mapper;
 
 import org.springframework.stereotype.Component;
 import partydj.backend.rest.domain.User;
@@ -9,8 +9,8 @@ import partydj.backend.rest.domain.response.UserResponse;
 import java.util.ArrayList;
 
 @Component
-public class UserTransformer {
-    public UserResponse transformUserToUserResponse(final User user) {
+public class UserMapper {
+    public UserResponse mapUserToUserResponse(final User user) {
         return UserResponse.builder()
                 .id(user.getId())
                 .email(user.getEmail())
@@ -18,7 +18,7 @@ public class UserTransformer {
                 .build();
     }
 
-    public User transformUserRequestToUser(final SaveUserRequest userRequest) {
+    public User mapUserRequestToUser(final SaveUserRequest userRequest) {
         return User.builder()
                 .email(userRequest.getEmail())
                 .username(userRequest.getUsername())

@@ -6,7 +6,7 @@ import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.request.SaveUserRequest;
 import partydj.backend.rest.domain.response.UserResponse;
 import partydj.backend.rest.service.UserService;
-import partydj.backend.rest.transformer.UserTransformer;
+import partydj.backend.rest.mapper.UserMapper;
 import partydj.backend.rest.validation.UserValidator;
 
 @RestController
@@ -20,14 +20,14 @@ public class UserController {
     private UserValidator userValidator;
 
     @Autowired
-    private UserTransformer userTransformer;
+    private UserMapper userMapper;
 
     @PostMapping
     public UserResponse save(final SaveUserRequest userRequest) {
-        User user = userTransformer.transformUserRequestToUser(userRequest);
+        User user = userMapper.mapUserRequestToUser(userRequest);
         userValidator.validateOnPost(user);
         User savedUser = userService.save(user);
-        return userTransformer.transformUserToUserResponse(savedUser);
+        return userMapper.mapUserToUserResponse(savedUser);
     }
 
     @GetMapping("/{userId}")
@@ -35,5 +35,7 @@ public class UserController {
         User user =  userService.findById(userId);
         userValidator.validateOnGet(user);
         return userTransformer.transformUserToUserResponse(user);
+        User user = userService.findById(userId);
+        return userMapper.mapUserToUserResponse(user);
     }
 }
