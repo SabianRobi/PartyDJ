@@ -45,7 +45,7 @@ localhost:8080/api/v1/
 | [X]  | Create        | POST   | /party/create                       | Validates the submitted data                      |
 | [F]  | Party         | GET    | F: /party/{partyName}               | Returns the party page                            |
 | [ ]  | Leave         | POST   | /party/{partyName}/leave            | Removes the user from the party                   |
-| [ ]  | Delete        | DELETE | /party/{partyName}                  | Deletes the party                                 |
+| [X]  | Delete        | DELETE | /party/{partyName}                  | Deletes the party                                 |
 | [ ]  | Search        | GET    | /party/search                       | Returns the search results                        |
 | [ ]  | WatchQueue    | GET    | /party/{partyName}/tracks           | Returns the tracks in queue                       |
 | [ ]  | AddTrack      | POST   | /party/{partyName}/tracks           | Adds a track to the queue                         |

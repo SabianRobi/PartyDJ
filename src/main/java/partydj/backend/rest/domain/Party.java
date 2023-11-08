@@ -29,6 +29,6 @@ public class Party {
     @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Collection<Track> previousTracks;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.EAGER)
     private Collection<User> users;
 }
