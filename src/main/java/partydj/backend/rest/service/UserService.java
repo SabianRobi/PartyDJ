@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.repository.UserRepository;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
 
@@ -34,5 +36,12 @@ public class UserService {
 
     public boolean existsByEmail(final String email) {
         return  userRepository.existsByEmail(email);
+    }
+
+    public User update(final User user, final User updatedUserInfos) {
+        Optional.ofNullable(updatedUserInfos.getUsername()).ifPresent(user::setUsername);
+        Optional.ofNullable(updatedUserInfos.getEmail()).ifPresent(user::setEmail);
+        Optional.ofNullable(updatedUserInfos.getPassword()).ifPresent(user::setPassword);
+        return userRepository.save(user);
     }
 }

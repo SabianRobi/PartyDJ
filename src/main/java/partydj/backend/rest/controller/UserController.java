@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.request.SaveUserRequest;
+import partydj.backend.rest.domain.request.UpdateUserRequest;
 import partydj.backend.rest.domain.response.UserResponse;
 import partydj.backend.rest.mapper.UserMapper;
 import partydj.backend.rest.service.UserService;
@@ -22,13 +23,26 @@ public class UserController {
     @Autowired
     private UserMapper userMapper;
 
-    // Register & update
+    // Register
     @PostMapping
     public UserResponse save(final SaveUserRequest userRequest) {
         User user = userMapper.mapUserRequestToUser(userRequest);
         userValidator.validateOnPost(user);
         User savedUser = userService.save(user);
         return userMapper.mapUserToUserResponse(savedUser);
+    }
+
+    // Update
+    @PatchMapping("/{userId}")
+    public UserResponse update(final UpdateUserRequest userRequest, @PathVariable final int userId) {
+        User updatedUserInfos = userMapper.mapUpdateUserRequestToUser(userRequest);
+        userValidator.validateOnUpdate(updatedUserInfos);
+
+        User user = userService.findById(userId);
+        userValidator.validateOnGetAndDelete(user);
+
+        User updatedUser = userService.update(user, updatedUserInfos);
+        return userMapper.mapUserToUserResponse(updatedUser);
     }
 
     // Listing user infos
