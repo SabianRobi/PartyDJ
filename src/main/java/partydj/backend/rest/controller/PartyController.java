@@ -22,6 +22,7 @@ public class PartyController {
     @Autowired
     private PartyMapper partyMapper;
 
+    // Register & update
     @PostMapping
     public PartyResponse save(final SavePartyRequest savePartyRequest) {
         Party party = partyMapper.mapPartyRequestToParty(savePartyRequest);

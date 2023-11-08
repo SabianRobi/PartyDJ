@@ -5,8 +5,8 @@ import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.request.SaveUserRequest;
 import partydj.backend.rest.domain.response.UserResponse;
-import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.mapper.UserMapper;
+import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.UserValidator;
 
 @RestController
