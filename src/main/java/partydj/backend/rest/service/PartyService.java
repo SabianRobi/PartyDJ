@@ -25,4 +25,8 @@ public class PartyService {
     public boolean existsByName(final String name) {
         return repository.existsByName(name);
     }
+
+    public Party findByName(final String name) {
+        return repository.findByName(name);
+    }
 }

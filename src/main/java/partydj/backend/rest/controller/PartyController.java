@@ -33,12 +33,11 @@ public class PartyController {
 
     // Delete
     @Transactional
-    @DeleteMapping("/{partyId}")
-    public PartyResponse delete(@PathVariable final int partyId) {
-        Party party = partyService.findById(partyId);
+    @DeleteMapping("/{partyName}")
+    public PartyResponse delete(@PathVariable final String partyName) {
+        Party party = partyService.findByName(partyName);
         partyValidator.validateOnGetAndDelete(party);
         partyService.delete(party);
-        System.out.println(party.toString());
         return partyMapper.mapPartyToPartyResponse(party);
     }
 }

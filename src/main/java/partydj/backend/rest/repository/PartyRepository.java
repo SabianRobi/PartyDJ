@@ -7,4 +7,6 @@ public interface PartyRepository extends CrudRepository<Party, Integer> {
     Party findById(final int id);
 
     boolean existsByName(final String name);
+
+    Party findByName(final String name);
 }
