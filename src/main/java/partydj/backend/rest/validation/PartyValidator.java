@@ -1,5 +1,6 @@
 package partydj.backend.rest.validation;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.Party;
@@ -17,6 +18,12 @@ public class PartyValidator {
 
         if (partyService.existsByName(party.getName())) {
             throw new IllegalStateException("A party with this name already exists.");
+        }
+    }
+
+    public void validateOnGetAndDelete(Party party) {
+        if (party == null) {
+            throw new EntityNotFoundException("Party does not exists.");
         }
     }
 }

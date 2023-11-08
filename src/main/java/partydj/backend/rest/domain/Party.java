@@ -1,6 +1,7 @@
 package partydj.backend.rest.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.util.Collection;
@@ -16,6 +17,7 @@ public class Party {
     @GeneratedValue
     private int id;
 
+    @NotBlank
     private String name;
     private String password;
     private String spotifyDeviceId;
