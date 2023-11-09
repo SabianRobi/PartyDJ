@@ -4,7 +4,11 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.Party;
+import partydj.backend.rest.domain.User;
+import partydj.backend.rest.domain.request.JoinPartyRequest;
 import partydj.backend.rest.service.PartyService;
+
+import java.util.Objects;
 
 @Service
 public class PartyValidator {

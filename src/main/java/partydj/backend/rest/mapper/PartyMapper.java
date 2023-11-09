@@ -1,5 +1,6 @@
 package partydj.backend.rest.mapper;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import partydj.backend.rest.domain.Party;
 import partydj.backend.rest.domain.request.SavePartyRequest;
