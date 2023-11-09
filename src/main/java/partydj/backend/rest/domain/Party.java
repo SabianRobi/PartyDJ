@@ -31,4 +31,11 @@ public class Party {
 
     @OneToMany(fetch = FetchType.EAGER)
     private Collection<User> users;
+
+    public boolean hasPassword() { return password != null; }
+
+    public void addUser(User user) {
+        users.add(user);
+    }
+
 }

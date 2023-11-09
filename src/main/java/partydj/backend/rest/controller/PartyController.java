@@ -4,10 +4,14 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.Party;
+import partydj.backend.rest.domain.User;
+import partydj.backend.rest.domain.enums.PartyRole;
+import partydj.backend.rest.domain.request.JoinPartyRequest;
 import partydj.backend.rest.domain.request.SavePartyRequest;
 import partydj.backend.rest.domain.response.PartyResponse;
 import partydj.backend.rest.mapper.PartyMapper;
 import partydj.backend.rest.service.PartyService;
+import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.PartyValidator;
 
 @RestController
@@ -22,7 +26,10 @@ public class PartyController {
     @Autowired
     private PartyMapper partyMapper;
 
-    // Register & update
+    @Autowired
+    private UserService userService;
+
+    // Create & update
     @PostMapping
     public PartyResponse save(final SavePartyRequest savePartyRequest) {
         Party party = partyMapper.mapPartyRequestToParty(savePartyRequest);
@@ -38,6 +45,21 @@ public class PartyController {
         Party party = partyService.findByName(partyName);
         partyValidator.validateOnGetAndDelete(party);
         partyService.delete(party);
+        return partyMapper.mapPartyToPartyResponse(party);
+    }
+
+    // Join
+    @PostMapping("/*/join")
+    public PartyResponse join(final JoinPartyRequest joinRequest) {
+        User user = userService.findById(1); // TODO: get authenticated user instead
+        Party party = partyService.findByName(joinRequest.getName());
+        partyValidator.validateOnJoin(joinRequest, party, user);
+
+        party.addUser(user);
+        user.setPartyRole(PartyRole.PARTICIPANT);
+        userService.save(user);
+        partyService.save(party);
+
         return partyMapper.mapPartyToPartyResponse(party);
     }
 }

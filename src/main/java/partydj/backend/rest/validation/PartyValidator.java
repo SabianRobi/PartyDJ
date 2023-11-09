@@ -21,7 +21,29 @@ public class PartyValidator {
         }
     }
 
-    public void validateOnGetAndDelete(Party party) {
+    // Get & Delete
+    public void validateOnGetAndDelete(final Party party) {
+        checkPartyExists(party);
+    }
+
+    // Join
+    public void validateOnJoin(final JoinPartyRequest joinRequest, final Party party, final User user) {
+        // Check user is already at a party
+        if (user.getPartyRole() != null) {
+            throw new IllegalStateException("User is already in a party.");
+        }
+
+        checkPartyExists(party);
+
+        // Check password matches when required
+        if (party.hasPassword() &&
+                (joinRequest.getPassword() == null ||
+                        !Objects.equals(party.getPassword(), joinRequest.getPassword().trim()))) {
+            throw new IllegalStateException("Incorrect password.");
+        }
+    }
+
+    private void checkPartyExists(final Party party) {
         if (party == null) {
             throw new EntityNotFoundException("Party does not exists.");
         }
