@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.Party;
 import partydj.backend.rest.domain.User;
+import partydj.backend.rest.domain.error.RequiredFieldMissingException;
 import partydj.backend.rest.domain.request.JoinPartyRequest;
 import partydj.backend.rest.service.PartyService;
 
@@ -18,7 +19,7 @@ public class PartyValidator {
     // Create
     public void validateOnPost(final Party party) {
         if (party.getName() == null || party.getName().isBlank()) {
-            throw new IllegalStateException("Party name cannot be empty.");
+            throw new RequiredFieldMissingException("Party name cannot be empty.");
         }
 
         if (partyService.existsByName(party.getName())) {

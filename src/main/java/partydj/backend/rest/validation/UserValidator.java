@@ -4,6 +4,8 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.User;
+import partydj.backend.rest.domain.error.RequiredFieldInvalidException;
+import partydj.backend.rest.domain.error.RequiredFieldMissingException;
 import partydj.backend.rest.service.UserService;
 
 import java.util.regex.Matcher;
@@ -23,14 +25,14 @@ public class UserValidator {
     }
 
     public void validateOnPost(User user) {
-        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
-            throw new IllegalStateException("Email cannot be empty.");
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
+            throw new RequiredFieldMissingException("Email cannot be empty.");
         }
-        if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
-            throw new IllegalStateException("Username cannot be empty.");
+        if (user.getUsername() == null || user.getUsername().isBlank()) {
+            throw new RequiredFieldMissingException("Username cannot be empty.");
         }
-        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
-            throw new IllegalStateException("Password cannot be empty.");
+        if (user.getPassword() == null || user.getPassword().isBlank()) {
+            throw new RequiredFieldMissingException("Password cannot be empty.");
         }
 
         CheckUsernameMinLength(user.getUsername());
@@ -54,14 +56,14 @@ public class UserValidator {
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(email);
 
-        if(!m.matches()) {
-            throw new IllegalStateException("Invalid email format.");
+        if (!m.matches()) {
+            throw new RequiredFieldInvalidException("Invalid email format.");
         }
     }
 
     private void CheckUsernameMinLength(final String username) {
         if (username.trim().length() < USERNAME_MIN_LENGTH) {
-            throw new IllegalStateException("Username must be at least " + USERNAME_MIN_LENGTH + " characters long.");
+            throw new RequiredFieldInvalidException("Username must be at least " + USERNAME_MIN_LENGTH + " characters long.");
         }
     }
 
