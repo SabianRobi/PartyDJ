@@ -26,7 +26,7 @@ public class UserController {
     // Register
     @PostMapping
     public UserResponse save(final SaveUserRequest userRequest) {
-        User user = userMapper.mapUserRequestToUser(userRequest);
+        User user = userMapper.mapSaveUserRequestToUser(userRequest);
         userValidator.validateOnPost(user);
         User savedUser = userService.save(user);
         return userMapper.mapUserToUserResponse(savedUser);

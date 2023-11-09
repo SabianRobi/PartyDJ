@@ -20,7 +20,7 @@ public class UserMapper {
                 .build();
     }
 
-    public User mapUserRequestToUser(final SaveUserRequest userRequest) {
+    public User mapSaveUserRequestToUser(final SaveUserRequest userRequest) {
         return User.builder()
                 .email(userRequest.getEmail())
                 .username(userRequest.getUsername())
