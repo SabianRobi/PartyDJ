@@ -5,6 +5,7 @@ import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.enums.UserType;
 import partydj.backend.rest.domain.request.SaveUserRequest;
 import partydj.backend.rest.domain.request.UpdateUserRequest;
+import partydj.backend.rest.domain.response.UserInPartyResponse;
 import partydj.backend.rest.domain.response.UserResponse;
 
 import java.util.ArrayList;
@@ -34,6 +35,14 @@ public class UserMapper {
                 .email(userRequest.getEmail())
                 .username(userRequest.getUsername())
                 .password(userRequest.getPassword())
+                .build();
+    }
+
+    public UserInPartyResponse mapUserToUserInPartyResponse(final User user) {
+        return UserInPartyResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .partyRole(user.getPartyRole())
                 .build();
     }
 }

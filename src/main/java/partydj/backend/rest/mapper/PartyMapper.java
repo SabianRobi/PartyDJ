@@ -9,6 +9,10 @@ import java.util.ArrayList;
 
 @Component
 public class PartyMapper {
+
+    @Autowired
+    UserMapper userMapper;
+
     public Party mapPartyRequestToParty(final SavePartyRequest partyRequest) {
         Party party = Party.builder()
                 .name(partyRequest.getName().trim())
@@ -29,7 +33,7 @@ public class PartyMapper {
                 .name(party.getName())
                 .inQueueTracks(party.getInQueueTracks())
                 .previousTracks(party.getPreviousTracks())
-                .users(party.getUsers())
+                .users(party.getUsers().stream().map(user -> userMapper.mapUserToUserInPartyResponse(user)).toList())
                 .build();
     }
 }
