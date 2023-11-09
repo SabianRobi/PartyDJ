@@ -15,13 +15,13 @@ public class PartyMapper {
 
     public Party mapPartyRequestToParty(final SavePartyRequest partyRequest) {
         Party party = Party.builder()
-                .name(partyRequest.getName().trim())
+                .name(partyRequest.getName())
                 .waitingForTrack(true)
                 .inQueueTracks(new ArrayList<>())
                 .previousTracks(new ArrayList<>())
                 .users(new ArrayList<>())
                 .build();
-        if(partyRequest.getPassword() != null && !partyRequest.getPassword().trim().isEmpty()) {
+        if (partyRequest.getPassword() != null && !partyRequest.getPassword().isBlank()) {
             party.setPassword(partyRequest.getPassword().trim());
         }
         return party;

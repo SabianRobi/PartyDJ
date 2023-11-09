@@ -23,14 +23,14 @@ public class UserValidator {
     }
 
     public void validateOnPost(User user) {
-        if (user.getEmail().isEmpty()) {
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
             throw new IllegalStateException("Email cannot be empty.");
         }
-        if (user.getPassword().isEmpty()) {
-            throw new IllegalStateException("Password cannot be empty.");
-        }
-        if (user.getUsername().isEmpty()) {
+        if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
             throw new IllegalStateException("Username cannot be empty.");
+        }
+        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+            throw new IllegalStateException("Password cannot be empty.");
         }
 
         CheckUsernameMinLength(user.getUsername());

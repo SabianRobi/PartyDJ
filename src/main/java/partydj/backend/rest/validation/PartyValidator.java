@@ -11,8 +11,9 @@ public class PartyValidator {
     @Autowired
     private PartyService partyService;
 
-    public void validateOnPost(Party party) {
-        if(party.getName() == null || party.getName().trim().isEmpty()) {
+    // Create
+    public void validateOnPost(final Party party) {
+        if (party.getName() == null || party.getName().isBlank()) {
             throw new IllegalStateException("Party name cannot be empty.");
         }
 
