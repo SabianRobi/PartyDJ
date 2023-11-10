@@ -11,6 +11,7 @@ public class PartyService {
     private PartyRepository repository;
 
     public Party save(final Party party) {
+        party.setName(party.getName().trim());
         return repository.save(party);
     }
 

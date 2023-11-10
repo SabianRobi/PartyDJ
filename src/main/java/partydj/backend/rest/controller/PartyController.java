@@ -29,11 +29,11 @@ public class PartyController {
     @Autowired
     private UserService userService;
 
-    // Create & update
+    // Create
     @PostMapping
     public PartyResponse save(final SavePartyRequest savePartyRequest) {
+        partyValidator.validateOnPost(savePartyRequest);
         Party party = partyMapper.mapPartyRequestToParty(savePartyRequest);
-        partyValidator.validateOnPost(party);
         Party savedParty = partyService.save(party);
         return partyMapper.mapPartyToPartyResponse(savedParty);
     }
@@ -43,7 +43,7 @@ public class PartyController {
     @DeleteMapping("/{partyName}")
     public PartyResponse delete(@PathVariable final String partyName) {
         Party party = partyService.findByName(partyName);
-        partyValidator.validateOnGetAndDelete(party);
+        partyValidator.validateOnDelete(party);
         partyService.delete(party);
         return partyMapper.mapPartyToPartyResponse(party);
     }
