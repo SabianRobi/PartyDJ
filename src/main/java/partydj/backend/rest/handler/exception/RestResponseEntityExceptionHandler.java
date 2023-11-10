@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import partydj.backend.rest.domain.error.RequiredFieldException;
 import partydj.backend.rest.domain.error.RequiredFieldInvalidException;
 import partydj.backend.rest.domain.error.RequiredFieldMissingException;
 import partydj.backend.rest.domain.response.ErrorResponse;
@@ -39,8 +40,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @ExceptionHandler(value = {RequiredFieldMissingException.class, RequiredFieldInvalidException.class})
-    protected ResponseEntity<Object> handleRequiredFieldIsMissingException(final RequiredFieldMissingException ex,
-                                                                           final WebRequest request) {
+    protected ResponseEntity<Object> handleRequiredFieldExceptions(final RequiredFieldException ex,
+                                                                   final WebRequest request) {
         final ErrorResponse responseBody = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())

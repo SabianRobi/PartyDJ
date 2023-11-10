@@ -26,8 +26,8 @@ public class UserController {
     // Register
     @PostMapping
     public UserResponse save(final SaveUserRequest userRequest) {
+        userValidator.validateOnPost(userRequest);
         User user = userMapper.mapSaveUserRequestToUser(userRequest);
-        userValidator.validateOnPost(user);
         User savedUser = userService.save(user);
         return userMapper.mapUserToUserResponse(savedUser);
     }
@@ -35,13 +35,10 @@ public class UserController {
     // Update
     @PatchMapping("/{userId}")
     public UserResponse update(final UpdateUserRequest userRequest, @PathVariable final int userId) {
-        User updatedUserInfos = userMapper.mapUpdateUserRequestToUser(userRequest);
-        userValidator.validateOnUpdate(updatedUserInfos);
-
         User user = userService.findById(userId);
-        userValidator.validateOnGetAndDelete(user);
+        userValidator.validateOnPatch(userRequest, user);
 
-        User updatedUser = userService.update(user, updatedUserInfos);
+        User updatedUser = userService.update(user, userRequest);
         return userMapper.mapUserToUserResponse(updatedUser);
     }
 
@@ -49,7 +46,7 @@ public class UserController {
     @GetMapping("/{userId}")
     public UserResponse get(@PathVariable final int userId) {
         User user = userService.findById(userId);
-        userValidator.validateOnGetAndDelete(user);
+        userValidator.validateOnGet(user);
         return userMapper.mapUserToUserResponse(user);
     }
 
@@ -57,7 +54,7 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public UserResponse delete(@PathVariable final int userId) {
         User user = userService.findById(userId);
-        userValidator.validateOnGetAndDelete(user);
+        userValidator.validateOnDelete(user);
         userService.delete(user);
         return userMapper.mapUserToUserResponse(user);
     }

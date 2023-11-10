@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.User;
+import partydj.backend.rest.domain.request.UpdateUserRequest;
 import partydj.backend.rest.repository.UserRepository;
 
 import java.util.Optional;
@@ -15,6 +16,9 @@ public class UserService {
     private UserRepository userRepository;
 
     public User save(final User user) {
+        user.setUsername(user.getUsername().trim());
+        user.setEmail(user.getEmail().trim());
+        user.setPassword(user.getPassword().trim());
         try {
             return userRepository.save(user);
         } catch (DataIntegrityViolationException ex) {
@@ -35,13 +39,13 @@ public class UserService {
     }
 
     public boolean existsByEmail(final String email) {
-        return  userRepository.existsByEmail(email);
+        return userRepository.existsByEmail(email);
     }
 
-    public User update(final User user, final User updatedUserInfos) {
-        Optional.ofNullable(updatedUserInfos.getUsername()).ifPresent(user::setUsername);
-        Optional.ofNullable(updatedUserInfos.getEmail()).ifPresent(user::setEmail);
-        Optional.ofNullable(updatedUserInfos.getPassword()).ifPresent(user::setPassword);
+    public User update(final User user, final UpdateUserRequest updatedUserInfos) {
+        Optional.ofNullable(updatedUserInfos.getUsername()).ifPresent(username -> user.setUsername(username.trim()));
+        Optional.ofNullable(updatedUserInfos.getEmail()).ifPresent(email -> user.setEmail(email.trim()));
+        Optional.ofNullable(updatedUserInfos.getPassword()).ifPresent(password -> user.setPassword(password.trim()));
         return userRepository.save(user);
     }
 }
