@@ -1,6 +1,7 @@
 package partydj.backend.rest.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.request.SaveUserRequest;
@@ -27,35 +28,49 @@ public class UserController {
     @PostMapping
     public UserResponse save(final SaveUserRequest userRequest) {
         userValidator.validateOnPost(userRequest);
+
         User user = userMapper.mapSaveUserRequestToUser(userRequest);
         User savedUser = userService.save(user);
+
         return userMapper.mapUserToUserResponse(savedUser);
     }
 
     // Update
     @PatchMapping("/{userId}")
-    public UserResponse update(final UpdateUserRequest userRequest, @PathVariable final int userId) {
-        User user = userService.findById(userId);
-        userValidator.validateOnPatch(userRequest, user);
+    public UserResponse update(final UpdateUserRequest userRequest, @PathVariable final int userId, final Authentication auth) {
+        User loggedInUser = userService.findByUsername(auth.getName());
+        User toBeUpdatedUser = userService.findById(userId);
 
-        User updatedUser = userService.update(user, userRequest);
+        userValidator.validateOnPatch(userRequest, toBeUpdatedUser, loggedInUser);
+
+        User updatedUser = userService.update(toBeUpdatedUser, userRequest);
+
+        // TODO Update the currently logged-in user details
+//        Authentication authentication = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), auth.getCredentials(), auth.getAuthorities());
+//        SecurityContextHolder.getContext().setAuthentication(authentication);
+
         return userMapper.mapUserToUserResponse(updatedUser);
     }
 
     // Listing user infos
     @GetMapping("/{userId}")
     public UserResponse get(@PathVariable final int userId) {
-        User user = userService.findById(userId);
-        userValidator.validateOnGet(user);
-        return userMapper.mapUserToUserResponse(user);
+        User toGetUser = userService.findById(userId);
+
+        userValidator.validateOnGet(toGetUser);
+
+        return userMapper.mapUserToUserResponse(toGetUser);
     }
 
     // Delete
     @DeleteMapping("/{userId}")
-    public UserResponse delete(@PathVariable final int userId) {
-        User user = userService.findById(userId);
-        userValidator.validateOnDelete(user);
-        userService.delete(user);
-        return userMapper.mapUserToUserResponse(user);
+    public UserResponse delete(@PathVariable final int userId, final Authentication auth) {
+        User loggedInUser = userService.findByUsername(auth.getName());
+        User toBeDeletedUser = userService.findById(userId);
+
+        userValidator.validateOnDelete(toBeDeletedUser, loggedInUser);
+
+        userService.delete(toBeDeletedUser);
+        return userMapper.mapUserToUserResponse(toBeDeletedUser);
     }
 }

@@ -2,6 +2,7 @@ package partydj.backend.rest.validation;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.error.RequiredFieldInvalidException;
@@ -41,8 +42,10 @@ public class UserValidator {
         VerifyUserNotNull(user);
     }
 
-    public void validateOnPatch(final UpdateUserRequest newUserInfos, final User user) {
-        VerifyUserNotNull(user);
+    public void validateOnPatch(final UpdateUserRequest newUserInfos, final User toBeUpdatedUser, final User loggedInUser) {
+        VerifyUserNotNull(toBeUpdatedUser);
+        // TODO: will throw internal server error when updating the profiles multiple times without logging out and back in
+        VerifySameUser(toBeUpdatedUser, loggedInUser);
 
         if (newUserInfos.getUsername() != null) {
             VerifyUsernameMinLength(newUserInfos.getUsername());
@@ -58,8 +61,9 @@ public class UserValidator {
         }
     }
 
-    public void validateOnDelete(final User user) {
-        VerifyUserNotNull(user);
+    public void validateOnDelete(final User toBeDeletedUser, final User loggedInUser) {
+        VerifyUserNotNull(toBeDeletedUser);
+        VerifySameUser(toBeDeletedUser, loggedInUser);
     }
 
     private void VerifyEmailFormat(final String email) {
@@ -93,6 +97,12 @@ public class UserValidator {
     private void VerifyUserNotNull(final User user) {
         if (user == null) {
             throw new EntityNotFoundException("User does not exists.");
+        }
+    }
+
+    private void VerifySameUser(final User user1, final User user2) {
+        if (user1.getId() != user2.getId()) {
+            throw new AccessDeniedException("You don't have permission to make changes to this user's profile.");
         }
     }
 }

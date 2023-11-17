@@ -47,9 +47,12 @@ public class UserService {
     }
 
     public User update(final User user, final UpdateUserRequest updatedUserInfos) {
-        Optional.ofNullable(updatedUserInfos.getUsername()).ifPresent(username -> user.setUsername(username.trim()));
-        Optional.ofNullable(updatedUserInfos.getEmail()).ifPresent(email -> user.setEmail(email.trim()));
-        Optional.ofNullable(updatedUserInfos.getPassword()).ifPresent(password -> user.setPassword(password.trim()));
+        Optional.ofNullable(updatedUserInfos.getUsername()).ifPresent(username ->
+                user.setUsername(username.trim()));
+        Optional.ofNullable(updatedUserInfos.getEmail()).ifPresent(email ->
+                user.setEmail(email.trim()));
+        Optional.ofNullable(updatedUserInfos.getPassword()).ifPresent(password ->
+                user.setPassword(passwordEncoder.encode(password.trim())));
         return userRepository.save(user);
     }
 
