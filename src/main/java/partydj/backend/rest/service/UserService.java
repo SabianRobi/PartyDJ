@@ -2,6 +2,7 @@ package partydj.backend.rest.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.request.UpdateUserRequest;
@@ -15,10 +16,13 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public User save(final User user) {
         user.setUsername(user.getUsername().trim());
         user.setEmail(user.getEmail().trim());
-        user.setPassword(user.getPassword().trim());
+        user.setPassword(passwordEncoder.encode(user.getPassword().trim()));
         try {
             return userRepository.save(user);
         } catch (DataIntegrityViolationException ex) {
@@ -47,5 +51,9 @@ public class UserService {
         Optional.ofNullable(updatedUserInfos.getEmail()).ifPresent(email -> user.setEmail(email.trim()));
         Optional.ofNullable(updatedUserInfos.getPassword()).ifPresent(password -> user.setPassword(password.trim()));
         return userRepository.save(user);
+    }
+
+    public User findByUsername(final String username) {
+        return userRepository.findByUsername(username);
     }
 }
