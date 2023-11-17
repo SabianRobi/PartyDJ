@@ -19,20 +19,21 @@ localhost:8080/api/v1/
 
 | Done | Name | Method | Path | Description           |
 |------|------|--------|------|-----------------------|
-| [ ]  | Home | GET    | /    | Returns the home page |
+| [F]  | Home | GET    | F: / | Returns the home page |
 
 ### User
 
-| Done | Name     | Method | Path              | Description                                |
-|------|----------|--------|-------------------|--------------------------------------------|
-| [F]  | Register | GET    | F: /user/register | Shows the registration page                |
-| [X]  | Register | POST   | /user             | Validates the submitted data & saves to DB |
-| [F]  | Login    | GET    | F: /user/login    | Shows the login page                       |
-| [ ]  | Login    | POST   | /user/login       | Validates the submitted data & updates DB  |
-| [ ]  | Logout   | POST   | /user/logout      | Logs out the user                          |
-| [X]  | Profile  | GET    | /user/{userId}    | Returns the user infos                     |
-| [X]  | Profile  | PATCH  | /user/{userId}    | Updates the user infos                     |
-| [X]  | Profile  | DELETE | /user/{userId}    | Deletes the profile                        |
+| Done | Name     | Method | Path              | Description                                | Auth required? |
+|------|----------|--------|-------------------|--------------------------------------------|----------------|
+| [F]  | Register | GET    | F: /user/register | Shows the registration page                | no             |
+| [X]  | Register | POST   | /user             | Validates the submitted data & saves to DB | no             |
+| [F]  | Login    | GET    | F: /user/login    | Shows the login page                       | no             |
+| [X]  | Login    | POST   | /login            | Validates the submitted data & updates DB  | no             |
+| [X]  | Logout   | POST   | /logout           | Logs out the user                          | yes            |
+| [X]  | Profile  | GET    | /user/{userId}    | Returns the user infos                     | yes            |
+| [X]  | Profile  | PATCH  | /user/{userId}    | Updates the user infos                     | yes            |
+| [X]  | Profile  | DELETE | /user/{userId}    | Deletes the profile                        | yes            |
+
 
 ### Party
 
@@ -40,7 +41,7 @@ localhost:8080/api/v1/
 |------|---------------|--------|-------------------------------------|---------------------------------------------------|
 | [F]  | Landing       | GET    | F: /party/landing                   | Returns the create/join page                      |
 | [F]  | Join          | GET    | F: /party/join                      | Returns the party login page                      |
-| [ ]  | Join          | POST   | /party/join                         | Validates the submitted data                      |
+| [X]  | Join          | POST   | /party/{partyName}/join             | Validates the submitted data                      |
 | [F]  | Create        | GET    | F: /party/create                    | Returns the party creation page                   |
 | [X]  | Create        | POST   | /party/create                       | Validates the submitted data                      |
 | [F]  | Party         | GET    | F: /party/{partyName}               | Returns the party page                            |
@@ -63,9 +64,11 @@ localhost:8080/api/v1/
 | [ ]  | GetToken     | GET    | /platforms/spotify/token      | Returns the user's Spotify token                   |
 | [ ]  | RefreshToken | PATCH  | /platforms/spotify/token      | Makes the backend refresh the user's Spotify token |
 
-[ ] Add cascade options for db relations. - test them
-[ ] Encrypt passwords
-[ ] User patch endpoint
+* Add cascade options for db relations. - test them
+* Rework database models in this TODO file
+* Update Party validation
+* Enable CSRF protection
+* Update logged-in user's infos on user update
 
 # FrontEnd
 
