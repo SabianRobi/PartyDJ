@@ -2,6 +2,7 @@ package partydj.backend.rest.controller;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.Party;
 import partydj.backend.rest.domain.User;
@@ -31,9 +32,15 @@ public class PartyController {
 
     // Create
     @PostMapping
-    public PartyResponse save(final SavePartyRequest savePartyRequest) {
-        partyValidator.validateOnPost(savePartyRequest);
+    public PartyResponse save(final SavePartyRequest savePartyRequest, final Authentication auth) {
+        User loggedInUser = userService.findByUsername(auth.getName());
+        partyValidator.validateOnPost(savePartyRequest, loggedInUser);
+
         Party party = partyMapper.mapPartyRequestToParty(savePartyRequest);
+
+        loggedInUser.setPartyRole(PartyRole.CREATOR);
+        userService.save(loggedInUser);
+        party.addUser(loggedInUser);
         Party savedParty = partyService.save(party);
         return partyMapper.mapPartyToPartyResponse(savedParty);
     }
@@ -41,23 +48,29 @@ public class PartyController {
     // Delete
     @Transactional
     @DeleteMapping("/{partyName}")
-    public PartyResponse delete(@PathVariable final String partyName) {
+    public PartyResponse delete(@PathVariable final String partyName, final Authentication auth) {
+        User loggedInUser = userService.findByUsername(auth.getName());
         Party party = partyService.findByName(partyName);
-        partyValidator.validateOnDelete(party);
+
+        partyValidator.validateOnDelete(party, loggedInUser);
+
         partyService.delete(party);
+        loggedInUser.setPartyRole(null);
+        userService.save(loggedInUser);
         return partyMapper.mapPartyToPartyResponse(party);
     }
 
     // Join
     @PostMapping("/*/join")
-    public PartyResponse join(final JoinPartyRequest joinRequest) {
-        User user = userService.findById(1); // TODO: get authenticated user instead
-        Party party = partyService.findByName(joinRequest.getName());
-        partyValidator.validateOnJoin(joinRequest, party, user);
+    public PartyResponse join(final JoinPartyRequest joinRequest, final Authentication auth) {
+        User loggedInUser = userService.findByUsername(auth.getName());
 
-        party.addUser(user);
-        user.setPartyRole(PartyRole.PARTICIPANT);
-        userService.save(user);
+        partyValidator.validateOnJoin(joinRequest, loggedInUser);
+
+        Party party = partyService.findByName(joinRequest.getName());
+        party.addUser(loggedInUser);
+        loggedInUser.setPartyRole(PartyRole.PARTICIPANT);
+        userService.save(loggedInUser);
         partyService.save(party);
 
         return partyMapper.mapPartyToPartyResponse(party);
