@@ -1,6 +1,7 @@
 package partydj.backend.rest.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.Party;
 import partydj.backend.rest.repository.PartyRepository;
@@ -10,8 +11,16 @@ public class PartyService {
     @Autowired
     private PartyRepository repository;
 
-    public Party save(final Party party) {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public Party register(final Party party) {
         party.setName(party.getName().trim());
+        party.setPassword(passwordEncoder.encode(party.getPassword()));
+        return repository.save(party);
+    }
+
+    public Party save(final Party party) {
         return repository.save(party);
     }
 

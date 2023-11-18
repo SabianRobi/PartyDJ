@@ -31,7 +31,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @ExceptionHandler(value = IllegalStateException.class)
-    protected ResponseEntity<Object> handleConstraintViolationException(final IllegalStateException ex, final WebRequest request) {
+    protected ResponseEntity<Object> handleIllegalStateException(final IllegalStateException ex, final WebRequest request) {
         final ErrorResponse responseBody = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.CONFLICT.value())

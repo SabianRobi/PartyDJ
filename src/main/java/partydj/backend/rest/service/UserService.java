@@ -19,10 +19,18 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public User save(final User user) {
+    public User register(final User user) {
         user.setUsername(user.getUsername().trim());
         user.setEmail(user.getEmail().trim());
         user.setPassword(passwordEncoder.encode(user.getPassword().trim()));
+        try {
+            return userRepository.save(user);
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Cannot save entity");
+        }
+    }
+
+    public User save(final User user) {
         try {
             return userRepository.save(user);
         } catch (DataIntegrityViolationException ex) {

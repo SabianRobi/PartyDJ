@@ -64,6 +64,10 @@ public class UserValidator {
     public void validateOnDelete(final User toBeDeletedUser, final User loggedInUser) {
         VerifyUserNotNull(toBeDeletedUser);
         VerifySameUser(toBeDeletedUser, loggedInUser);
+
+        if(toBeDeletedUser.getPartyRole() != null) {
+            throw new IllegalStateException("Can't delete profile, leave the party first.");
+        }
     }
 
     private void VerifyEmailFormat(final String email) {

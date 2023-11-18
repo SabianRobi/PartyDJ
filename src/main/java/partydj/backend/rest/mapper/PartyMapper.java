@@ -14,13 +14,16 @@ public class PartyMapper {
     @Autowired
     UserMapper userMapper;
 
+    @Autowired
+    TrackMapper trackMapper;
+
     public Party mapPartyRequestToParty(final SavePartyRequest partyRequest) {
         Party party = Party.builder()
                 .name(partyRequest.getName())
                 .waitingForTrack(true)
-                .inQueueTracks(new ArrayList<>())
+                .tracksInQueue(new ArrayList<>())
                 .previousTracks(new ArrayList<>())
-                .users(new ArrayList<>())
+                .participants(new ArrayList<>())
                 .build();
         if (partyRequest.getPassword() != null && !partyRequest.getPassword().isBlank()) {
             party.setPassword(partyRequest.getPassword().trim());
@@ -28,13 +31,13 @@ public class PartyMapper {
         return party;
     }
 
-    public PartyResponse mapPartyToPartyResponse(Party party) {
+    public PartyResponse mapPartyToPartyResponse(final Party party) {
         return PartyResponse.builder()
                 .id(party.getId())
                 .name(party.getName())
-                .inQueueTracks(party.getInQueueTracks())
-                .previousTracks(party.getPreviousTracks())
-                .users(party.getUsers().stream().map(user -> userMapper.mapUserToUserInPartyResponse(user)).toList())
+                .tracksInQueue(party.getTracksInQueue().stream().map(track -> trackMapper.mapTrackToTrackInQueue(track)).toList())
+//                .previousTracks(party.getPreviousTracks().stream().map(track -> trackMapper.mapTrackToTrackInQueue(track)).toList())
+                .participants(party.getParticipants().stream().map(user -> userMapper.mapUserToUserInPartyResponse(user)).toList())
                 .build();
     }
 }

@@ -41,8 +41,19 @@ public class PartyController {
         loggedInUser.setPartyRole(PartyRole.CREATOR);
         userService.save(loggedInUser);
         party.addUser(loggedInUser);
-        Party savedParty = partyService.save(party);
+        Party savedParty = partyService.register(party);
         return partyMapper.mapPartyToPartyResponse(savedParty);
+    }
+
+    // Get
+    @GetMapping("/{partyName}")
+    public PartyResponse get(@PathVariable final String partyName, final Authentication auth) {
+        User loggedInUser = userService.findByUsername(auth.getName());
+        Party party = partyService.findByName(partyName);
+
+        partyValidator.validateOnGet(party, loggedInUser);
+
+        return partyMapper.mapPartyToPartyResponse(party);
     }
 
     // Delete
@@ -54,9 +65,12 @@ public class PartyController {
 
         partyValidator.validateOnDelete(party, loggedInUser);
 
+        for (User participant : party.getParticipants()) {
+            participant.setPartyRole(null);
+            userService.save(participant);
+        }
         partyService.delete(party);
-        loggedInUser.setPartyRole(null);
-        userService.save(loggedInUser);
+
         return partyMapper.mapPartyToPartyResponse(party);
     }
 
@@ -73,6 +87,21 @@ public class PartyController {
         userService.save(loggedInUser);
         partyService.save(party);
 
+        return partyMapper.mapPartyToPartyResponse(party);
+    }
+
+    // Leave
+    @PostMapping("/{partyName}/leave")
+    public PartyResponse leave(@PathVariable final String partyName, final Authentication auth) {
+        Party party = partyService.findByName(partyName);
+        User loggedInUser = userService.findByUsername(auth.getName());
+
+        partyValidator.validateOnLeave(party, loggedInUser);
+
+        party.removeUser(loggedInUser);
+        loggedInUser.setPartyRole(null);
+        userService.save(loggedInUser);
+        partyService.save(party);
         return partyMapper.mapPartyToPartyResponse(party);
     }
 }

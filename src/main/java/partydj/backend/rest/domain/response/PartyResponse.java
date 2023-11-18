@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import partydj.backend.rest.domain.Track;
 
 import java.util.Collection;
 
@@ -15,7 +14,7 @@ import java.util.Collection;
 public class PartyResponse {
     private int id;
     private String name;
-    private Collection<Track> inQueueTracks;
-    private Collection<Track> previousTracks;
-    private Collection<UserInPartyResponse> users;
+    private Collection<TrackInQueueResponse> tracksInQueue;
+//    private Collection<TrackInQueueResponse> previousTracks;
+    private Collection<UserInPartyResponse> participants;
 }

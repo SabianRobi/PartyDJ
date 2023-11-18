@@ -64,11 +64,10 @@ localhost:8080/api/v1/
 | [ ]  | GetToken     | GET    | /platforms/spotify/token      | Returns the user's Spotify token                   |
 | [ ]  | RefreshToken | PATCH  | /platforms/spotify/token      | Makes the backend refresh the user's Spotify token |
 
-* Add cascade options for db relations. - test them
 * Rework database models in this TODO file
-* Update Party validation
 * Enable CSRF protection
 * Update logged-in user's infos on user update
+* Log out user when deletes profile
 
 # FrontEnd
 

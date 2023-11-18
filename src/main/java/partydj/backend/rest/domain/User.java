@@ -8,8 +8,6 @@ import lombok.*;
 import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.UserType;
 
-import java.util.Collection;
-
 @Getter
 @Setter
 @Entity
@@ -43,7 +41,14 @@ public class User {
     @OneToOne
     private SpotifyCredential spotifyCredential;
 
-    @NotNull
-    @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private Collection<Track> addedTracks;
+    @ManyToOne
+    private Party party;
+
+//    @NotNull
+//    @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
+//    private Collection<Track> addedTracks;
+
+//    public void addAddedTrack(Track track) {
+//        addedTracks.add(track);
+//    }
 }

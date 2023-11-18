@@ -30,7 +30,7 @@ public class UserController {
         userValidator.validateOnPost(userRequest);
 
         User user = userMapper.mapSaveUserRequestToUser(userRequest);
-        User savedUser = userService.save(user);
+        User savedUser = userService.register(user);
 
         return userMapper.mapUserToUserResponse(savedUser);
     }
