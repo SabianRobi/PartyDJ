@@ -82,11 +82,11 @@ public class PartyValidator {
         VerifyPartyNotNull(party);
 
         if (loggedInUser.getPartyRole() == null) {
-            throw new IllegalStateException("User is not in a party.");
+            throw new IllegalStateException("You are not in a party.");
         }
 
         if (!party.getParticipants().contains(loggedInUser)) {
-            throw new IllegalStateException("User is not participating the given party.");
+            throw new IllegalStateException("You are not in the given party.");
         }
 
         if(CheckHasRole(loggedInUser, PartyRole.CREATOR)) {
@@ -103,7 +103,7 @@ public class PartyValidator {
 
     private void VerifyUserIsNotInAParty(final User user) {
         if (user.getPartyRole() != null) {
-            throw new IllegalStateException("User is already in a party.");
+            throw new IllegalStateException("You are already in a party.");
         }
     }
 

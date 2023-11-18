@@ -66,7 +66,7 @@ public class UserValidator {
         VerifySameUser(toBeDeletedUser, loggedInUser);
 
         if(toBeDeletedUser.getPartyRole() != null) {
-            throw new IllegalStateException("Can't delete profile, leave the party first.");
+            throw new IllegalStateException("You can't delete your profile, leave the party first.");
         }
     }
 
