@@ -7,6 +7,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -30,6 +32,7 @@ public class SecurityConfig {
                                 AntPathRequestMatcher.antMatcher("/error/**"),
                                 AntPathRequestMatcher.antMatcher("/h2-console/**"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/"),
+                                AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/favicon.ico"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/v1/user"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/platforms/spotify/callback/**")
                         ).permitAll()
@@ -47,12 +50,12 @@ public class SecurityConfig {
                                 .defaultSuccessUrl("/protected")
                                 .permitAll()
                 )
-                .logout((logout) -> logout.permitAll())
+                .logout(LogoutConfigurer::permitAll)
 //                .csrf(form -> form
 //                        .ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**"))
 //                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .headers(head -> head.frameOptions(frame -> frame.sameOrigin()));
+                .headers(head -> head.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 
         return http.build();
     }

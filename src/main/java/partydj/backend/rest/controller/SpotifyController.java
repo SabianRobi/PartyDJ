@@ -40,7 +40,7 @@ public class SpotifyController {
     @Autowired
     private SpotifyCredentialValidator spotifyCredentialValidator;
 
-    private SpotifyApi spotifyApi;
+    private final SpotifyApi spotifyApi;
 
     public SpotifyController() {
         spotifyApi = new SpotifyApi.Builder()

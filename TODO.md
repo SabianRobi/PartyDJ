@@ -2,13 +2,13 @@
 
 ## Database models:
 
-| Name               | Parameters                                                                            |
-|--------------------|---------------------------------------------------------------------------------------|
-| User               | email\*, username\*, password\*                                                       |
-| Party              | creator\* [userId], name\*, password                                                  |
-| SpotifyCredentials | owner\* [userId], token\*, refreshToken\*, state                                      |
-| TrackInQueue       | addedBy\* [userId], party\* [partyId], platform\*, uri\*, score\*, currentlyPlaying\* |
-| TrackAlreadyPlayed | addedBy\* [userId], party\* [partyId], platform\*, uri\*, endedAt                     |
+| Name               | Parameters                                                                                                                        |
+|--------------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| User               | id\*, email\*, username\*, password\*, userType\*, partyRole, spotifyCredential [SpotifyCredential], party [Party]                |
+| Party              | id\*, name\*, password\*, spotifyDeviceId, waitingForTrack, participants [Users], TracksInQueue [Tracks], PreviousTracks [Tracks] |
+| SpotifyCredentials | id\*, token, refreshToken, state, owner [User]                                                                                    |
+| TrackInQueue       | id\*, uri\*, score\*, addedBy [User]                                                                                              |
+| PreviousTrack      | id\*, uri\*, score\*                                                                                                              |
 
 ## Endpoints:
 
@@ -68,7 +68,6 @@ Auth required for every endpoint
 | [ ]  | GetToken     | GET    | /platforms/spotify/token   | Returns the user's Spotify token                        |
 | [ ]  | RefreshToken | PATCH  | /platforms/spotify/token   | Makes the backend refresh the user's Spotify token      |
 
-* Rework database models in this TODO file
 * Enable CSRF protection
 * Update logged-in user's infos on user update
 * Log out user when deletes profile
