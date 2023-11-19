@@ -38,7 +38,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private PartyRole partyRole;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
     private SpotifyCredential spotifyCredential;
 
     @ManyToOne
