@@ -30,7 +30,8 @@ public class SecurityConfig {
                                 AntPathRequestMatcher.antMatcher("/error/**"),
                                 AntPathRequestMatcher.antMatcher("/h2-console/**"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/"),
-                                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/v1/user")
+                                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/v1/user"),
+                                AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/platforms/spotify/callback/**")
                         ).permitAll()
                         .requestMatchers(
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/protected"),

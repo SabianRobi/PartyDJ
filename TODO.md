@@ -37,6 +37,8 @@ localhost:8080/api/v1/
 
 ### Party
 
+Auth required for every endpoint
+
 | Done | Name          | Method | Path                                | Description                                       |
 |------|---------------|--------|-------------------------------------|---------------------------------------------------|
 | [F]  | Landing       | GET    | F: /party/landing                   | Returns the create/join page                      |
@@ -44,10 +46,10 @@ localhost:8080/api/v1/
 | [X]  | Join          | POST   | /party/{partyName}/join             | Validates the submitted data                      |
 | [F]  | Create        | GET    | F: /party/create                    | Returns the party creation page                   |
 | [X]  | Create        | POST   | /party/create                       | Validates the submitted data                      |
-| [F]  | Party         | GET    | F: /party/{partyName}               | Returns the party page                            |
-| [ ]  | Leave         | POST   | /party/{partyName}/leave            | Removes the user from the party                   |
+| [X]  | Party         | GET    | /party/{partyName}                  | Returns the party infos                           |
+| [X]  | Leave         | POST   | /party/{partyName}/leave            | Removes the user from the party                   |
 | [X]  | Delete        | DELETE | /party/{partyName}                  | Deletes the party                                 |
-| [ ]  | Search        | GET    | /party/search                       | Returns the search results                        |
+| [ ]  | Search        | GET    | /party/{partyName}/search           | Returns the search results                        |
 | [ ]  | WatchQueue    | GET    | /party/{partyName}/tracks           | Returns the tracks in queue                       |
 | [ ]  | AddTrack      | POST   | /party/{partyName}/tracks           | Adds a track to the queue                         |
 | [ ]  | RemoveTrack   | DELETE | /party/{partyName}/tracks/{trackId} | Removes a track form the queue                    |
@@ -56,18 +58,21 @@ localhost:8080/api/v1/
 
 ### SpotifyCredentials
 
-| Done | Name         | Method | Path                          | Description                                        |
-|------|--------------|--------|-------------------------------|----------------------------------------------------|
-| [ ]  | Connect      | POST   | /platforms/spotify/connect    | Redirects the user to the Spotify login page       |
-| [ ]  | Connect      | _POST_ | /platforms/spotify/callback   | Spotify login page redirects users here            |
-| [ ]  | Disconnect   | POST   | /platforms/spotify/disconnect | Disconnects the Spotify from the user              |
-| [ ]  | GetToken     | GET    | /platforms/spotify/token      | Returns the user's Spotify token                   |
-| [ ]  | RefreshToken | PATCH  | /platforms/spotify/token      | Makes the backend refresh the user's Spotify token |
+Auth required for every endpoint
+
+| Done | Name         | Method | Path                          | Description                                             |
+|------|--------------|--------|-------------------------------|---------------------------------------------------------|
+| [X]  | Connect      | GET    | /platforms/spotify/login      | Retrieves the Spotify login link                        |
+| [X]  | Connect      | GET    | /platforms/spotify/callback   | Spotify login page redirects users here, processes data |
+| [ ]  | Disconnect   | POST   | /platforms/spotify/disconnect | Disconnects the Spotify from the user                   |
+| [ ]  | GetToken     | GET    | /platforms/spotify/token      | Returns the user's Spotify token                        |
+| [ ]  | RefreshToken | PATCH  | /platforms/spotify/token      | Makes the backend refresh the user's Spotify token      |
 
 * Rework database models in this TODO file
 * Enable CSRF protection
 * Update logged-in user's infos on user update
 * Log out user when deletes profile
+* Move credentials from SpotifyConfig to application.properties
 
 # FrontEnd
 
