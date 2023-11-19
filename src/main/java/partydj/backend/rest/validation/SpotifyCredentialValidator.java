@@ -33,14 +33,22 @@ public class SpotifyCredentialValidator {
 
     public void validateOnGetToken(final SpotifyCredential spotifyCredential) {
         VerifyCredentialNotNull(spotifyCredential);
+        VerifyLoggedIn(spotifyCredential);
+    }
 
-        if (spotifyCredential.getToken() == null) {
-            throw new IllegalStateException("You aren't logged in with Spotify.");
-        }
+    public void validateOnRefreshToken(final SpotifyCredential spotifyCredential) {
+        VerifyCredentialNotNull(spotifyCredential);
+        VerifyLoggedIn(spotifyCredential);
     }
 
     private void VerifyCredentialNotNull(final SpotifyCredential spotifyCredential) {
         if (spotifyCredential == null) {
+            throw new IllegalStateException("You aren't logged in with Spotify.");
+        }
+    }
+
+    private void VerifyLoggedIn(final SpotifyCredential spotifyCredential) {
+        if (spotifyCredential.getToken() == null) {
             throw new IllegalStateException("You aren't logged in with Spotify.");
         }
     }

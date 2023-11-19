@@ -15,6 +15,7 @@ import partydj.backend.rest.validation.SpotifyCredentialValidator;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
+import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRefreshRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 
@@ -126,6 +127,28 @@ public class SpotifyController {
         SpotifyCredential spotifyCredential = spotifyCredentialService.findByOwner(loggedInUser);
 
         spotifyCredentialValidator.validateOnGetToken(spotifyCredential);
+
+        return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
+    }
+
+    @PatchMapping("/token")
+    public SpotifyCredentialResponse refreshToken(final Authentication auth) {
+        User loggedInUser = userService.findByUsername(auth.getName());
+        SpotifyCredential spotifyCredential = spotifyCredentialService.findByOwner(loggedInUser);
+
+        spotifyCredentialValidator.validateOnRefreshToken(spotifyCredential);
+
+        spotifyApi.setRefreshToken(spotifyCredential.getRefreshToken());
+        AuthorizationCodeRefreshRequest authorizationCodeRefreshRequest = spotifyApi.authorizationCodeRefresh()
+                .build();
+        try {
+            final AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRefreshRequest.execute();
+
+            spotifyCredential.setToken(authorizationCodeCredentials.getAccessToken());
+            spotifyCredentialService.save(spotifyCredential);
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            throw new ThirdPartyAPIError("Failed to refresh Spotify token: " + e.getMessage());
+        }
 
         return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }
