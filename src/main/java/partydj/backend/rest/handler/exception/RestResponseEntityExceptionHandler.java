@@ -22,43 +22,33 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     @ExceptionHandler(value = EntityNotFoundException.class)
     protected ResponseEntity<Object> handleEntityNotFoundException(final EntityNotFoundException ex,
                                                                    final WebRequest request) {
-        final ErrorResponse responseBody = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
-                .error(ex.getMessage())
-                .build();
-        return handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+        return handleExceptions(ex, request, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(value = IllegalStateException.class)
     protected ResponseEntity<Object> handleIllegalStateException(final IllegalStateException ex, final WebRequest request) {
-        final ErrorResponse responseBody = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.CONFLICT.value())
-                .error(ex.getMessage())
-                .build();
-        return handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.CONFLICT, request);
+        return handleExceptions(ex, request, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(value = {RequiredFieldMissingException.class, RequiredFieldInvalidException.class})
     protected ResponseEntity<Object> handleRequiredFieldExceptions(final RequiredFieldException ex,
                                                                    final WebRequest request) {
-        final ErrorResponse responseBody = ErrorResponse.builder()
-                .timestamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(ex.getMessage())
-                .build();
-        return handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+        return handleExceptions(ex, request, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)
     protected ResponseEntity<Object> handleAccessDeniedException(final AccessDeniedException ex,
                                                                    final WebRequest request) {
+                                                                 final WebRequest request) {
+        return handleExceptions(ex, request, HttpStatus.FORBIDDEN);
+    }
+
+    private ResponseEntity<Object> handleExceptions(final RuntimeException ex, final WebRequest request, final HttpStatus status) {
         final ErrorResponse responseBody = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
-                .status(HttpStatus.FORBIDDEN.value())
+                .status(status.value())
                 .error(ex.getMessage())
                 .build();
-        return handleExceptionInternal(ex, responseBody, new HttpHeaders(), HttpStatus.FORBIDDEN, request);
+        return handleExceptionInternal(ex, responseBody, new HttpHeaders(), status, request);
     }
 }
