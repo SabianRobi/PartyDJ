@@ -34,7 +34,6 @@ localhost:8080/api/v1/
 | [X]  | Profile  | PATCH  | /user/{userId}    | Updates the user infos                     | yes            |
 | [X]  | Profile  | DELETE | /user/{userId}    | Deletes the profile                        | yes            |
 
-
 ### Party
 
 Auth required for every endpoint
@@ -60,18 +59,20 @@ Auth required for every endpoint
 
 Auth required for every endpoint
 
-| Done | Name         | Method | Path                       | Description                                             |
-|------|--------------|--------|----------------------------|---------------------------------------------------------|
-| [X]  | Login        | GET    | /platforms/spotify/login   | Retrieves the Spotify login link                        |
+| Done | Name         | Method | Path                        | Description                                             |
+|------|--------------|--------|-----------------------------|---------------------------------------------------------|
+| [X]  | Login        | GET    | /platforms/spotify/login    | Retrieves the Spotify login link                        |
 | [X]  | Callback     | GET    | /platforms/spotify/callback | Spotify login page redirects users here, processes data |
-| [X]  | Logout       | POST   | /platforms/spotify/logout  | Disconnects the Spotify from the user                   |
-| [ ]  | GetToken     | GET    | /platforms/spotify/token   | Returns the user's Spotify token                        |
-| [ ]  | RefreshToken | PATCH  | /platforms/spotify/token   | Makes the backend refresh the user's Spotify token      |
+| [X]  | Logout       | POST   | /platforms/spotify/logout   | Disconnects the Spotify from the user                   |
+| [X]  | GetToken     | GET    | /platforms/spotify/token    | Returns the user's Spotify token                        |
+| [ ]  | RefreshToken | PATCH  | /platforms/spotify/token    | Makes the backend refresh the user's Spotify token      |
 
 * Enable CSRF protection
 * Update logged-in user's infos on user update
 * Log out user when deletes profile
 * Move credentials from SpotifyConfig to application.properties
+* Delete SpotifyCredential when deleting user profile
+* Fix SpotifyController callback endpoint (raw get): send back custom response
 
 # FrontEnd
 

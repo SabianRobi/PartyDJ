@@ -14,7 +14,7 @@ public class SpotifyCredentialValidator {
     }
 
     public void validateOnCallback(final SpotifyCredential spotifyCredential, final String code) {
-        if(spotifyCredential == null) {
+        if (spotifyCredential == null) {
             throw new IllegalStateException("Login failed. Please try again.");
         }
 
@@ -24,7 +24,19 @@ public class SpotifyCredentialValidator {
     }
 
     public void validateOnLogout(final SpotifyCredential spotifyCredential) {
-        if(spotifyCredential == null) {
+        VerifyCredentialNotNull(spotifyCredential);
+    }
+
+    public void validateOnGetToken(final SpotifyCredential spotifyCredential) {
+        VerifyCredentialNotNull(spotifyCredential);
+
+        if (spotifyCredential.getToken() == null) {
+            throw new IllegalStateException("You aren't logged in with Spotify.");
+        }
+    }
+
+    private void VerifyCredentialNotNull(final SpotifyCredential spotifyCredential) {
+        if (spotifyCredential == null) {
             throw new IllegalStateException("You aren't logged in with Spotify.");
         }
     }

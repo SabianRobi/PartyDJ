@@ -107,7 +107,7 @@ public class SpotifyController {
     }
 
     @PostMapping("/logout")
-    public SpotifyCredentialResponse logout(Authentication auth) {
+    public SpotifyCredentialResponse logout(final Authentication auth) {
         User loggedInUser = userService.findByUsername(auth.getName());
         SpotifyCredential spotifyCredential = spotifyCredentialService.findByOwner(loggedInUser);
 
@@ -116,6 +116,16 @@ public class SpotifyController {
         loggedInUser.setSpotifyCredential(null);
         userService.save(loggedInUser);
         spotifyCredentialService.delete(spotifyCredential);
+
+        return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
+    }
+
+    @GetMapping("/token")
+    public SpotifyCredentialResponse getToken(final Authentication auth) {
+        User loggedInUser = userService.findByUsername(auth.getName());
+        SpotifyCredential spotifyCredential = spotifyCredentialService.findByOwner(loggedInUser);
+
+        spotifyCredentialValidator.validateOnGetToken(spotifyCredential);
 
         return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }
