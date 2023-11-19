@@ -13,13 +13,17 @@ public class SpotifyCredentialValidator {
         }
     }
 
-    public void validateOnCallback(final SpotifyCredential spotifyCredential, final String code) {
-        if (spotifyCredential == null) {
-            throw new IllegalStateException("Login failed. Please try again.");
+    public void validateOnCallback(final String code, final String state, final SpotifyCredential spotifyCredential) {
+        if (code == null || code.isBlank()) {
+            throw new RequiredFieldMissingException("Login failed. Please try again.");
         }
 
-        if (code.isBlank()) {
+        if (state == null || state.isBlank()) {
             throw new RequiredFieldMissingException("Login failed. Please try again.");
+        }
+
+        if (spotifyCredential == null) {
+            throw new IllegalStateException("Login failed. Please try again.");
         }
     }
 

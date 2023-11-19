@@ -82,11 +82,11 @@ public class SpotifyController {
     }
 
     @GetMapping("/callback")
-    public SpotifyCredentialResponse processCallback(@RequestParam("code") final String code,
-                                                     @RequestParam("state") final String state) {
+    public SpotifyCredentialResponse processCallback(@RequestParam(required = false) final String code,
+                                                     @RequestParam(required = false) final String state) {
         SpotifyCredential spotifyCredential = spotifyCredentialService.findByState(state);
 
-        spotifyCredentialValidator.validateOnCallback(spotifyCredential, code);
+        spotifyCredentialValidator.validateOnCallback(code, state, spotifyCredential);
         AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(code).build();
 
         try {
