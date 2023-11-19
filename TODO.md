@@ -60,13 +60,13 @@ Auth required for every endpoint
 
 Auth required for every endpoint
 
-| Done | Name         | Method | Path                          | Description                                             |
-|------|--------------|--------|-------------------------------|---------------------------------------------------------|
-| [X]  | Connect      | GET    | /platforms/spotify/login      | Retrieves the Spotify login link                        |
-| [X]  | Connect      | GET    | /platforms/spotify/callback   | Spotify login page redirects users here, processes data |
-| [ ]  | Disconnect   | POST   | /platforms/spotify/disconnect | Disconnects the Spotify from the user                   |
-| [ ]  | GetToken     | GET    | /platforms/spotify/token      | Returns the user's Spotify token                        |
-| [ ]  | RefreshToken | PATCH  | /platforms/spotify/token      | Makes the backend refresh the user's Spotify token      |
+| Done | Name         | Method | Path                       | Description                                             |
+|------|--------------|--------|----------------------------|---------------------------------------------------------|
+| [X]  | Login        | GET    | /platforms/spotify/login   | Retrieves the Spotify login link                        |
+| [X]  | Callback     | GET    | /platforms/spotify/callback | Spotify login page redirects users here, processes data |
+| [X]  | Logout       | POST   | /platforms/spotify/logout  | Disconnects the Spotify from the user                   |
+| [ ]  | GetToken     | GET    | /platforms/spotify/token   | Returns the user's Spotify token                        |
+| [ ]  | RefreshToken | PATCH  | /platforms/spotify/token   | Makes the backend refresh the user's Spotify token      |
 
 * Rework database models in this TODO file
 * Enable CSRF protection

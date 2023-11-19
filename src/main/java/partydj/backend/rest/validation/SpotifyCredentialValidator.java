@@ -22,4 +22,10 @@ public class SpotifyCredentialValidator {
             throw new RequiredFieldMissingException("Login failed. Please try again.");
         }
     }
+
+    public void validateOnLogout(final SpotifyCredential spotifyCredential) {
+        if(spotifyCredential == null) {
+            throw new IllegalStateException("You aren't logged in with Spotify.");
+        }
+    }
 }

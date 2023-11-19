@@ -3,10 +3,7 @@ package partydj.backend.rest.controller;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.SpotifyCredential;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.error.ThirdPartyAPIError;
@@ -105,6 +102,20 @@ public class SpotifyController {
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             throw new ThirdPartyAPIError("Failed to log in with Spotify: " + e.getMessage());
         }
+
+        return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
+    }
+
+    @PostMapping("/logout")
+    public SpotifyCredentialResponse logout(Authentication auth) {
+        User loggedInUser = userService.findByUsername(auth.getName());
+        SpotifyCredential spotifyCredential = spotifyCredentialService.findByOwner(loggedInUser);
+
+        spotifyCredentialValidator.validateOnLogout(spotifyCredential);
+
+        loggedInUser.setSpotifyCredential(null);
+        userService.save(loggedInUser);
+        spotifyCredentialService.delete(spotifyCredential);
 
         return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }
