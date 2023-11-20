@@ -70,7 +70,6 @@ Auth required for every endpoint
 * Enable CSRF protection
 * Update logged-in user's infos on user update
 * Log out user when deletes profile
-* Move credentials from SpotifyConfig to application.properties
 
 # FrontEnd
 

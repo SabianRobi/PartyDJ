@@ -21,9 +21,8 @@ import se.michaelthelin.spotify.requests.authorization.authorization_code.Author
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
 import java.util.UUID;
-
-import static partydj.backend.rest.config.SpotifyConfig.*;
 
 @RestController
 @RequestMapping("/api/v1/platforms/spotify")
@@ -41,13 +40,17 @@ public class SpotifyController {
     @Autowired
     private SpotifyCredentialValidator spotifyCredentialValidator;
 
+    @Autowired
+    private Map<String, String> spotifyConfigs;
+
     private final SpotifyApi spotifyApi;
 
-    public SpotifyController() {
+    @Autowired
+    public SpotifyController(final Map<String, String> spotifyConfigs) {
         spotifyApi = new SpotifyApi.Builder()
-                .setClientId(CLIENT_ID)
-                .setClientSecret(CLIENT_SECRET)
-                .setRedirectUri(URI.create(REDIRECT_URI))
+                .setClientId(spotifyConfigs.get("client-id"))
+                .setClientSecret(spotifyConfigs.get("client-secret"))
+                .setRedirectUri(URI.create(spotifyConfigs.get("redirect-uri")))
                 .build();
     }
 
@@ -74,7 +77,7 @@ public class SpotifyController {
         userService.save(loggedInUser);
 
         final AuthorizationCodeUriRequest authorizationCodeUriRequest = spotifyApi.authorizationCodeUri()
-                .scope(SCOPES)
+                .scope(spotifyConfigs.get("scopes"))
                 .show_dialog(true)
                 .state(state)
                 .build();
