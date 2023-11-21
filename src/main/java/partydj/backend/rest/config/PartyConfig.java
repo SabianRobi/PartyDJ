@@ -1,5 +1,6 @@
 package partydj.backend.rest.config;
 
-public abstract class PartyConfig {
+public class PartyConfig {
     public final static int PARTY_NAME_MIN_LENGTH = 3;
+    public final static int DEFAULT_LIMIT = 5;
 }

@@ -1,5 +1,6 @@
 package partydj.backend.rest.controller;
 
+import com.neovisionaries.i18n.CountryCode;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -8,19 +9,26 @@ import partydj.backend.rest.domain.SpotifyCredential;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.error.ThirdPartyAPIError;
 import partydj.backend.rest.domain.response.SpotifyCredentialResponse;
+import partydj.backend.rest.domain.response.TrackSearchResultResponse;
 import partydj.backend.rest.mapper.SpotifyCredentialMapper;
+import partydj.backend.rest.mapper.TrackMapper;
 import partydj.backend.rest.service.SpotifyCredentialService;
 import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.SpotifyCredentialValidator;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
+import se.michaelthelin.spotify.model_objects.specification.Paging;
+import se.michaelthelin.spotify.model_objects.specification.Track;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRefreshRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
+import se.michaelthelin.spotify.requests.data.search.simplified.SearchTracksRequest;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
@@ -42,6 +50,9 @@ public class SpotifyController {
 
     @Autowired
     private Map<String, String> spotifyConfigs;
+
+    @Autowired
+    private TrackMapper trackMapper;
 
     private final SpotifyApi spotifyApi;
 
@@ -154,5 +165,26 @@ public class SpotifyController {
         }
 
         return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
+    }
+
+    protected Collection<TrackSearchResultResponse> search(final String query, final int offset,
+                                                           final int limit, final User loggedInUser) {
+        spotifyApi.setAccessToken(loggedInUser.getSpotifyCredential().getToken());
+        SearchTracksRequest searchTracksRequest = spotifyApi.searchTracks(query)
+                .market(CountryCode.HU)
+                .offset(offset)
+                .limit(limit)
+                .build();
+
+        Paging<Track> trackPaging;
+
+        try {
+            trackPaging = searchTracksRequest.execute();
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            throw new ThirdPartyAPIError(e.getMessage());
+        }
+
+        return Arrays.stream(trackPaging.getItems()).map(track ->
+                trackMapper.mapSpotifyTrackToTrackSearchResultResponse(track)).toList();
     }
 }

@@ -16,10 +16,14 @@ public class Track {
     private int id;
 
     private String uri;
+    private String title;
+    private String artists;
+    private String coverUri;
+    private int length;
     private int score;
 
     @Enumerated(EnumType.STRING)
-    private PlatformType platform;
+    private PlatformType platformType;
 
     @ManyToOne
     private User addedBy;

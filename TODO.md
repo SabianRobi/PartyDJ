@@ -48,7 +48,7 @@ Auth required for every endpoint
 | [X]  | Party         | GET    | /party/{partyName}                  | Returns the party infos                           |
 | [X]  | Leave         | POST   | /party/{partyName}/leave            | Removes the user from the party                   |
 | [X]  | Delete        | DELETE | /party/{partyName}                  | Deletes the party                                 |
-| [ ]  | Search        | GET    | /party/{partyName}/search           | Returns the search results                        |
+| [X]  | Search        | GET    | /party/{partyName}/search           | Returns the search results                        |
 | [ ]  | WatchQueue    | GET    | /party/{partyName}/tracks           | Returns the tracks in queue                       |
 | [ ]  | AddTrack      | POST   | /party/{partyName}/tracks           | Adds a track to the queue                         |
 | [ ]  | RemoveTrack   | DELETE | /party/{partyName}/tracks/{trackId} | Removes a track form the queue                    |

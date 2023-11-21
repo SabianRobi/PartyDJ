@@ -3,7 +3,12 @@ package partydj.backend.rest.mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import partydj.backend.rest.domain.Track;
+import partydj.backend.rest.domain.enums.PlatformType;
 import partydj.backend.rest.domain.response.TrackInQueueResponse;
+import partydj.backend.rest.domain.response.TrackSearchResultResponse;
+import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
+
+import java.util.Arrays;
 
 @Component
 public class TrackMapper {
@@ -15,8 +20,19 @@ public class TrackMapper {
         return TrackInQueueResponse.builder()
                 .id(track.getId())
                 .uri(track.getUri())
-                .platformType(track.getPlatform())
+                .platformType(track.getPlatformType())
                 .addedBy(userMapper.mapUserToUserInPartyTrackInQueueResponse(track.getAddedBy()))
+                .build();
+    }
+
+    public TrackSearchResultResponse mapSpotifyTrackToTrackSearchResultResponse(se.michaelthelin.spotify.model_objects.specification.Track track) {
+        return TrackSearchResultResponse.builder()
+                .title(track.getName())
+                .artists(Arrays.stream(track.getArtists()).map(ArtistSimplified::getName).toList())
+                .coverUri(track.getAlbum().getImages()[1].getUrl())
+                .length(track.getDurationMs())
+                .platformType(PlatformType.SPOTIFY)
+                .uri(track.getUri())
                 .build();
     }
 }

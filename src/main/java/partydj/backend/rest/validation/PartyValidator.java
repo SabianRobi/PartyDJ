@@ -8,11 +8,14 @@ import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.Party;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.enums.PartyRole;
+import partydj.backend.rest.domain.enums.PlatformType;
 import partydj.backend.rest.domain.error.RequiredFieldInvalidException;
 import partydj.backend.rest.domain.error.RequiredFieldMissingException;
 import partydj.backend.rest.domain.request.JoinPartyRequest;
 import partydj.backend.rest.domain.request.SavePartyRequest;
 import partydj.backend.rest.service.PartyService;
+
+import java.util.List;
 
 import static partydj.backend.rest.config.PartyConfig.PARTY_NAME_MIN_LENGTH;
 import static partydj.backend.rest.config.UserConfig.USERNAME_MIN_LENGTH;
@@ -89,12 +92,55 @@ public class PartyValidator {
             throw new IllegalStateException("You are not in the given party.");
         }
 
-        if(CheckHasRole(loggedInUser, PartyRole.CREATOR)) {
+        if (CheckHasRole(loggedInUser, PartyRole.CREATOR)) {
             throw new IllegalStateException("You can't leave your own party, only by deleting it.");
         }
     }
 
     // Helper verifiers
+    public void validateOnSearch(final Party party, final User user,
+                                 final String query, final List<String> platforms,
+                                 final int offset, final int limit) {
+        // Party
+        VerifyPartyNotNull(party);
+
+        // Offset
+        if (offset < 0) {
+            throw new RequiredFieldInvalidException("Offset cannot be less then zero.");
+        }
+
+        // Limit
+        if (limit < 1) {
+            throw new RequiredFieldInvalidException("Limit cannot be less then one.");
+        }
+
+        // Query
+        if (query == null || query.length() < 3) {
+            throw new RequiredFieldInvalidException("Invalid search query, please be more specific.");
+        }
+
+        // User
+        VerifyUserIsInParty(user, party);
+
+        // Platforms
+        if (platforms == null || platforms.isEmpty()) {
+            throw new RequiredFieldMissingException("Invalid platform selection, select at least one platform to search at.");
+        }
+
+        for (String platform : platforms) {
+            if (!PlatformType.getPlatformTypes().contains(platform.toUpperCase())) {
+                throw new RequiredFieldInvalidException("Invalid platform type selected.");
+            }
+        }
+
+
+        if (platforms.contains("Spotify")) {
+            if (user.getSpotifyCredential() == null || user.getSpotifyCredential().getToken() == null) {
+                throw new IllegalStateException("You aren't logged in with Spotify.");
+            }
+        }
+    }
+
     private void VerifyPartyNotNull(final Party party) {
         if (party == null) {
             throw new EntityNotFoundException("Party does not exists.");
