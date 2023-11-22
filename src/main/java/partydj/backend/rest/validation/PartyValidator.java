@@ -11,11 +11,13 @@ import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.PlatformType;
 import partydj.backend.rest.domain.error.RequiredFieldInvalidException;
 import partydj.backend.rest.domain.error.RequiredFieldMissingException;
+import partydj.backend.rest.domain.request.AddTrackRequest;
 import partydj.backend.rest.domain.request.JoinPartyRequest;
 import partydj.backend.rest.domain.request.SavePartyRequest;
 import partydj.backend.rest.service.PartyService;
 
 import java.util.List;
+import java.util.Objects;
 
 import static partydj.backend.rest.config.PartyConfig.PARTY_NAME_MIN_LENGTH;
 import static partydj.backend.rest.config.UserConfig.USERNAME_MIN_LENGTH;
@@ -133,12 +135,35 @@ public class PartyValidator {
         }
     }
 
+    // Add track to queue
+    public void validateOnAddTrack(final AddTrackRequest addTrackRequest, final Party party, final User user) {
+        VerifyPartyNotNull(party);
 
-        if (platforms.contains("Spotify")) {
-            if (user.getSpotifyCredential() == null || user.getSpotifyCredential().getToken() == null) {
-                throw new IllegalStateException("You aren't logged in with Spotify.");
+        // Uri
+        if (addTrackRequest.getUri() == null || addTrackRequest.getUri().isBlank()) {
+            throw new RequiredFieldMissingException("Track uri cannot be empty.");
+        }
+
+        if (addTrackRequest.getPlatformType() == PlatformType.SPOTIFY) {
+            String[] splittedUri = addTrackRequest.getUri().split(":");
+            if (splittedUri.length != 3 ||
+                    !Objects.equals(splittedUri[0], "spotify") ||
+                    !Objects.equals(splittedUri[1], "track")) {
+                throw new RequiredFieldInvalidException("Invalid track uri.");
             }
         }
+
+        // Platform type
+        if (addTrackRequest.getPlatformType() == null) {
+            throw new RequiredFieldMissingException("Platform type is invalid.");
+        }
+
+        if (addTrackRequest.getPlatformType() == PlatformType.SPOTIFY) {
+            VerifyUserIsLoggedInWithSpotify(user);
+        }
+
+        // User
+        VerifyUserIsInParty(user, party);
     }
 
     // Helper verifiers

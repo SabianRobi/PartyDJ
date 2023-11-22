@@ -6,16 +6,21 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.Party;
+import partydj.backend.rest.domain.Track;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.PlatformType;
+import partydj.backend.rest.domain.request.AddTrackRequest;
 import partydj.backend.rest.domain.request.JoinPartyRequest;
 import partydj.backend.rest.domain.request.SavePartyRequest;
 import partydj.backend.rest.domain.response.PartyResponse;
+import partydj.backend.rest.domain.response.TrackInQueueResponse;
 import partydj.backend.rest.domain.response.TrackSearchResultResponse;
 import partydj.backend.rest.editor.PlatformTypeEditor;
 import partydj.backend.rest.mapper.PartyMapper;
+import partydj.backend.rest.mapper.TrackMapper;
 import partydj.backend.rest.service.PartyService;
+import partydj.backend.rest.service.TrackService;
 import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.PartyValidator;
 
@@ -42,6 +47,12 @@ public class PartyController {
 
     @Autowired
     private SpotifyController spotifyController;
+
+    @Autowired
+    private TrackMapper trackMapper;
+
+    @Autowired
+    private TrackService trackService;
 
     // Create
     @PostMapping
@@ -137,6 +148,24 @@ public class PartyController {
         }
 
         return results;
+    }
+
+    // Add track to queue
+    @PostMapping("/{partyName}/tracks")
+    public TrackInQueueResponse addTrack(final AddTrackRequest addTrackRequest,
+                                         @PathVariable final String partyName,
+                                         final Authentication auth) {
+        Party party = partyService.findByName(partyName);
+        User loggedInUser = userService.findByUsername(auth.getName());
+
+        partyValidator.validateOnAddTrack(addTrackRequest, party, loggedInUser);
+
+        Track track = spotifyController.fetchTrackInfo(addTrackRequest.getUri(), loggedInUser);
+        trackService.save(track);
+        party.addTrackToQueue(track);
+        partyService.save(party);
+
+        return trackMapper.mapTrackToTrackInQueueResponse(track);
     }
 
     @InitBinder

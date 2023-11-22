@@ -35,7 +35,7 @@ public class PartyMapper {
         return PartyResponse.builder()
                 .id(party.getId())
                 .name(party.getName())
-                .tracksInQueue(party.getTracksInQueue().stream().map(track -> trackMapper.mapTrackToTrackInQueue(track)).toList())
+                .tracksInQueue(party.getTracksInQueue().stream().map(track -> trackMapper.mapTrackToTrackInQueueResponse(track)).toList())
 //                .previousTracks(party.getPreviousTracks().stream().map(track -> trackMapper.mapTrackToTrackInQueue(track)).toList())
                 .participants(party.getParticipants().stream().map(user -> userMapper.mapUserToUserInPartyResponse(user)).toList())
                 .build();

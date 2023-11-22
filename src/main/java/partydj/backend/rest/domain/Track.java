@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import partydj.backend.rest.domain.enums.PlatformType;
 
+import java.util.Collection;
+
 @Getter
 @Setter
 @Entity
@@ -17,10 +19,12 @@ public class Track {
 
     private String uri;
     private String title;
-    private String artists;
     private String coverUri;
     private int length;
     private int score;
+
+    @ManyToMany
+    private Collection<Artist> artists;
 
     @Enumerated(EnumType.STRING)
     private PlatformType platformType;

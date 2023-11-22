@@ -24,6 +24,7 @@ import se.michaelthelin.spotify.requests.authorization.authorization_code.Author
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import se.michaelthelin.spotify.requests.data.search.simplified.SearchTracksRequest;
+import se.michaelthelin.spotify.requests.data.tracks.GetTrackRequest;
 
 import java.io.IOException;
 import java.net.URI;
@@ -186,5 +187,21 @@ public class SpotifyController {
 
         return Arrays.stream(trackPaging.getItems()).map(track ->
                 trackMapper.mapSpotifyTrackToTrackSearchResultResponse(track)).toList();
+    }
+
+    protected Track fetchTrackInfo(final String uri, final User loggedInUser) {
+        spotifyApi.setAccessToken(loggedInUser.getSpotifyCredential().getToken());
+        GetTrackRequest getTrackRequest = spotifyApi.getTrack(uri.split(":")[2])
+                .market(CountryCode.HU)
+                .build();
+        se.michaelthelin.spotify.model_objects.specification.Track spotifyTrack;
+
+        try {
+            spotifyTrack = getTrackRequest.execute();
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            throw new ThirdPartyAPIError("Failed to fetch track infos: " + e.getMessage());
+        }
+
+        return trackMapper.mapSpotifyTrackToTrack(spotifyTrack, loggedInUser);
     }
 }

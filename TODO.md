@@ -51,6 +51,7 @@ Auth required for every endpoint
 | [X]  | Search        | GET    | /party/{partyName}/search           | Returns the search results                        |
 | [ ]  | WatchQueue    | GET    | /party/{partyName}/tracks           | Returns the tracks in queue                       |
 | [ ]  | AddTrack      | POST   | /party/{partyName}/tracks           | Adds a track to the queue                         |
+| [X]  | AddTrack      | POST   | /party/{partyName}/tracks           | Adds a track to the queue                         |
 | [ ]  | RemoveTrack   | DELETE | /party/{partyName}/tracks/{trackId} | Removes a track form the queue                    |
 | [ ]  | SkipTrack     | POST   | /party/{partyName}/tracks/skip      | Skips the current track                           |
 | [ ]  | setSpDeviceId | POST   | /party/{partyName}/spotifyDeviceId  | Sets the Spotify Web Playback's device at backend |
