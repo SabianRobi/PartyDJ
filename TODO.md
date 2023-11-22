@@ -71,6 +71,12 @@ Auth required for every endpoint
 * Enable CSRF protection
 * Update logged-in user's infos on user update
 * Log out user when deletes profile
+* Set Response status codes to 201 where necessary
+* Migrate to a normal DB
+* Recheck validation options: create & use custom annotations?
+* Add example properties file
+* Remove PageController when frontend comes alive
+* Add tests
 
 # FrontEnd
 
