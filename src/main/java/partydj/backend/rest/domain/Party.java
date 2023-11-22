@@ -50,7 +50,7 @@ public class Party {
         previousTracks.remove(track);
     }
 
-    public void removeFromInQueueTracks(final Track track) {
+    public void removeTrackFromQueue(final Track track) {
         tracksInQueue.remove(track);
     }
 

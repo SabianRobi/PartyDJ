@@ -6,6 +6,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.Party;
+import partydj.backend.rest.domain.Track;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.PlatformType;
@@ -193,6 +194,23 @@ public class PartyValidator {
         }
 
         VerifyUserIsLoggedInWithSpotify(user);
+    }
+
+    public void validateOnRemoveTrackFromQueue(final Track track, final Party party, final User user) {
+        VerifyPartyNotNull(party);
+        VerifyUserIsInParty(user, party);
+
+        if (track == null) {
+            throw new RequiredFieldMissingException("Invalid track.");
+        }
+
+        if (!party.getTracksInQueue().contains(track)) {
+            throw new IllegalStateException("This track is not in the party's queue.");
+        }
+
+        if (track.getAddedBy() != user) {
+            throw new AccessDeniedException("You don't have permission to remove other's track from the queue");
+        }
     }
 
     // Helper verifiers

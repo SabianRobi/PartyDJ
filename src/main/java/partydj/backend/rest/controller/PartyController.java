@@ -211,6 +211,23 @@ public class PartyController {
         return request.getDeviceId();
     }
 
+    // Remove track from queue
+    @DeleteMapping("/{partyName}/tracks/{trackId}")
+    public TrackInQueueResponse removeTrackFromQueue(@PathVariable String partyName,
+                                                     @PathVariable int trackId,
+                                                     Authentication auth) {
+        Party party = partyService.findByName(partyName);
+        User loggedInUser = userService.findByUsername(auth.getName());
+        Track track = trackService.findById(trackId);
+
+        partyValidator.validateOnRemoveTrackFromQueue(track, party, loggedInUser);
+
+        party.removeTrackFromQueue(track);
+        partyService.save(party);
+        trackService.delete(track);
+        return trackMapper.mapTrackToTrackInQueueResponse(track);
+    }
+
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
         dataBinder.registerCustomEditor(PlatformType.class, new PlatformTypeEditor());
