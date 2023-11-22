@@ -9,7 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.Party;
 import partydj.backend.rest.domain.SpotifyCredential;
-import partydj.backend.rest.domain.Track;
+import partydj.backend.rest.domain.TrackInQueue;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.error.ThirdPartyAPIError;
 import partydj.backend.rest.domain.response.SpotifyCredentialResponse;
@@ -193,7 +193,7 @@ public class SpotifyController {
                 trackMapper.mapSpotifyTrackToTrackSearchResultResponse(track)).toList();
     }
 
-    protected Track fetchTrackInfo(final String uri, final User loggedInUser, final Party party) {
+    protected TrackInQueue fetchTrackInfo(final String uri, final User loggedInUser, final Party party) {
         spotifyApi.setAccessToken(loggedInUser.getSpotifyCredential().getToken());
         GetTrackRequest getTrackRequest = spotifyApi.getTrack(uri.split(":")[2])
                 .market(CountryCode.HU)
@@ -209,7 +209,7 @@ public class SpotifyController {
         return trackMapper.mapSpotifyTrackToTrack(spotifyTrack, loggedInUser, party);
     }
 
-    protected void playNextTrack(final Party party, final Track track, final User loggedInUser) {
+    protected void playNextTrack(final Party party, final TrackInQueue track, final User loggedInUser) {
         spotifyApi.setAccessToken(loggedInUser.getSpotifyCredential().getToken());
 
         JsonArray jsonUri = JsonParser.parseString("[\"" + track.getUri() + "\"]").getAsJsonArray();
@@ -221,7 +221,7 @@ public class SpotifyController {
                 .build();
 
         try {
-            final String string = startResumeUsersPlaybackRequest.execute();
+            startResumeUsersPlaybackRequest.execute();
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             throw new ThirdPartyAPIError("Could not play next track: " + e.getMessage());
         }

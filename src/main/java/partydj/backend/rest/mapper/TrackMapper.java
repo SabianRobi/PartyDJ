@@ -2,10 +2,7 @@ package partydj.backend.rest.mapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import partydj.backend.rest.domain.Artist;
-import partydj.backend.rest.domain.Party;
-import partydj.backend.rest.domain.Track;
-import partydj.backend.rest.domain.User;
+import partydj.backend.rest.domain.*;
 import partydj.backend.rest.domain.enums.PlatformType;
 import partydj.backend.rest.domain.response.PreviousTrackResponse;
 import partydj.backend.rest.domain.response.TrackInQueueResponse;
@@ -13,6 +10,7 @@ import partydj.backend.rest.domain.response.TrackSearchResultResponse;
 import partydj.backend.rest.service.ArtistService;
 import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,7 +27,7 @@ public class TrackMapper {
     @Autowired
     private ArtistMapper artistMapper;
 
-    public TrackInQueueResponse mapTrackToTrackInQueueResponse(final Track track) {
+    public TrackInQueueResponse mapTrackToTrackInQueueResponse(final TrackInQueue track) {
         return TrackInQueueResponse.builder()
                 .id(track.getId())
                 .title(track.getTitle())
@@ -42,14 +40,16 @@ public class TrackMapper {
                 .build();
     }
 
-    public PreviousTrackResponse mapTrackToPreviousTrackResponse(final Track track) {
+    public PreviousTrackResponse mapPreviousTrackToPreviousTrackResponse(final PreviousTrack track) {
         return PreviousTrackResponse.builder()
                 .title(track.getTitle())
+                .coverUri(track.getCoverUri())
+                .length(track.getLength())
                 .artists(track.getArtists().stream().map(artist ->
                         artistMapper.mapArtistToArtistResponse(artist)).toList())
-                .length(track.getLength())
                 .platformType(track.getPlatformType())
                 .addedBy(userMapper.mapUserToUserInPartyTrackInQueueResponse(track.getAddedBy()))
+                .endedAt(track.getEndedAt())
                 .build();
     }
 
@@ -65,8 +65,8 @@ public class TrackMapper {
                 .build();
     }
 
-    public Track mapSpotifyTrackToTrack(final se.michaelthelin.spotify.model_objects.specification.Track track,
-                                        final User addedBy, final Party party) {
+    public TrackInQueue mapSpotifyTrackToTrack(final se.michaelthelin.spotify.model_objects.specification.Track track,
+                                               final User addedBy, final Party party) {
         Collection<Artist> artists = new ArrayList<>();
         Arrays.stream(track.getArtists()).forEach(artist -> {
             Artist newArtist = Artist.builder()
@@ -75,7 +75,7 @@ public class TrackMapper {
             artists.add(artistService.register(newArtist));
         });
 
-        return Track.builder()
+        return TrackInQueue.builder()
                 .uri(track.getUri())
                 .title(track.getName())
                 .artists(artists)
@@ -86,6 +86,29 @@ public class TrackMapper {
                 .addedBy(addedBy)
                 .isPlaying(false)
                 .party(party)
+                .build();
+    }
+
+    public PreviousTrack mapTrackInQueueToPreviousTrack(final TrackInQueue track) {
+        ArrayList<Artist> newArtists = new ArrayList<>();
+        track.getArtists().forEach(artist -> {
+            Artist newArtist = Artist.builder()
+                    .name(artist.getName())
+                    .build();
+            artistService.save(newArtist);
+            newArtists.add(newArtist);
+        });
+
+        return PreviousTrack.builder()
+                .uri(track.getUri())
+                .title(track.getTitle())
+                .coverUri(track.getCoverUri())
+                .length(track.getLength())
+                .artists(newArtists)
+                .platformType(track.getPlatformType())
+                .addedBy(track.getAddedBy())
+                .party(track.getParty())
+                .endedAt(LocalDateTime.now())
                 .build();
     }
 }

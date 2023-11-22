@@ -6,7 +6,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.Party;
-import partydj.backend.rest.domain.Track;
+import partydj.backend.rest.domain.TrackInQueue;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.PlatformType;
@@ -198,7 +198,7 @@ public class PartyValidator {
     }
 
     // Remove track from queue
-    public void validateOnRemoveTrackFromQueue(final Track track, final Party party, final User user) {
+    public void validateOnRemoveTrackFromQueue(final TrackInQueue track, final Party party, final User user) {
         VerifyPartyNotNull(party);
         VerifyUserIsInParty(user, party);
 
@@ -216,7 +216,7 @@ public class PartyValidator {
     }
 
     // Play next track
-    public void validateOnPlayNextTrack(final Party party, final User user) {
+    public void validateOnPlayNextTrack(final Party party, final User user, final TrackInQueue track) {
         VerifyPartyNotNull(party);
         VerifyUserIsInParty(user, party);
 
@@ -224,8 +224,12 @@ public class PartyValidator {
             throw new AccessDeniedException("You don't have permission to control playback.");
         }
 
-        if (party.getTracksInQueue().isEmpty()) {
+        if (track == null) {
             throw new IllegalStateException("There are no tracks in queue.");
+        }
+
+        if (party.getSpotifyDeviceId() == null) {
+            throw new IllegalStateException("Party's playback device is not set.");
         }
     }
 

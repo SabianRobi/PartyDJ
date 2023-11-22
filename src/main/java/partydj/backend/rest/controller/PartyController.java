@@ -6,7 +6,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.Party;
-import partydj.backend.rest.domain.Track;
+import partydj.backend.rest.domain.PreviousTrack;
+import partydj.backend.rest.domain.TrackInQueue;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.PlatformType;
@@ -22,6 +23,7 @@ import partydj.backend.rest.editor.PlatformTypeEditor;
 import partydj.backend.rest.mapper.PartyMapper;
 import partydj.backend.rest.mapper.TrackMapper;
 import partydj.backend.rest.service.PartyService;
+import partydj.backend.rest.service.PreviousTrackService;
 import partydj.backend.rest.service.TrackService;
 import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.PartyValidator;
@@ -55,6 +57,9 @@ public class PartyController {
 
     @Autowired
     private TrackService trackService;
+
+    @Autowired
+    private PreviousTrackService previousTrackService;
 
     // Create
     @PostMapping
@@ -162,7 +167,7 @@ public class PartyController {
 
         partyValidator.validateOnAddTrack(addTrackRequest, party, loggedInUser);
 
-        Track track = spotifyController.fetchTrackInfo(addTrackRequest.getUri(), loggedInUser, party);
+        TrackInQueue track = spotifyController.fetchTrackInfo(addTrackRequest.getUri(), loggedInUser, party);
         trackService.save(track);
         party.addTrackToQueue(track);
         partyService.save(party);
@@ -179,7 +184,7 @@ public class PartyController {
 
         partyValidator.validateOnGetTracks(party, loggedInUser);
 
-        Collection<Track> tracks = party.getTracksInQueue();
+        Collection<TrackInQueue> tracks = party.getTracksInQueue();
         return tracks.stream().map(track -> trackMapper.mapTrackToTrackInQueueResponse(track)).toList();
     }
 
@@ -192,8 +197,8 @@ public class PartyController {
 
         partyValidator.validateOnGetPreviousTracks(party, loggedInUser);
 
-        Collection<Track> tracks = party.getPreviousTracks();
-        return tracks.stream().map(track -> trackMapper.mapTrackToPreviousTrackResponse(track)).toList();
+        Collection<PreviousTrack> tracks = party.getPreviousTracks();
+        return tracks.stream().map(track -> trackMapper.mapPreviousTrackToPreviousTrackResponse(track)).toList();
     }
 
     // Set Spotify device id
@@ -218,7 +223,7 @@ public class PartyController {
                                                      Authentication auth) {
         Party party = partyService.findByName(partyName);
         User loggedInUser = userService.findByUsername(auth.getName());
-        Track track = trackService.findById(trackId);
+        TrackInQueue track = trackService.findById(trackId);
 
         partyValidator.validateOnRemoveTrackFromQueue(track, party, loggedInUser);
 
@@ -234,22 +239,25 @@ public class PartyController {
                                               Authentication auth) {
         Party party = partyService.findByName(partyName);
         User loggedInUser = userService.findByUsername(auth.getName());
+        TrackInQueue nowPlayingTrack = trackService.getNowPlaying(partyName);
+        TrackInQueue nextTrack = trackService.getNextTrack(partyName);
 
-        partyValidator.validateOnPlayNextTrack(party, loggedInUser);
+        partyValidator.validateOnPlayNextTrack(party, loggedInUser, nextTrack);
 
-//        Track nowPlayingTrack = trackService.findByPartyNameAndIsPlayingIsTrue(partyName);
-        Track nextTrack = trackService.findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc(partyName);
 
         if (nextTrack.getPlatformType() == PlatformType.SPOTIFY) {
             spotifyController.playNextTrack(party, nextTrack, loggedInUser);
         }
 
-//        if (nowPlayingTrack != null) {
-//            nowPlayingTrack.setPlaying(false);
-//            party.removeTrackFromQueue(nowPlayingTrack);
-//            party.addTrackToPreviousTracks(nowPlayingTrack);
-//        }
-//        partyService.save(party);
+        if (nowPlayingTrack != null) {
+            PreviousTrack prevTrack = trackMapper.mapTrackInQueueToPreviousTrack(nowPlayingTrack);
+            previousTrackService.save(prevTrack);
+            party.addTrackToPreviousTracks(prevTrack);
+            party.removeTrackFromQueue(nowPlayingTrack);
+            partyService.save(party);
+
+            trackService.delete(nowPlayingTrack);
+        }
 
         nextTrack.setPlaying(true);
         trackService.save(nextTrack);

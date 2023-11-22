@@ -1,12 +1,12 @@
 package partydj.backend.rest.repository;
 
 import org.springframework.data.repository.CrudRepository;
-import partydj.backend.rest.domain.Track;
+import partydj.backend.rest.domain.TrackInQueue;
 
-public interface TrackRepository extends CrudRepository<Track, Integer> {
-    Track findById(final int id);
+public interface TrackRepository extends CrudRepository<TrackInQueue, Integer> {
+    TrackInQueue findById(final int id);
 
-    Track findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc(final String partyName);
+    TrackInQueue findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc(final String partyName);
 
-    Track findByPartyNameAndIsPlayingIsTrue(final String partyName);
+    TrackInQueue findByPartyNameAndIsPlayingIsTrue(final String partyName);
 }

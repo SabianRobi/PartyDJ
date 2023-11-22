@@ -2,7 +2,7 @@ package partydj.backend.rest.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import partydj.backend.rest.domain.Track;
+import partydj.backend.rest.domain.TrackInQueue;
 import partydj.backend.rest.repository.TrackRepository;
 
 @Service
@@ -10,23 +10,23 @@ public class TrackService {
     @Autowired
     private TrackRepository repository;
 
-    public Track save(final Track track) {
-        return repository.save(track);
+    public TrackInQueue save(final TrackInQueue trackInQueue) {
+        return repository.save(trackInQueue);
     }
 
-    public void delete(final Track track) {
-        repository.delete(track);
+    public void delete(final TrackInQueue trackInQueue) {
+        repository.delete(trackInQueue);
     }
 
-    public Track findById(final int trackId) {
+    public TrackInQueue findById(final int trackId) {
         return repository.findById(trackId);
     }
 
-    public Track findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc(final String partyName) {
+    public TrackInQueue getNextTrack(final String partyName) {
         return repository.findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc(partyName);
     }
 
-    public Track findByPartyNameAndIsPlayingIsTrue(final String partyName) {
+    public TrackInQueue getNowPlaying(final String partyName) {
         return repository.findByPartyNameAndIsPlayingIsTrue(partyName);
     }
 }

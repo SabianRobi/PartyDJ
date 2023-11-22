@@ -24,33 +24,31 @@ public class Party {
     private boolean waitingForTrack;
 
     @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private Collection<Track> tracksInQueue;
+    private Collection<TrackInQueue> tracksInQueue;
 
     @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private Collection<Track> previousTracks;
+    private Collection<PreviousTrack> previousTracks;
 
     @OneToMany(fetch = FetchType.EAGER)
     private Collection<User> participants;
 
-    public boolean hasPassword() { return password != null; }
+    public boolean hasPassword() {
+        return password != null;
+    }
 
     public void addUser(final User user) {
         participants.add(user);
     }
 
-    public void addTrackToQueue(final Track queueTrack) {
-        tracksInQueue.add(queueTrack);
+    public void addTrackToQueue(final TrackInQueue track) {
+        tracksInQueue.add(track);
     }
 
-    public void addTrackToPreviousTracks(final Track prevTrack) {
-        previousTracks.add(prevTrack);
+    public void addTrackToPreviousTracks(final PreviousTrack track) {
+        previousTracks.add(track);
     }
 
-    public void removeFromPreviousTracks(final Track track) {
-        previousTracks.remove(track);
-    }
-
-    public void removeTrackFromQueue(final Track track) {
+    public void removeTrackFromQueue(final TrackInQueue track) {
         tracksInQueue.remove(track);
     }
 

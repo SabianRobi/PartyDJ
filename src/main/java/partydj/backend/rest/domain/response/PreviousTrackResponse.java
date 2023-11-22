@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import partydj.backend.rest.domain.enums.PlatformType;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 @Getter
@@ -12,8 +13,10 @@ import java.util.Collection;
 @Builder
 public class PreviousTrackResponse {
     private String title;
-    private Collection<ArtistResponse> artists;
+    private String coverUri;
     private int length;
+    private Collection<ArtistResponse> artists;
     private PlatformType platformType;
     private UserInPartyTrackInQueueResponse addedBy;
+    private LocalDateTime endedAt;
 }

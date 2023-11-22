@@ -14,4 +14,8 @@ public class ArtistService {
     public Artist register(final Artist artist) {
         return repository.save(artist);
     }
+
+    public Artist save(final Artist artist) {
+        return repository.save(artist);
+    }
 }

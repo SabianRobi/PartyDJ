@@ -1,9 +1,13 @@
 package partydj.backend.rest.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import partydj.backend.rest.domain.enums.PlatformType;
 
 import java.util.Collection;
@@ -11,7 +15,7 @@ import java.util.Collection;
 @Getter
 @Setter
 @Entity
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Track {
@@ -26,7 +30,6 @@ public class Track {
     private String coverUri;
     @Min(0)
     private int length;
-    private int score;
 
     @ManyToMany(cascade = CascadeType.REMOVE)
     private Collection<Artist> artists;
