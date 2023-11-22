@@ -81,6 +81,7 @@ public class PartyValidator {
         }
     }
 
+    // Leave
     public void validateOnLeave(final Party party, final User loggedInUser) {
         VerifyPartyNotNull(party);
 
@@ -97,9 +98,9 @@ public class PartyValidator {
         }
     }
 
-    // Helper verifiers
+    // Search
     public void validateOnSearch(final Party party, final User user,
-                                 final String query, final List<String> platforms,
+                                 final String query, final List<PlatformType> platforms,
                                  final int offset, final int limit) {
         // Party
         VerifyPartyNotNull(party);
@@ -123,15 +124,14 @@ public class PartyValidator {
         VerifyUserIsInParty(user, party);
 
         // Platforms
-        if (platforms == null || platforms.isEmpty()) {
-            throw new RequiredFieldMissingException("Invalid platform selection, select at least one platform to search at.");
+        if (platforms == null || platforms.isEmpty() || platforms.contains(null)) {
+            throw new RequiredFieldMissingException("Invalid platform selection.");
         }
 
-        for (String platform : platforms) {
-            if (!PlatformType.getPlatformTypes().contains(platform.toUpperCase())) {
-                throw new RequiredFieldInvalidException("Invalid platform type selected.");
-            }
+        if (platforms.contains(PlatformType.SPOTIFY)) {
+            VerifyUserIsLoggedInWithSpotify(user);
         }
+    }
 
 
         if (platforms.contains("Spotify")) {
@@ -141,6 +141,7 @@ public class PartyValidator {
         }
     }
 
+    // Helper verifiers
     private void VerifyPartyNotNull(final Party party) {
         if (party == null) {
             throw new EntityNotFoundException("Party does not exists.");
@@ -156,6 +157,12 @@ public class PartyValidator {
     private void VerifyUserIsInParty(final User user, final Party party) {
         if (!party.getParticipants().contains(user)) {
             throw new IllegalStateException("You are not in this party.");
+        }
+    }
+
+    private void VerifyUserIsLoggedInWithSpotify(final User user) {
+        if (user.getSpotifyCredential() == null || user.getSpotifyCredential().getToken() == null) {
+            throw new IllegalStateException("You are not logged in with Spotify.");
         }
     }
 

@@ -25,7 +25,8 @@ public class TrackMapper {
                 .build();
     }
 
-    public TrackSearchResultResponse mapSpotifyTrackToTrackSearchResultResponse(se.michaelthelin.spotify.model_objects.specification.Track track) {
+    public TrackSearchResultResponse mapSpotifyTrackToTrackSearchResultResponse(
+            final se.michaelthelin.spotify.model_objects.specification.Track track) {
         return TrackSearchResultResponse.builder()
                 .title(track.getName())
                 .artists(Arrays.stream(track.getArtists()).map(ArtistSimplified::getName).toList())

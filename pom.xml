@@ -75,6 +75,12 @@
             <artifactId>spotify-web-api-java</artifactId>
             <version>8.3.4</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.SpotifyCredential;
+import partydj.backend.rest.domain.Track;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.error.ThirdPartyAPIError;
 import partydj.backend.rest.domain.response.SpotifyCredentialResponse;
@@ -19,7 +20,6 @@ import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import se.michaelthelin.spotify.model_objects.specification.Paging;
-import se.michaelthelin.spotify.model_objects.specification.Track;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRefreshRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
@@ -176,12 +176,12 @@ public class SpotifyController {
                 .limit(limit)
                 .build();
 
-        Paging<Track> trackPaging;
+        Paging<se.michaelthelin.spotify.model_objects.specification.Track> trackPaging;
 
         try {
             trackPaging = searchTracksRequest.execute();
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            throw new ThirdPartyAPIError(e.getMessage());
+            throw new ThirdPartyAPIError("Failed to search tracks: " + e.getMessage());
         }
 
         return Arrays.stream(trackPaging.getItems()).map(track ->

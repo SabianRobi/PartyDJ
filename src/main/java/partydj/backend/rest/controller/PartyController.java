@@ -3,14 +3,17 @@ package partydj.backend.rest.controller;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.Party;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.enums.PartyRole;
+import partydj.backend.rest.domain.enums.PlatformType;
 import partydj.backend.rest.domain.request.JoinPartyRequest;
 import partydj.backend.rest.domain.request.SavePartyRequest;
 import partydj.backend.rest.domain.response.PartyResponse;
 import partydj.backend.rest.domain.response.TrackSearchResultResponse;
+import partydj.backend.rest.editor.PlatformTypeEditor;
 import partydj.backend.rest.mapper.PartyMapper;
 import partydj.backend.rest.service.PartyService;
 import partydj.backend.rest.service.UserService;
@@ -118,7 +121,7 @@ public class PartyController {
     // Search
     @GetMapping("/{partyName}/search")
     public Collection<TrackSearchResultResponse> search(@RequestParam(required = false) final String query,
-                                                        @RequestParam(required = false) final List<String> platforms,
+                                                        @RequestParam(required = false) final List<PlatformType> platforms,
                                                         @RequestParam(required = false, defaultValue = "0") final int offset,
                                                         @RequestParam(required = false, defaultValue = DEFAULT_LIMIT + "") final int limit,
                                                         @PathVariable final String partyName,
@@ -129,10 +132,15 @@ public class PartyController {
         partyValidator.validateOnSearch(party, loggedInUser, query, platforms, offset, limit);
 
         Collection<TrackSearchResultResponse> results = new ArrayList<>();
-        if (platforms.contains("Spotify")) {
+        if (platforms.contains(PlatformType.SPOTIFY)) {
             results.addAll(spotifyController.search(query, offset, limit, loggedInUser));
         }
 
         return results;
+    }
+
+    @InitBinder
+    public void initBinder(WebDataBinder dataBinder) {
+        dataBinder.registerCustomEditor(PlatformType.class, new PlatformTypeEditor());
     }
 }
