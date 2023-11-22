@@ -13,6 +13,7 @@ import partydj.backend.rest.domain.enums.PlatformType;
 import partydj.backend.rest.domain.request.AddTrackRequest;
 import partydj.backend.rest.domain.request.JoinPartyRequest;
 import partydj.backend.rest.domain.request.SavePartyRequest;
+import partydj.backend.rest.domain.request.SetSpotifyDeviceIdRequest;
 import partydj.backend.rest.domain.response.PartyResponse;
 import partydj.backend.rest.domain.response.PreviousTrackResponse;
 import partydj.backend.rest.domain.response.TrackInQueueResponse;
@@ -193,6 +194,21 @@ public class PartyController {
 
         Collection<Track> tracks = party.getPreviousTracks();
         return tracks.stream().map(track -> trackMapper.mapTrackToPreviousTrackResponse(track)).toList();
+    }
+
+    // Set Spotify device id
+    @PostMapping("/{partyName}/spotifyDeviceId")
+    public String setSpotifyDeviceId(final SetSpotifyDeviceIdRequest request,
+                                     @PathVariable final String partyName,
+                                     final Authentication auth) {
+        Party party = partyService.findByName(partyName);
+        User loggedInUser = userService.findByUsername(auth.getName());
+
+        partyValidator.validateOnSetSpotifyDeviceId(request, party, loggedInUser);
+
+        party.setSpotifyDeviceId(request.getDeviceId());
+        partyService.save(party);
+        return request.getDeviceId();
     }
 
     @InitBinder

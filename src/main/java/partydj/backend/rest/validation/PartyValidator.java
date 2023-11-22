@@ -14,6 +14,7 @@ import partydj.backend.rest.domain.error.RequiredFieldMissingException;
 import partydj.backend.rest.domain.request.AddTrackRequest;
 import partydj.backend.rest.domain.request.JoinPartyRequest;
 import partydj.backend.rest.domain.request.SavePartyRequest;
+import partydj.backend.rest.domain.request.SetSpotifyDeviceIdRequest;
 import partydj.backend.rest.service.PartyService;
 
 import java.util.List;
@@ -176,6 +177,22 @@ public class PartyValidator {
 
         // User
         VerifyUserIsInParty(user, party);
+    }
+
+    public void validateOnSetSpotifyDeviceId(final SetSpotifyDeviceIdRequest request,
+                                             final Party party, final User user) {
+        if (request.getDeviceId() == null || request.getDeviceId().isBlank()) {
+            throw new RequiredFieldMissingException("Device id is missing");
+        }
+
+        VerifyPartyNotNull(party);
+        VerifyUserIsInParty(user, party);
+
+        if (!CheckHasRole(user, PartyRole.CREATOR)) {
+            throw new AccessDeniedException("You don't have permission to set this id to this party.");
+        }
+
+        VerifyUserIsLoggedInWithSpotify(user);
     }
 
     // Helper verifiers
