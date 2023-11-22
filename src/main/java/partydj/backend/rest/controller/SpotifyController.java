@@ -1,10 +1,13 @@
 package partydj.backend.rest.controller;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 import com.neovisionaries.i18n.CountryCode;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import partydj.backend.rest.domain.Party;
 import partydj.backend.rest.domain.SpotifyCredential;
 import partydj.backend.rest.domain.Track;
 import partydj.backend.rest.domain.User;
@@ -23,6 +26,7 @@ import se.michaelthelin.spotify.model_objects.specification.Paging;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRefreshRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
+import se.michaelthelin.spotify.requests.data.player.StartResumeUsersPlaybackRequest;
 import se.michaelthelin.spotify.requests.data.search.simplified.SearchTracksRequest;
 import se.michaelthelin.spotify.requests.data.tracks.GetTrackRequest;
 
@@ -189,7 +193,7 @@ public class SpotifyController {
                 trackMapper.mapSpotifyTrackToTrackSearchResultResponse(track)).toList();
     }
 
-    protected Track fetchTrackInfo(final String uri, final User loggedInUser) {
+    protected Track fetchTrackInfo(final String uri, final User loggedInUser, final Party party) {
         spotifyApi.setAccessToken(loggedInUser.getSpotifyCredential().getToken());
         GetTrackRequest getTrackRequest = spotifyApi.getTrack(uri.split(":")[2])
                 .market(CountryCode.HU)
@@ -202,6 +206,24 @@ public class SpotifyController {
             throw new ThirdPartyAPIError("Failed to fetch track infos: " + e.getMessage());
         }
 
-        return trackMapper.mapSpotifyTrackToTrack(spotifyTrack, loggedInUser);
+        return trackMapper.mapSpotifyTrackToTrack(spotifyTrack, loggedInUser, party);
+    }
+
+    protected void playNextTrack(final Party party, final Track track, final User loggedInUser) {
+        spotifyApi.setAccessToken(loggedInUser.getSpotifyCredential().getToken());
+
+        JsonArray jsonUri = JsonParser.parseString("[\"" + track.getUri() + "\"]").getAsJsonArray();
+
+        StartResumeUsersPlaybackRequest startResumeUsersPlaybackRequest = spotifyApi
+                .startResumeUsersPlayback()
+                .device_id(party.getSpotifyDeviceId())
+                .uris(jsonUri)
+                .build();
+
+        try {
+            final String string = startResumeUsersPlaybackRequest.execute();
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            throw new ThirdPartyAPIError("Could not play next track: " + e.getMessage());
+        }
     }
 }

@@ -162,7 +162,7 @@ public class PartyController {
 
         partyValidator.validateOnAddTrack(addTrackRequest, party, loggedInUser);
 
-        Track track = spotifyController.fetchTrackInfo(addTrackRequest.getUri(), loggedInUser);
+        Track track = spotifyController.fetchTrackInfo(addTrackRequest.getUri(), loggedInUser, party);
         trackService.save(track);
         party.addTrackToQueue(track);
         partyService.save(party);
@@ -226,6 +226,35 @@ public class PartyController {
         partyService.save(party);
         trackService.delete(track);
         return trackMapper.mapTrackToTrackInQueueResponse(track);
+    }
+
+    // Skip track, play next
+    @PostMapping("/{partyName}/tracks/playNext")
+    public TrackInQueueResponse playNextTrack(@PathVariable String partyName,
+                                              Authentication auth) {
+        Party party = partyService.findByName(partyName);
+        User loggedInUser = userService.findByUsername(auth.getName());
+
+        partyValidator.validateOnPlayNextTrack(party, loggedInUser);
+
+//        Track nowPlayingTrack = trackService.findByPartyNameAndIsPlayingIsTrue(partyName);
+        Track nextTrack = trackService.findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc(partyName);
+
+        if (nextTrack.getPlatformType() == PlatformType.SPOTIFY) {
+            spotifyController.playNextTrack(party, nextTrack, loggedInUser);
+        }
+
+//        if (nowPlayingTrack != null) {
+//            nowPlayingTrack.setPlaying(false);
+//            party.removeTrackFromQueue(nowPlayingTrack);
+//            party.addTrackToPreviousTracks(nowPlayingTrack);
+//        }
+//        partyService.save(party);
+
+        nextTrack.setPlaying(true);
+        trackService.save(nextTrack);
+
+        return trackMapper.mapTrackToTrackInQueueResponse(nextTrack);
     }
 
     @InitBinder

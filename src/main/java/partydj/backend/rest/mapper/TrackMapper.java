@@ -3,6 +3,7 @@ package partydj.backend.rest.mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import partydj.backend.rest.domain.Artist;
+import partydj.backend.rest.domain.Party;
 import partydj.backend.rest.domain.Track;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.enums.PlatformType;
@@ -65,7 +66,7 @@ public class TrackMapper {
     }
 
     public Track mapSpotifyTrackToTrack(final se.michaelthelin.spotify.model_objects.specification.Track track,
-                                        final User addedBy) {
+                                        final User addedBy, final Party party) {
         Collection<Artist> artists = new ArrayList<>();
         Arrays.stream(track.getArtists()).forEach(artist -> {
             Artist newArtist = Artist.builder()
@@ -83,6 +84,8 @@ public class TrackMapper {
                 .score(0)
                 .platformType(PlatformType.SPOTIFY)
                 .addedBy(addedBy)
+                .isPlaying(false)
+                .party(party)
                 .build();
     }
 }

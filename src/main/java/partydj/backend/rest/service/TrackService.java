@@ -21,4 +21,12 @@ public class TrackService {
     public Track findById(final int trackId) {
         return repository.findById(trackId);
     }
+
+    public Track findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc(final String partyName) {
+        return repository.findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc(partyName);
+    }
+
+    public Track findByPartyNameAndIsPlayingIsTrue(final String partyName) {
+        return repository.findByPartyNameAndIsPlayingIsTrue(partyName);
+    }
 }

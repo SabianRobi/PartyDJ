@@ -180,10 +180,11 @@ public class PartyValidator {
         VerifyUserIsInParty(user, party);
     }
 
+    // Set Spotify device id to party
     public void validateOnSetSpotifyDeviceId(final SetSpotifyDeviceIdRequest request,
                                              final Party party, final User user) {
         if (request.getDeviceId() == null || request.getDeviceId().isBlank()) {
-            throw new RequiredFieldMissingException("Device id is missing");
+            throw new RequiredFieldMissingException("Device id is missing.");
         }
 
         VerifyPartyNotNull(party);
@@ -196,6 +197,7 @@ public class PartyValidator {
         VerifyUserIsLoggedInWithSpotify(user);
     }
 
+    // Remove track from queue
     public void validateOnRemoveTrackFromQueue(final Track track, final Party party, final User user) {
         VerifyPartyNotNull(party);
         VerifyUserIsInParty(user, party);
@@ -209,7 +211,21 @@ public class PartyValidator {
         }
 
         if (track.getAddedBy() != user) {
-            throw new AccessDeniedException("You don't have permission to remove other's track from the queue");
+            throw new AccessDeniedException("You don't have permission to remove other's track from the queue.");
+        }
+    }
+
+    // Play next track
+    public void validateOnPlayNextTrack(final Party party, final User user) {
+        VerifyPartyNotNull(party);
+        VerifyUserIsInParty(user, party);
+
+        if (!CheckIsCreator(user)) {
+            throw new AccessDeniedException("You don't have permission to control playback.");
+        }
+
+        if (party.getTracksInQueue().isEmpty()) {
+            throw new IllegalStateException("There are no tracks in queue.");
         }
     }
 
