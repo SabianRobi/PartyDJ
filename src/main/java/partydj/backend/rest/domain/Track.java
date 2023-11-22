@@ -23,7 +23,7 @@ public class Track {
     private int length;
     private int score;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.REMOVE)
     private Collection<Artist> artists;
 
     @Enumerated(EnumType.STRING)
