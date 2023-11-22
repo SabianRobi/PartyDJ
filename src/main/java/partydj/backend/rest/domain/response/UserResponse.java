@@ -13,5 +13,5 @@ public class UserResponse {
     private int id;
     private String email;
     private String username;
-// TODO: isSpotifyConnected should be added
+    private boolean isSpotifyConnected;
 }

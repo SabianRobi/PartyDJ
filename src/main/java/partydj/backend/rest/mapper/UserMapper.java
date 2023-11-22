@@ -15,6 +15,7 @@ public class UserMapper {
                 .id(user.getId())
                 .email(user.getEmail())
                 .username(user.getUsername())
+                .isSpotifyConnected(user.getSpotifyCredential() != null)
                 .build();
     }
 
