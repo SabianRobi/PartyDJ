@@ -59,7 +59,7 @@ public class PartyValidator {
         VerifyPartyNotNull(party);
         VerifyUserIsInParty(loggedInUser, party);
 
-        if (!CheckHasRole(loggedInUser, PartyRole.CREATOR)) {
+        if (!CheckIsCreator(loggedInUser)) {
             throw new AccessDeniedException("You don't have permission to delete this party.");
         }
     }
@@ -96,7 +96,7 @@ public class PartyValidator {
             throw new IllegalStateException("You are not in the given party.");
         }
 
-        if (CheckHasRole(loggedInUser, PartyRole.CREATOR)) {
+        if (CheckIsCreator(loggedInUser)) {
             throw new IllegalStateException("You can't leave your own party, only by deleting it.");
         }
     }
@@ -188,7 +188,7 @@ public class PartyValidator {
         VerifyPartyNotNull(party);
         VerifyUserIsInParty(user, party);
 
-        if (!CheckHasRole(user, PartyRole.CREATOR)) {
+        if (!CheckIsCreator(user)) {
             throw new AccessDeniedException("You don't have permission to set this id to this party.");
         }
 
@@ -220,7 +220,7 @@ public class PartyValidator {
         }
     }
 
-    private boolean CheckHasRole(final User user, final PartyRole partyRole) {
-        return user.getPartyRole() == partyRole;
+    private boolean CheckIsCreator(final User user) {
+        return user.getPartyRole() == PartyRole.CREATOR;
     }
 }
