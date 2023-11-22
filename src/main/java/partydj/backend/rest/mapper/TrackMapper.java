@@ -6,6 +6,7 @@ import partydj.backend.rest.domain.Artist;
 import partydj.backend.rest.domain.Track;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.enums.PlatformType;
+import partydj.backend.rest.domain.response.PreviousTrackResponse;
 import partydj.backend.rest.domain.response.TrackInQueueResponse;
 import partydj.backend.rest.domain.response.TrackSearchResultResponse;
 import partydj.backend.rest.service.ArtistService;
@@ -34,6 +35,17 @@ public class TrackMapper {
                 .artists(track.getArtists().stream().map(artist ->
                         artistMapper.mapArtistToArtistResponse(artist)).toList())
                 .coverUri(track.getCoverUri())
+                .length(track.getLength())
+                .platformType(track.getPlatformType())
+                .addedBy(userMapper.mapUserToUserInPartyTrackInQueueResponse(track.getAddedBy()))
+                .build();
+    }
+
+    public PreviousTrackResponse mapTrackToPreviousTrackResponse(final Track track) {
+        return PreviousTrackResponse.builder()
+                .title(track.getTitle())
+                .artists(track.getArtists().stream().map(artist ->
+                        artistMapper.mapArtistToArtistResponse(artist)).toList())
                 .length(track.getLength())
                 .platformType(track.getPlatformType())
                 .addedBy(userMapper.mapUserToUserInPartyTrackInQueueResponse(track.getAddedBy()))

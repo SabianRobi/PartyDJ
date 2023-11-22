@@ -14,6 +14,7 @@ import partydj.backend.rest.domain.request.AddTrackRequest;
 import partydj.backend.rest.domain.request.JoinPartyRequest;
 import partydj.backend.rest.domain.request.SavePartyRequest;
 import partydj.backend.rest.domain.response.PartyResponse;
+import partydj.backend.rest.domain.response.PreviousTrackResponse;
 import partydj.backend.rest.domain.response.TrackInQueueResponse;
 import partydj.backend.rest.domain.response.TrackSearchResultResponse;
 import partydj.backend.rest.editor.PlatformTypeEditor;
@@ -179,6 +180,19 @@ public class PartyController {
 
         Collection<Track> tracks = party.getTracksInQueue();
         return tracks.stream().map(track -> trackMapper.mapTrackToTrackInQueueResponse(track)).toList();
+    }
+
+    // Get previous tracks
+    @GetMapping("/{partyName}/tracks/previous")
+    public Collection<PreviousTrackResponse> getPreviousTracks(@PathVariable final String partyName,
+                                                               final Authentication auth) {
+        Party party = partyService.findByName(partyName);
+        User loggedInUser = userService.findByUsername(auth.getName());
+
+        partyValidator.validateOnGetPreviousTracks(party, loggedInUser);
+
+        Collection<Track> tracks = party.getPreviousTracks();
+        return tracks.stream().map(track -> trackMapper.mapTrackToPreviousTrackResponse(track)).toList();
     }
 
     @InitBinder

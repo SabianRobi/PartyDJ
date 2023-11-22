@@ -141,6 +141,12 @@ public class PartyValidator {
         VerifyUserIsInParty(user, party);
     }
 
+    // Get previous tracks
+    public void validateOnGetPreviousTracks(final Party party, final User user) {
+        VerifyPartyNotNull(party);
+        VerifyUserIsInParty(user, party);
+    }
+
     // Add track to queue
     public void validateOnAddTrack(final AddTrackRequest addTrackRequest, final Party party, final User user) {
         VerifyPartyNotNull(party);
