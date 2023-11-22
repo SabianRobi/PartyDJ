@@ -168,6 +168,19 @@ public class PartyController {
         return trackMapper.mapTrackToTrackInQueueResponse(track);
     }
 
+    // Get tracks in queue
+    @GetMapping("/{partyName}/tracks")
+    public Collection<TrackInQueueResponse> getTracks(@PathVariable final String partyName,
+                                                      final Authentication auth) {
+        Party party = partyService.findByName(partyName);
+        User loggedInUser = userService.findByUsername(auth.getName());
+
+        partyValidator.validateOnGetTracks(party, loggedInUser);
+
+        Collection<Track> tracks = party.getTracksInQueue();
+        return tracks.stream().map(track -> trackMapper.mapTrackToTrackInQueueResponse(track)).toList();
+    }
+
     @InitBinder
     public void initBinder(WebDataBinder dataBinder) {
         dataBinder.registerCustomEditor(PlatformType.class, new PlatformTypeEditor());

@@ -8,6 +8,5 @@ import lombok.Setter;
 @Setter
 @Builder
 public class UserInPartyTrackInQueueResponse {
-    private int id;
     private String username;
 }

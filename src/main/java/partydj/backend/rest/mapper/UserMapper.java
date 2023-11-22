@@ -47,7 +47,6 @@ public class UserMapper {
 
     public UserInPartyTrackInQueueResponse mapUserToUserInPartyTrackInQueueResponse(final User user) {
         return UserInPartyTrackInQueueResponse.builder()
-                .id(user.getId())
                 .username(user.getUsername())
                 .build();
     }
