@@ -1,6 +1,7 @@
 package partydj.backend.rest.security;
 
 import lombok.AllArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import partydj.backend.rest.domain.User;
@@ -8,9 +9,10 @@ import partydj.backend.rest.domain.User;
 import java.util.Collection;
 import java.util.List;
 
+@Setter
 @AllArgsConstructor
 public class UserPrincipal implements UserDetails {
-    final private User user;
+    private User user;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

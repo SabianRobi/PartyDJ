@@ -69,8 +69,6 @@ Auth required for every endpoint
 | [X]  | RefreshToken | PATCH  | /platforms/spotify/token    | Makes the backend refresh the user's Spotify token      |
 
 * Enable CSRF protection
-* Update logged-in user's infos on user update
-* Log out user when deletes profile
 * Recheck validation options: create & use custom annotations?
 * Remove PageController when frontend comes alive
 * Add tests

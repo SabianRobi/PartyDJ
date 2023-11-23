@@ -1,14 +1,19 @@
 package partydj.backend.rest.controller;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.request.SaveUserRequest;
 import partydj.backend.rest.domain.request.UpdateUserRequest;
 import partydj.backend.rest.domain.response.UserResponse;
 import partydj.backend.rest.mapper.UserMapper;
+import partydj.backend.rest.security.UserPrincipal;
 import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.UserValidator;
 
@@ -39,7 +44,8 @@ public class UserController {
 
     // Update
     @PatchMapping("/{userId}")
-    public UserResponse update(final UpdateUserRequest userRequest, @PathVariable final int userId, final Authentication auth) {
+    public UserResponse update(final UpdateUserRequest userRequest, @PathVariable final int userId,
+                               final Authentication auth, final UserPrincipal userPrincipal) {
         User loggedInUser = userService.findByUsername(auth.getName());
         User toBeUpdatedUser = userService.findById(userId);
 
@@ -47,9 +53,11 @@ public class UserController {
 
         User updatedUser = userService.update(toBeUpdatedUser, userRequest);
 
-        // TODO Update the currently logged-in user details
-//        Authentication authentication = new UsernamePasswordAuthenticationToken(auth.getPrincipal(), auth.getCredentials(), auth.getAuthorities());
-//        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // Update logged in user infos
+        userPrincipal.setUser(updatedUser);
+        Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                userPrincipal, auth.getCredentials(), auth.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
 
         return userMapper.mapUserToUserResponse(updatedUser);
     }
@@ -66,13 +74,21 @@ public class UserController {
 
     // Delete
     @DeleteMapping("/{userId}")
-    public UserResponse delete(@PathVariable final int userId, final Authentication auth) {
+    public UserResponse delete(@PathVariable final int userId, final Authentication auth,
+                               final HttpServletRequest request) {
         User loggedInUser = userService.findByUsername(auth.getName());
         User toBeDeletedUser = userService.findById(userId);
 
         userValidator.validateOnDelete(toBeDeletedUser, loggedInUser);
 
         userService.delete(toBeDeletedUser);
+
+        // Log out the user
+        try {
+            request.logout();
+        } catch (ServletException ignored) {
+        }
+
         return userMapper.mapUserToUserResponse(toBeDeletedUser);
     }
 }

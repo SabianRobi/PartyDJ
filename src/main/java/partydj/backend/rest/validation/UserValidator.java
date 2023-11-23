@@ -44,7 +44,6 @@ public class UserValidator {
 
     public void validateOnPatch(final UpdateUserRequest newUserInfos, final User toBeUpdatedUser, final User loggedInUser) {
         VerifyUserNotNull(toBeUpdatedUser);
-        // TODO: will throw internal server error when updating the profiles multiple times without logging out and back in
         VerifySameUser(toBeUpdatedUser, loggedInUser);
 
         if (newUserInfos.getUsername() != null) {
