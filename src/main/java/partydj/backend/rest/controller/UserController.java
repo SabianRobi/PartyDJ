@@ -1,6 +1,7 @@
 package partydj.backend.rest.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.User;
@@ -26,6 +27,7 @@ public class UserController {
 
     // Register
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public UserResponse save(final SaveUserRequest userRequest) {
         userValidator.validateOnPost(userRequest);
 

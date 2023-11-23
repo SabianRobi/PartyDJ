@@ -2,6 +2,7 @@ package partydj.backend.rest.controller;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -63,6 +64,7 @@ public class PartyController {
 
     // Create
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public PartyResponse save(final SavePartyRequest savePartyRequest, final Authentication auth) {
         User loggedInUser = userService.findByUsername(auth.getName());
         partyValidator.validateOnPost(savePartyRequest, loggedInUser);
@@ -159,6 +161,7 @@ public class PartyController {
 
     // Add track to queue
     @PostMapping("/{partyName}/tracks")
+    @ResponseStatus(HttpStatus.CREATED)
     public TrackInQueueResponse addTrack(final AddTrackRequest addTrackRequest,
                                          @PathVariable final String partyName,
                                          final Authentication auth) {

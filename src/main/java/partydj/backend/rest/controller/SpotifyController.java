@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import com.neovisionaries.i18n.CountryCode;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.Party;
@@ -102,6 +103,7 @@ public class SpotifyController {
     }
 
     @GetMapping("/callback")
+    @ResponseStatus(HttpStatus.CREATED)
     public SpotifyCredentialResponse processCallback(@RequestParam(required = false) final String code,
                                                      @RequestParam(required = false) final String state) {
         SpotifyCredential spotifyCredential = spotifyCredentialService.findByState(state);
