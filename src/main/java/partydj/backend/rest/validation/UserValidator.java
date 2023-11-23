@@ -48,11 +48,11 @@ public class UserValidator {
 
         if (newUserInfos.getUsername() != null) {
             VerifyUsernameMinLength(newUserInfos.getUsername());
-            VerifyUsernameAlreadyExists(newUserInfos.getUsername());
+            VerifyUsernameAlreadyExists(newUserInfos.getUsername(), loggedInUser);
         }
         if (newUserInfos.getEmail() != null) {
             VerifyEmailFormat(newUserInfos.getEmail());
-            VerifyEmailAlreadyExists(newUserInfos.getEmail());
+            VerifyEmailAlreadyExists(newUserInfos.getEmail(), loggedInUser);
         }
 
         if (newUserInfos.getPassword() != null && newUserInfos.getPassword().isBlank()) {
@@ -64,11 +64,12 @@ public class UserValidator {
         VerifyUserNotNull(toBeDeletedUser);
         VerifySameUser(toBeDeletedUser, loggedInUser);
 
-        if(toBeDeletedUser.getPartyRole() != null) {
+        if (toBeDeletedUser.getPartyRole() != null) {
             throw new IllegalStateException("You can't delete your profile, leave the party first.");
         }
     }
 
+    // Helper verifiers
     private void VerifyEmailFormat(final String email) {
         final String regex = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
         final Pattern p = Pattern.compile(regex);
@@ -85,6 +86,13 @@ public class UserValidator {
         }
     }
 
+    private void VerifyEmailAlreadyExists(final String email, final User loggedInUser) {
+        User user = userService.findByEmail(email);
+        if (user != null && user.getId() != loggedInUser.getId()) {
+            throw new IllegalStateException("A user with this email already exists.");
+        }
+    }
+
     private void VerifyEmailAlreadyExists(final String email) {
         if (userService.existsByEmail(email)) {
             throw new IllegalStateException("A user with this email already exists.");
@@ -93,6 +101,13 @@ public class UserValidator {
 
     private void VerifyUsernameAlreadyExists(final String username) {
         if (userService.existsByUsername(username)) {
+            throw new IllegalStateException("A user with this username already exists.");
+        }
+    }
+
+    private void VerifyUsernameAlreadyExists(final String username, final User toBeUpdatedUser) {
+        User user = userService.findByUsername(username);
+        if (user != null && user.getId() != toBeUpdatedUser.getId()) {
             throw new IllegalStateException("A user with this username already exists.");
         }
     }
