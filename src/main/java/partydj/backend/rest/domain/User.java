@@ -8,6 +8,8 @@ import lombok.*;
 import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.UserType;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @Entity
@@ -44,11 +46,15 @@ public class User {
     @ManyToOne
     private Party party;
 
-//    @NotNull
-//    @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
-//    private Collection<Track> addedTracks;
+    @NotNull
+    @OneToMany
+    private Set<TrackInQueue> addedTracks;
 
-//    public void addAddedTrack(Track track) {
-//        addedTracks.add(track);
-//    }
+    public void addAddedTrack(final TrackInQueue track) {
+        addedTracks.add(track);
+    }
+
+    public void removeAddedTrack(final TrackInQueue track) {
+        addedTracks.remove(track);
+    }
 }

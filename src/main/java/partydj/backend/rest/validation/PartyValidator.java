@@ -210,6 +210,10 @@ public class PartyValidator {
             throw new IllegalStateException("This track is not in the party's queue.");
         }
 
+        if (track.isPlaying()) {
+            throw new IllegalStateException("Can't delete track from queue, it is now playing.");
+        }
+
         if (track.getAddedBy() != user) {
             throw new AccessDeniedException("You don't have permission to remove other's track from the queue.");
         }

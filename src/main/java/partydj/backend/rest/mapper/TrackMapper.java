@@ -11,9 +11,8 @@ import partydj.backend.rest.service.ArtistService;
 import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.HashSet;
 
 @Component
 public class TrackMapper {
@@ -66,14 +65,7 @@ public class TrackMapper {
     }
 
     public TrackInQueue mapSpotifyTrackToTrack(final se.michaelthelin.spotify.model_objects.specification.Track track,
-                                               final User addedBy, final Party party) {
-        Collection<Artist> artists = new ArrayList<>();
-        Arrays.stream(track.getArtists()).forEach(artist -> {
-            Artist newArtist = Artist.builder()
-                    .name(artist.getName())
-                    .build();
-            artists.add(artistService.register(newArtist));
-        });
+                                               final User addedBy, final Party party, final HashSet<Artist> artists) {
 
         return TrackInQueue.builder()
                 .uri(track.getUri())
@@ -90,21 +82,14 @@ public class TrackMapper {
     }
 
     public PreviousTrack mapTrackInQueueToPreviousTrack(final TrackInQueue track) {
-        ArrayList<Artist> newArtists = new ArrayList<>();
-        track.getArtists().forEach(artist -> {
-            Artist newArtist = Artist.builder()
-                    .name(artist.getName())
-                    .build();
-            artistService.save(newArtist);
-            newArtists.add(newArtist);
-        });
+        HashSet<Artist> artists = new HashSet<>(artistService.findAllByTracksContaining(track));
 
         return PreviousTrack.builder()
                 .uri(track.getUri())
                 .title(track.getTitle())
                 .coverUri(track.getCoverUri())
                 .length(track.getLength())
-                .artists(newArtists)
+                .artists(artists)
                 .platformType(track.getPlatformType())
                 .addedBy(track.getAddedBy())
                 .party(track.getParty())

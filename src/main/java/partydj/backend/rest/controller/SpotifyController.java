@@ -8,22 +8,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import partydj.backend.rest.domain.Party;
-import partydj.backend.rest.domain.SpotifyCredential;
-import partydj.backend.rest.domain.TrackInQueue;
-import partydj.backend.rest.domain.User;
+import partydj.backend.rest.domain.*;
 import partydj.backend.rest.domain.error.ThirdPartyAPIError;
 import partydj.backend.rest.domain.response.SpotifyCredentialResponse;
 import partydj.backend.rest.domain.response.SpotifyLoginUriResponse;
 import partydj.backend.rest.domain.response.TrackSearchResultResponse;
 import partydj.backend.rest.mapper.SpotifyCredentialMapper;
 import partydj.backend.rest.mapper.TrackMapper;
+import partydj.backend.rest.service.ArtistService;
 import partydj.backend.rest.service.SpotifyCredentialService;
+import partydj.backend.rest.service.TrackService;
 import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.SpotifyCredentialValidator;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
+import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
 import se.michaelthelin.spotify.model_objects.specification.Paging;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRefreshRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
@@ -34,10 +34,7 @@ import se.michaelthelin.spotify.requests.data.tracks.GetTrackRequest;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping(value = "/api/v1/platforms/spotify", produces = "application/json")
@@ -60,6 +57,12 @@ public class SpotifyController {
 
     @Autowired
     private TrackMapper trackMapper;
+
+    @Autowired
+    private ArtistService artistService;
+
+    @Autowired
+    private TrackService trackService;
 
     private final SpotifyApi spotifyApi;
 
@@ -196,7 +199,7 @@ public class SpotifyController {
                 trackMapper.mapSpotifyTrackToTrackSearchResultResponse(track)).toList();
     }
 
-    protected TrackInQueue fetchTrackInfo(final String uri, final User loggedInUser, final Party party) {
+    protected TrackInQueue fetchAndSafeTrackInfo(final String uri, final User loggedInUser, final Party party) {
         spotifyApi.setAccessToken(loggedInUser.getSpotifyCredential().getToken());
         GetTrackRequest getTrackRequest = spotifyApi.getTrack(uri.split(":")[2])
                 .market(CountryCode.HU)
@@ -209,7 +212,20 @@ public class SpotifyController {
             throw new ThirdPartyAPIError("Failed to fetch track infos: " + e.getMessage());
         }
 
-        return trackMapper.mapSpotifyTrackToTrack(spotifyTrack, loggedInUser, party);
+        HashSet<Artist> artists = saveArtists(
+                Arrays.stream(spotifyTrack.getArtists())
+                        .map(ArtistSimplified::getName)
+                        .toList());
+
+        TrackInQueue track = trackMapper.mapSpotifyTrackToTrack(spotifyTrack, loggedInUser, party, artists);
+        trackService.save(track);
+
+        artists.forEach(artist -> {
+            artist.addTrack(track);
+            artistService.save(artist);
+        });
+
+        return track;
     }
 
     protected void playNextTrack(final Party party, final TrackInQueue track, final User loggedInUser) {
@@ -228,5 +244,22 @@ public class SpotifyController {
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             throw new ThirdPartyAPIError("Could not play next track: " + e.getMessage());
         }
+    }
+
+    private HashSet<Artist> saveArtists(final List<String> artistNames) {
+        HashSet<Artist> artists = new HashSet<>(artistService.findAllByNameIn(artistNames));
+
+        List<String> dbNames = artists.stream().map(Artist::getName).toList();
+
+        artistNames.forEach(artistName -> {
+            if (!dbNames.contains(artistName)) {
+                artists.add(artistService.register(
+                        Artist.builder()
+                                .name(artistName)
+                                .tracks(new HashSet<>())
+                                .build()));
+            }
+        });
+        return artists;
     }
 }

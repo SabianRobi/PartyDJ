@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
-import java.util.Collection;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -24,13 +24,13 @@ public class Party {
     private boolean waitingForTrack;
 
     @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private Collection<TrackInQueue> tracksInQueue;
+    private Set<TrackInQueue> tracksInQueue;
 
     @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private Collection<PreviousTrack> previousTracks;
+    private Set<PreviousTrack> previousTracks;
 
     @OneToMany(fetch = FetchType.EAGER)
-    private Collection<User> participants;
+    private Set<User> participants;
 
     public boolean hasPassword() {
         return password != null;

@@ -68,10 +68,13 @@ Auth required for every endpoint
 | [X]  | GetToken     | GET    | /platforms/spotify/token    | Returns the user's Spotify token                        |
 | [X]  | RefreshToken | PATCH  | /platforms/spotify/token    | Makes the backend refresh the user's Spotify token      |
 
-* Enable CSRF protection
-* Recheck validation options: create & use custom annotations?
-* Remove PageController when frontend comes alive
+* Throw 401 Unauthorized instead of redirecting to login page
 * Add tests
+* Add CI
+* [SHELVED] Fix UniqueUsernameValidator/Email: maybe try: entityManager.setFlushMode(FlushModeType.COMMIT);
+* [SHELVED] UserController#67
+* When frontend comes alive: remove PageController
+* When frontend comes alive: Enable CSRF protection
 
 # FrontEnd
 

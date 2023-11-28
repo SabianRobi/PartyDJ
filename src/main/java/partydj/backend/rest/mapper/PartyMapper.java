@@ -7,7 +7,7 @@ import partydj.backend.rest.domain.request.SavePartyRequest;
 import partydj.backend.rest.domain.response.PartyResponse;
 import partydj.backend.rest.domain.response.SpotifyDeviceIdResponse;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 @Component
 public class PartyMapper {
@@ -22,9 +22,9 @@ public class PartyMapper {
         Party party = Party.builder()
                 .name(partyRequest.getName())
                 .waitingForTrack(true)
-                .tracksInQueue(new ArrayList<>())
-                .previousTracks(new ArrayList<>())
-                .participants(new ArrayList<>())
+                .tracksInQueue(new HashSet<>())
+                .previousTracks(new HashSet<>())
+                .participants(new HashSet<>())
                 .build();
         if (partyRequest.getPassword() != null && !partyRequest.getPassword().isBlank()) {
             party.setPassword(partyRequest.getPassword().trim());

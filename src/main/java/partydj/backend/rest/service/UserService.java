@@ -5,10 +5,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.User;
+import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.request.UpdateUserRequest;
 import partydj.backend.rest.repository.UserRepository;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UserService {
@@ -18,6 +20,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private PartyService partyService;
 
     public User register(final User user) {
         user.setUsername(user.getUsername().trim());
@@ -39,6 +44,17 @@ public class UserService {
     }
 
     public void delete(final User user) {
+        if (user.getPartyRole() != null) {
+            if (user.getPartyRole() == PartyRole.CREATOR) {
+                partyService.delete(user.getParty());
+            } else {
+                user.getAddedTracks().forEach(track ->
+                        user.getParty().removeTrackFromQueue(track));
+                user.getParty().removeUser(user);
+                partyService.save(user.getParty());
+            }
+        }
+
         userRepository.delete(user);
     }
 
@@ -70,5 +86,9 @@ public class UserService {
 
     public User findByEmail(final String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public void saveAll(final Set<User> users) {
+        userRepository.saveAll(users);
     }
 }

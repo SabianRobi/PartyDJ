@@ -6,10 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import partydj.backend.rest.domain.Party;
-import partydj.backend.rest.domain.PreviousTrack;
-import partydj.backend.rest.domain.TrackInQueue;
-import partydj.backend.rest.domain.User;
+import partydj.backend.rest.domain.*;
 import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.PlatformType;
 import partydj.backend.rest.domain.request.AddTrackRequest;
@@ -20,8 +17,8 @@ import partydj.backend.rest.domain.response.*;
 import partydj.backend.rest.editor.PlatformTypeEditor;
 import partydj.backend.rest.mapper.PartyMapper;
 import partydj.backend.rest.mapper.TrackMapper;
+import partydj.backend.rest.service.ArtistService;
 import partydj.backend.rest.service.PartyService;
-import partydj.backend.rest.service.PreviousTrackService;
 import partydj.backend.rest.service.TrackService;
 import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.PartyValidator;
@@ -57,7 +54,7 @@ public class PartyController {
     private TrackService trackService;
 
     @Autowired
-    private PreviousTrackService previousTrackService;
+    private ArtistService artistService;
 
     // Create
     @PostMapping(consumes = "application/x-www-form-urlencoded")
@@ -68,10 +65,12 @@ public class PartyController {
 
         Party party = partyMapper.mapPartyRequestToParty(savePartyRequest);
 
-        loggedInUser.setPartyRole(PartyRole.CREATOR);
-        userService.save(loggedInUser);
         party.addUser(loggedInUser);
         Party savedParty = partyService.register(party);
+        loggedInUser.setParty(savedParty);
+        loggedInUser.setPartyRole(PartyRole.CREATOR);
+        userService.save(loggedInUser);
+
         return partyMapper.mapPartyToPartyResponse(savedParty);
     }
 
@@ -95,10 +94,6 @@ public class PartyController {
 
         partyValidator.validateOnDelete(party, loggedInUser);
 
-        for (User participant : party.getParticipants()) {
-            participant.setPartyRole(null);
-            userService.save(participant);
-        }
         partyService.delete(party);
 
         return partyMapper.mapPartyToPartyResponse(party);
@@ -167,10 +162,12 @@ public class PartyController {
 
         partyValidator.validateOnAddTrack(addTrackRequest, party, loggedInUser);
 
-        TrackInQueue track = spotifyController.fetchTrackInfo(addTrackRequest.getUri(), loggedInUser, party);
-        trackService.save(track);
+        TrackInQueue track = spotifyController.fetchAndSafeTrackInfo(addTrackRequest.getUri(), loggedInUser, party);
         party.addTrackToQueue(track);
         partyService.save(party);
+
+        loggedInUser.addAddedTrack(track);
+        userService.save(loggedInUser);
 
         return trackMapper.mapTrackToTrackInQueueResponse(track);
     }
@@ -244,14 +241,19 @@ public class PartyController {
 
         partyValidator.validateOnPlayNextTrack(party, loggedInUser, nextTrack);
 
-
         if (nextTrack.getPlatformType() == PlatformType.SPOTIFY) {
             spotifyController.playNextTrack(party, nextTrack, loggedInUser);
         }
 
         if (nowPlayingTrack != null) {
             PreviousTrack prevTrack = trackMapper.mapTrackInQueueToPreviousTrack(nowPlayingTrack);
-            previousTrackService.save(prevTrack);
+            trackService.save(prevTrack);
+
+            for (final Artist artist : nowPlayingTrack.getArtists()) {
+                artist.addTrack(prevTrack);
+                artistService.save(artist);
+            }
+
             party.addTrackToPreviousTracks(prevTrack);
             party.removeTrackFromQueue(nowPlayingTrack);
             partyService.save(party);

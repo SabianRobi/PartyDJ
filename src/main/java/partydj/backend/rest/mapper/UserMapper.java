@@ -8,6 +8,8 @@ import partydj.backend.rest.domain.response.UserInPartyResponse;
 import partydj.backend.rest.domain.response.UserInPartyTrackInQueueResponse;
 import partydj.backend.rest.domain.response.UserResponse;
 
+import java.util.HashSet;
+
 @Component
 public class UserMapper {
     public UserResponse mapUserToUserResponse(final User user) {
@@ -24,7 +26,7 @@ public class UserMapper {
                 .email(userRequest.getEmail())
                 .username(userRequest.getUsername())
                 .password(userRequest.getPassword())
-//                .addedTracks(new ArrayList<>())
+                .addedTracks(new HashSet<>())
                 .userType(UserType.NORMAL)
                 .build();
     }

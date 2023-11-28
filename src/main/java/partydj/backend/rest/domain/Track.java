@@ -10,7 +10,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import partydj.backend.rest.domain.enums.PlatformType;
 
-import java.util.Collection;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -31,8 +31,8 @@ public class Track {
     @Min(0)
     private int length;
 
-    @ManyToMany(cascade = CascadeType.REMOVE)
-    private Collection<Artist> artists;
+    @ManyToMany
+    private Set<Artist> artists;
 
     @Enumerated(EnumType.STRING)
     private PlatformType platformType;
