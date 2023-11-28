@@ -18,7 +18,7 @@ import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.UserValidator;
 
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping(value = "/api/v1/user", produces = "application/json")
 public class UserController {
 
     @Autowired
@@ -31,7 +31,7 @@ public class UserController {
     private UserMapper userMapper;
 
     // Register
-    @PostMapping
+    @PostMapping(consumes = "application/x-www-form-urlencoded")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse save(final SaveUserRequest userRequest) {
         userValidator.validateOnPost(userRequest);
@@ -43,7 +43,7 @@ public class UserController {
     }
 
     // Update
-    @PatchMapping("/{userId}")
+    @PatchMapping(value = "/{userId}", consumes = "application/x-www-form-urlencoded")
     public UserResponse update(final UpdateUserRequest userRequest, @PathVariable final int userId,
                                final Authentication auth, final UserPrincipal userPrincipal) {
         User loggedInUser = userService.findByUsername(auth.getName());

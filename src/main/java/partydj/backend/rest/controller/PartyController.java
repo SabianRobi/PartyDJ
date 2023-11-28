@@ -16,10 +16,7 @@ import partydj.backend.rest.domain.request.AddTrackRequest;
 import partydj.backend.rest.domain.request.JoinPartyRequest;
 import partydj.backend.rest.domain.request.SavePartyRequest;
 import partydj.backend.rest.domain.request.SetSpotifyDeviceIdRequest;
-import partydj.backend.rest.domain.response.PartyResponse;
-import partydj.backend.rest.domain.response.PreviousTrackResponse;
-import partydj.backend.rest.domain.response.TrackInQueueResponse;
-import partydj.backend.rest.domain.response.TrackSearchResultResponse;
+import partydj.backend.rest.domain.response.*;
 import partydj.backend.rest.editor.PlatformTypeEditor;
 import partydj.backend.rest.mapper.PartyMapper;
 import partydj.backend.rest.mapper.TrackMapper;
@@ -36,7 +33,7 @@ import java.util.List;
 import static partydj.backend.rest.config.PartyConfig.DEFAULT_LIMIT;
 
 @RestController
-@RequestMapping("/api/v1/party")
+@RequestMapping(value = "/api/v1/party", produces = "application/json")
 public class PartyController {
     @Autowired
     private PartyService partyService;
@@ -63,7 +60,7 @@ public class PartyController {
     private PreviousTrackService previousTrackService;
 
     // Create
-    @PostMapping
+    @PostMapping(consumes = "application/x-www-form-urlencoded")
     @ResponseStatus(HttpStatus.CREATED)
     public PartyResponse save(final SavePartyRequest savePartyRequest, final Authentication auth) {
         User loggedInUser = userService.findByUsername(auth.getName());
@@ -108,7 +105,7 @@ public class PartyController {
     }
 
     // Join
-    @PostMapping("/*/join")
+    @PostMapping(value = "/*/join", consumes = "application/x-www-form-urlencoded")
     public PartyResponse join(final JoinPartyRequest joinRequest, final Authentication auth) {
         User loggedInUser = userService.findByUsername(auth.getName());
 
@@ -160,7 +157,7 @@ public class PartyController {
     }
 
     // Add track to queue
-    @PostMapping("/{partyName}/tracks")
+    @PostMapping(value = "/{partyName}/tracks", consumes = "application/x-www-form-urlencoded")
     @ResponseStatus(HttpStatus.CREATED)
     public TrackInQueueResponse addTrack(final AddTrackRequest addTrackRequest,
                                          @PathVariable final String partyName,
@@ -205,18 +202,18 @@ public class PartyController {
     }
 
     // Set Spotify device id
-    @PostMapping("/{partyName}/spotifyDeviceId")
-    public String setSpotifyDeviceId(final SetSpotifyDeviceIdRequest request,
-                                     @PathVariable final String partyName,
-                                     final Authentication auth) {
+    @PostMapping(value = "/{partyName}/spotifyDeviceId", consumes = "application/x-www-form-urlencoded")
+    public SpotifyDeviceIdResponse setSpotifyDeviceId(final SetSpotifyDeviceIdRequest request,
+                                                      @PathVariable final String partyName,
+                                                      final Authentication auth) {
         Party party = partyService.findByName(partyName);
         User loggedInUser = userService.findByUsername(auth.getName());
 
         partyValidator.validateOnSetSpotifyDeviceId(request, party, loggedInUser);
 
         party.setSpotifyDeviceId(request.getDeviceId());
-        partyService.save(party);
-        return request.getDeviceId();
+        Party savedParty = partyService.save(party);
+        return partyMapper.mapPartyToSpotifyDeviceId(savedParty);
     }
 
     // Remove track from queue

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import partydj.backend.rest.domain.Party;
 import partydj.backend.rest.domain.request.SavePartyRequest;
 import partydj.backend.rest.domain.response.PartyResponse;
+import partydj.backend.rest.domain.response.SpotifyDeviceIdResponse;
 
 import java.util.ArrayList;
 
@@ -39,5 +40,9 @@ public class PartyMapper {
 //                .previousTracks(party.getPreviousTracks().stream().map(track -> trackMapper.mapTrackToTrackInQueue(track)).toList())
                 .participants(party.getParticipants().stream().map(user -> userMapper.mapUserToUserInPartyResponse(user)).toList())
                 .build();
+    }
+
+    public SpotifyDeviceIdResponse mapPartyToSpotifyDeviceId(final Party party) {
+        return new SpotifyDeviceIdResponse(party.getSpotifyDeviceId());
     }
 }

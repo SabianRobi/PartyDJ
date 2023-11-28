@@ -14,6 +14,7 @@ import partydj.backend.rest.domain.TrackInQueue;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.error.ThirdPartyAPIError;
 import partydj.backend.rest.domain.response.SpotifyCredentialResponse;
+import partydj.backend.rest.domain.response.SpotifyLoginUriResponse;
 import partydj.backend.rest.domain.response.TrackSearchResultResponse;
 import partydj.backend.rest.mapper.SpotifyCredentialMapper;
 import partydj.backend.rest.mapper.TrackMapper;
@@ -39,7 +40,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/platforms/spotify")
+@RequestMapping(value = "/api/v1/platforms/spotify", produces = "application/json")
 public class SpotifyController {
 
     @Autowired
@@ -72,7 +73,7 @@ public class SpotifyController {
     }
 
     @GetMapping("/login")
-    public String getLoginURI(final Authentication auth) {
+    public SpotifyLoginUriResponse getLoginURI(final Authentication auth) {
         User loggedInUser = userService.findByUsername(auth.getName());
         SpotifyCredential spotifyCredential = spotifyCredentialService.findByOwner(loggedInUser);
 
@@ -99,7 +100,7 @@ public class SpotifyController {
                 .state(state)
                 .build();
         URI uri = authorizationCodeUriRequest.execute();
-        return uri.toString();
+        return new SpotifyLoginUriResponse(uri.toString());
     }
 
     @GetMapping("/callback")
