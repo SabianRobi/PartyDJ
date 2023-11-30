@@ -15,19 +15,11 @@
 Backend base uri:
 localhost:8080/api/v1/
 
-### Home
-
-| Done | Name | Method | Path | Description           |
-|------|------|--------|------|-----------------------|
-| [F]  | Home | GET    | F: / | Returns the home page |
-
 ### User
 
 | Done | Name     | Method | Path              | Description                                | Auth required? |
 |------|----------|--------|-------------------|--------------------------------------------|----------------|
-| [F]  | Register | GET    | F: /user/register | Shows the registration page                | no             |
 | [X]  | Register | POST   | /user             | Validates the submitted data & saves to DB | no             |
-| [F]  | Login    | GET    | F: /user/login    | Shows the login page                       | no             |
 | [X]  | Login    | POST   | /login            | Validates the submitted data & updates DB  | no             |
 | [X]  | Logout   | POST   | /logout           | Logs out the user                          | yes            |
 | [X]  | Profile  | GET    | /user/{userId}    | Returns the user infos                     | yes            |
@@ -40,10 +32,7 @@ Auth required for every endpoint
 
 | Done | Name          | Method | Path                                | Description                                       |
 |------|---------------|--------|-------------------------------------|---------------------------------------------------|
-| [F]  | Landing       | GET    | F: /party/landing                   | Returns the create/join page                      |
-| [F]  | Join          | GET    | F: /party/join                      | Returns the party login page                      |
 | [X]  | Join          | POST   | /party/{partyName}/join             | Validates the submitted data                      |
-| [F]  | Create        | GET    | F: /party/create                    | Returns the party creation page                   |
 | [X]  | Create        | POST   | /party/create                       | Validates the submitted data                      |
 | [X]  | Party         | GET    | /party/{partyName}                  | Returns the party infos                           |
 | [X]  | Leave         | POST   | /party/{partyName}/leave            | Removes the user from the party                   |
@@ -70,34 +59,9 @@ Auth required for every endpoint
 
 * Add tests
 * Add CI
+* Getting user details should use usernames instead of ids
+* Add readme (introduction, configuring, running)
 * [SHELVED] Fix UniqueUsernameValidator/Email: maybe try: entityManager.setFlushMode(FlushModeType.COMMIT);
 * [SHELVED] UserController#67
 * When frontend comes alive: remove PageController
 * When frontend comes alive: Enable CSRF protection
-
-# FrontEnd
-
-## Pages
-
-- [ ] Home
-- [ ] Login
-    - [ ] Input validation
-    - [ ] Error handling (backend responses)
-- [ ] Register
-    - [ ] Input validation
-    - [ ] Error handling (backend responses)
-- [ ] Profile
-    - [ ] List infos
-    - [ ] Let the user change infos
-        - [ ] Input validation
-        - [ ] Error handling (backend responses)
-- [ ] Party landing
-- [ ] Join Party
-    - [ ] Input validation
-    - [ ] Error handling (backend responses)
-- [ ] Create Party
-    - [ ] Input validation
-    - [ ] Error handling (backend responses)
-- [ ] Party
-    - [ ] Input validation (searchBar)
-    - [ ] Error handling - to all requests that can be made to backend and during init of the Sp/YT players
