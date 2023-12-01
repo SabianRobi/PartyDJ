@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.Artist;
 import partydj.backend.rest.domain.Track;
-import partydj.backend.rest.repository.ArtistsRepository;
+import partydj.backend.rest.repository.ArtistRepository;
 
 import java.util.HashSet;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.Set;
 public class ArtistService {
 
     @Autowired
-    private ArtistsRepository repository;
+    private ArtistRepository repository;
 
     public Artist register(final Artist artist) {
         return repository.save(artist);

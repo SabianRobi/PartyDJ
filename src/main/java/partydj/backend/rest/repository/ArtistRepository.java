@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 
 @Repository
-public interface ArtistsRepository extends CrudRepository<Artist, String> {
+public interface ArtistRepository extends CrudRepository<Artist, String> {
     HashSet<Artist> findAllByTracksContaining(final Track track);
 
     HashSet<Artist> findAllByNameIn(final List<String> artistNames);
