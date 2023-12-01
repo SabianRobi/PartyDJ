@@ -1,11 +1,13 @@
 package partydj.backend.rest.domain;
 
 import jakarta.persistence.Entity;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-@Getter
-@Setter
+@Data
 @Entity
 @SuperBuilder
 @NoArgsConstructor

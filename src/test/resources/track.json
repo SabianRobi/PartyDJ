@@ -1,0 +1,11 @@
+{
+  "id" : 1,
+  "uri" : "uri",
+  "title" : "title",
+  "coverUri" : "coverUri",
+  "length" : 1,
+  "artists" : [ ],
+  "platformType" : "SPOTIFY",
+  "addedBy" : null,
+  "party" : null
+}
