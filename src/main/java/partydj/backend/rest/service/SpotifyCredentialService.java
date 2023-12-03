@@ -26,8 +26,4 @@ public class SpotifyCredentialService {
     public void delete(final SpotifyCredential spotifyCredential) {
         repository.delete(spotifyCredential);
     }
-
-    public SpotifyCredential findById(final int spotifyCredentialId) {
-        return repository.findById(spotifyCredentialId);
-    }
 }
