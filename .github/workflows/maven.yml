@@ -10,7 +10,7 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "main", "docker-test" ]
+    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -25,14 +25,12 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Build with Maven
+
+    - name: Build and run tests
       run: mvn -B package --file pom.xml
 
-#    - uses: actions/checkout@v3
-#      name: Check out code
-
-    - uses: mr-smithers-excellent/docker-build-push@v6
-      name: Build & push Docker image
+    - name: Build & push Docker image
+      uses: mr-smithers-excellent/docker-build-push@v6
       with:
         image: sabianrobi/partydj
         tags: latest
