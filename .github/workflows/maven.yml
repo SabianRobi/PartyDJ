@@ -32,7 +32,7 @@ jobs:
         run: mvn -B package --file pom.xml
 
       - name: Build & push Docker image
-        if: ${{ steps.test.outcome }} == "success" && ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ steps.test.outcome }} == "success" && false
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
           image: sabianrobi/partydj
