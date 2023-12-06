@@ -17,14 +17,14 @@ localhost:8080/api/v1/
 
 ### User
 
-| Done | Name     | Method | Path           | Description                                | Auth required? |
-|------|----------|--------|----------------|--------------------------------------------|----------------|
-| [X]  | Register | POST   | /user          | Validates the submitted data & saves to DB | no             |
-| [X]  | Login    | POST   | /login         | Validates the submitted data & updates DB  | no             |
-| [X]  | Logout   | POST   | /logout        | Logs out the user                          | yes            |
-| [X]  | Profile  | GET    | /user/{userId} | Returns the user infos                     | yes            |
-| [X]  | Profile  | PATCH  | /user/{userId} | Updates the user infos                     | yes            |
-| [X]  | Profile  | DELETE | /user/{userId} | Deletes the profile                        | yes            |
+| Done | Name     | Method | Path             | Description                                | Auth required? |
+|------|----------|--------|------------------|--------------------------------------------|----------------|
+| [X]  | Register | POST   | /user            | Validates the submitted data & saves to DB | no             |
+| [X]  | Login    | POST   | /login           | Validates the submitted data & updates DB  | no             |
+| [X]  | Logout   | POST   | /logout          | Logs out the user                          | yes            |
+| [X]  | Profile  | GET    | /user/{username} | Returns the user infos                     | yes            |
+| [X]  | Profile  | PATCH  | /user/{username} | Updates the user infos                     | yes            |
+| [X]  | Profile  | DELETE | /user/{username} | Deletes the profile                        | yes            |
 
 ### Party
 
@@ -57,7 +57,6 @@ Auth required for every endpoint
 | [X]  | GetToken     | GET    | /platforms/spotify/token    | Returns the user's Spotify token                        |
 | [X]  | RefreshToken | PATCH  | /platforms/spotify/token    | Makes the backend refresh the user's Spotify token      |
 
-* Give a custom response when Spotify token expires ("Failed to fetch track infos: The access token expired")
 * Recommend songs when no tracks in queue
 * Add tests
     * Models
@@ -65,10 +64,9 @@ Auth required for every endpoint
     * Repositories
     * Services
     * Controllers
-* Add CI
-* Getting user details should use usernames instead of ids
 * Add readme (introduction, configuring, running)
 * [SHELVED] Fix UniqueUsernameValidator/Email: maybe try: entityManager.setFlushMode(FlushModeType.COMMIT);
 * [SHELVED] UserController#67
+* Add YouTube support
 * When frontend comes alive: remove PageController
 * When frontend comes alive: Enable CSRF protection

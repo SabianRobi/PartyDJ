@@ -1,9 +1,7 @@
 package partydj.backend.rest.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.UserType;
@@ -26,6 +24,8 @@ public class User {
 
     @NotBlank
     @Column(unique = true)
+    @Size(min = 3, max = 32)
+    @Pattern(regexp = "^[a-zA-Z0-9-_]{3,32}$")
     private String username;
 
     @NotBlank

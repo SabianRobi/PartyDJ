@@ -43,11 +43,11 @@ public class UserController {
     }
 
     // Update
-    @PatchMapping(value = "/{userId}", consumes = "application/x-www-form-urlencoded")
-    public UserResponse update(final UpdateUserRequest userRequest, @PathVariable final int userId,
+    @PatchMapping(value = "/{username}", consumes = "application/x-www-form-urlencoded")
+    public UserResponse update(final UpdateUserRequest userRequest, @PathVariable final String username,
                                final Authentication auth, final UserPrincipal userPrincipal) {
         User loggedInUser = userService.findByUsername(auth.getName());
-        User toBeUpdatedUser = userService.findById(userId);
+        User toBeUpdatedUser = userService.findByUsername(username);
 
         userValidator.validateOnPatch(userRequest, toBeUpdatedUser, loggedInUser);
 
@@ -63,9 +63,9 @@ public class UserController {
     }
 
     // Listing user infos
-    @GetMapping("/{userId}")
-    public UserResponse get(@PathVariable final int userId) {
-        User toGetUser = userService.findById(userId);
+    @GetMapping("/{username}")
+    public UserResponse get(@PathVariable final String username) {
+        User toGetUser = userService.findByUsername(username);
 
         userValidator.validateOnGet(toGetUser);
 
@@ -73,11 +73,11 @@ public class UserController {
     }
 
     // Delete
-    @DeleteMapping("/{userId}")
-    public UserResponse delete(@PathVariable final int userId, final Authentication auth,
+    @DeleteMapping("/{username}")
+    public UserResponse delete(@PathVariable final String username, final Authentication auth,
                                final HttpServletRequest request) {
         User loggedInUser = userService.findByUsername(auth.getName());
-        User toBeDeletedUser = userService.findById(userId);
+        User toBeDeletedUser = userService.findByUsername(username);
 
         userValidator.validateOnDelete(toBeDeletedUser, loggedInUser);
 
