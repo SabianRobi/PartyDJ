@@ -34,7 +34,7 @@ jobs:
       - name: Echo ref name
         run: echo( GITHUB_REF_NAME )
       - name: Build & push Docker image
-        if: ${{ steps.test.outcome == success && GITHUB_REF_NAME == "main" }}
+        if: ${{ GITHUB_REF_NAME == "main" }}
         uses: mr-smithers-excellent/docker-build-push@v6
         with:
           image: sabianrobi/partydj
