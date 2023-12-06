@@ -5,10 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Set;
 
@@ -25,6 +22,7 @@ public class Artist {
     @NotBlank
     private String name;
 
+    @EqualsAndHashCode.Exclude
     @ManyToMany
     private Set<Track> tracks;
 

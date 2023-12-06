@@ -4,10 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.UserType;
 
@@ -42,12 +39,15 @@ public class User {
     @Enumerated(EnumType.STRING)
     private PartyRole partyRole;
 
+    @EqualsAndHashCode.Exclude
     @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
     private SpotifyCredential spotifyCredential;
 
+    @EqualsAndHashCode.Exclude
     @ManyToOne
     private Party party;
 
+    @EqualsAndHashCode.Exclude
     @NotNull
     @OneToMany
     private Set<TrackInQueue> addedTracks;

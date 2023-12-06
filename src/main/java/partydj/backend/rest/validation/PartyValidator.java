@@ -251,7 +251,7 @@ public class PartyValidator {
     }
 
     private void VerifyUserIsInParty(final User user, final Party party) {
-        if (!party.getParticipants().contains(user)) {
+        if (user.getParty() != party) {
             throw new IllegalStateException("You are not in this party.");
         }
     }

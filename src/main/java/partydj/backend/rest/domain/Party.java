@@ -2,10 +2,7 @@ package partydj.backend.rest.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Set;
 
@@ -25,12 +22,15 @@ public class Party {
     private String spotifyDeviceId;
     private boolean waitingForTrack;
 
+    @EqualsAndHashCode.Exclude
     @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<TrackInQueue> tracksInQueue;
 
+    @EqualsAndHashCode.Exclude
     @OneToMany(cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<PreviousTrack> previousTracks;
 
+    @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.EAGER)
     private Set<User> participants;
 
