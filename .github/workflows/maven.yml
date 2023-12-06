@@ -31,6 +31,9 @@ jobs:
         id: test
         run: mvn -B package --file pom.xml
 
+      - name: Echo ref name
+        run: echo( github.ref_name )
+
       - name: Build & push Docker image
         if: ${{ github.ref_name }} == "main"
         uses: mr-smithers-excellent/docker-build-push@v6
