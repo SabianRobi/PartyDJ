@@ -17,7 +17,7 @@ public class ArtistTest {
     public void shouldSerialize() {
         final Artist artist = Artist.builder()
                 .id(1)
-//                .name("artist")
+                .name("artist")
                 .tracks(new HashSet<>())
                 .build();
         final ObjectMapper objectMapper = new ObjectMapper();
