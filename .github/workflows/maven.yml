@@ -10,7 +10,7 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "test-deploy" ]
   pull_request:
     branches: [ "main" ]
 
@@ -27,9 +27,11 @@ jobs:
         cache: maven
 
     - name: Build and run tests
+      id: test
       run: mvn -B package --file pom.xml
 
     - name: Build & push Docker image
+      if: steps.test.outcome == "success"
       uses: mr-smithers-excellent/docker-build-push@v6
       with:
         image: sabianrobi/partydj
