@@ -12,7 +12,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import partydj.backend.rest.domain.error.RequiredFieldException;
 import partydj.backend.rest.domain.error.RequiredFieldInvalidException;
 import partydj.backend.rest.domain.error.RequiredFieldMissingException;
-import partydj.backend.rest.domain.error.ThirdPartyAPIError;
+import partydj.backend.rest.domain.error.ThirdPartyApiException;
 import partydj.backend.rest.domain.response.ErrorResponse;
 
 import java.time.LocalDateTime;
@@ -43,9 +43,9 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return handleExceptions(ex, request, HttpStatus.FORBIDDEN);
     }
 
-    @ExceptionHandler(value = ThirdPartyAPIError.class)
-    protected ResponseEntity<Object> handleSpotifyException(final ThirdPartyAPIError ex,
-                                                            final WebRequest request) {
+    @ExceptionHandler(value = ThirdPartyApiException.class)
+    protected ResponseEntity<Object> handleThirdPartyApiException(final ThirdPartyApiException ex,
+                                                                  final WebRequest request) {
         return handleExceptions(ex, request, HttpStatus.SERVICE_UNAVAILABLE);
     }
 

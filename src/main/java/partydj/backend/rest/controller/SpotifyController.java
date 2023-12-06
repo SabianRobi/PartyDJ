@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.*;
-import partydj.backend.rest.domain.error.ThirdPartyAPIError;
+import partydj.backend.rest.domain.error.ThirdPartyApiException;
 import partydj.backend.rest.domain.response.SpotifyCredentialResponse;
 import partydj.backend.rest.domain.response.SpotifyLoginUriResponse;
 import partydj.backend.rest.domain.response.TrackSearchResultResponse;
@@ -126,7 +126,7 @@ public class SpotifyController {
 
             spotifyCredentialService.save(spotifyCredential);
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            throw new ThirdPartyAPIError("Failed to log in with Spotify: " + e.getMessage());
+            throw new ThirdPartyApiException("Failed to log in with Spotify: " + e.getMessage());
         }
 
         return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
@@ -172,7 +172,7 @@ public class SpotifyController {
             spotifyCredential.setToken(authorizationCodeCredentials.getAccessToken());
             spotifyCredentialService.save(spotifyCredential);
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            throw new ThirdPartyAPIError("Failed to refresh Spotify token: " + e.getMessage());
+            throw new ThirdPartyApiException("Failed to refresh Spotify token: " + e.getMessage());
         }
 
         return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
@@ -192,7 +192,7 @@ public class SpotifyController {
         try {
             trackPaging = searchTracksRequest.execute();
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            throw new ThirdPartyAPIError("Failed to search tracks: " + e.getMessage());
+            throw new ThirdPartyApiException("Failed to search tracks: " + e.getMessage());
         }
 
         return Arrays.stream(trackPaging.getItems()).map(track ->
@@ -209,7 +209,7 @@ public class SpotifyController {
         try {
             spotifyTrack = getTrackRequest.execute();
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            throw new ThirdPartyAPIError("Failed to fetch track infos: " + e.getMessage());
+            throw new ThirdPartyApiException("Failed to fetch track infos: " + e.getMessage());
         }
 
         HashSet<Artist> artists = saveArtists(
@@ -242,7 +242,7 @@ public class SpotifyController {
         try {
             startResumeUsersPlaybackRequest.execute();
         } catch (IOException | SpotifyWebApiException | ParseException e) {
-            throw new ThirdPartyAPIError("Could not play next track: " + e.getMessage());
+            throw new ThirdPartyApiException("Could not play next track: " + e.getMessage());
         }
     }
 
