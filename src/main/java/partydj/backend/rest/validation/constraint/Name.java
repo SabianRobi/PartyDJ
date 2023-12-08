@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Name {
-    String message() default "Invalid name. Usable characters: English alphabet (a-z, A-Z), dash ( \"-\" ) and underscore ( \"_\" ). ";
+    String message() default "Invalid name. Usable characters: English alphabet (a-z, A-Z), dash ( \"-\" ) and underscore ( \"_\" ).";
 
     Class<?>[] groups() default {};
 

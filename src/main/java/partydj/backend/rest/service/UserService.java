@@ -6,9 +6,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.enums.PartyRole;
+import partydj.backend.rest.domain.enums.UserType;
+import partydj.backend.rest.domain.error.NotUniqueException;
+import partydj.backend.rest.domain.request.RegisterUserRequest;
 import partydj.backend.rest.domain.request.UpdateUserRequest;
 import partydj.backend.rest.repository.UserRepository;
 
+import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,13 +29,28 @@ public class UserService {
     @Autowired
     private PartyService partyService;
 
-    public User register(final User user) {
-        user.setUsername(user.getUsername().trim());
-        user.setEmail(user.getEmail().trim());
-        user.setPassword(passwordEncoder.encode(user.getPassword().trim()));
+    public User register(final RegisterUserRequest userRequest) {
+        User user = User.builder()
+                .email(userRequest.getEmail().trim())
+                .username(userRequest.getUsername().trim())
+                .password(passwordEncoder.encode(userRequest.getPassword()))
+                .userType(UserType.NORMAL)
+                .addedTracks(new HashSet<>())
+                .build();
+
         try {
             return userRepository.save(user);
-        } catch (DataIntegrityViolationException ex) {
+        } catch (final DataIntegrityViolationException ex) {
+            if (ex.getMessage().contains("Duplicate entry")) {
+                String wrongValue = ex.getMessage().split("'")[1];
+
+                if (Objects.equals(wrongValue, userRequest.getUsername())) {
+                    throw new NotUniqueException("username", "Already taken.");
+                }
+                if (Objects.equals(wrongValue, userRequest.getEmail())) {
+                    throw new NotUniqueException("email", "Already in use.");
+                }
+            }
             throw new IllegalStateException("Cannot save entity");
         }
     }
@@ -56,18 +76,6 @@ public class UserService {
         }
 
         userRepository.delete(user);
-    }
-
-    public User findById(final int userId) {
-        return userRepository.findById(userId);
-    }
-
-    public boolean existsByUsername(final String username) {
-        return userRepository.existsByUsername(username);
-    }
-
-    public boolean existsByEmail(final String email) {
-        return userRepository.existsByEmail(email);
     }
 
     public User update(final User user, final UpdateUserRequest updatedUserInfos) {

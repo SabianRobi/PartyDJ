@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.error.RequiredFieldInvalidException;
 import partydj.backend.rest.domain.error.RequiredFieldMissingException;
-import partydj.backend.rest.domain.request.SaveUserRequest;
 import partydj.backend.rest.domain.request.UpdateUserRequest;
 import partydj.backend.rest.service.UserService;
 
@@ -20,23 +19,6 @@ import static partydj.backend.rest.config.UserConfig.USERNAME_MIN_LENGTH;
 public class UserValidator {
     @Autowired
     private UserService userService;
-
-    public void validateOnPost(final SaveUserRequest user) {
-        if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new RequiredFieldMissingException("Email cannot be empty.");
-        }
-        if (user.getUsername() == null || user.getUsername().isBlank()) {
-            throw new RequiredFieldMissingException("Username cannot be empty.");
-        }
-        if (user.getPassword() == null || user.getPassword().isBlank()) {
-            throw new RequiredFieldMissingException("Password cannot be empty.");
-        }
-
-        VerifyUsernameMinLength(user.getUsername());
-        VerifyUsernameAlreadyExists(user.getUsername());
-        VerifyEmailFormat(user.getEmail());
-        VerifyEmailAlreadyExists(user.getEmail());
-    }
 
     public void validateOnGet(final User user) {
         VerifyUserNotNull(user);
@@ -90,18 +72,6 @@ public class UserValidator {
         User user = userService.findByEmail(email);
         if (user != null && user.getId() != loggedInUser.getId()) {
             throw new IllegalStateException("A user with this email already exists.");
-        }
-    }
-
-    private void VerifyEmailAlreadyExists(final String email) {
-        if (userService.existsByEmail(email)) {
-            throw new IllegalStateException("A user with this email already exists.");
-        }
-    }
-
-    private void VerifyUsernameAlreadyExists(final String username) {
-        if (userService.existsByUsername(username)) {
-            throw new IllegalStateException("A user with this username already exists.");
         }
     }
 

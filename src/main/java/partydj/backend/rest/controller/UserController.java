@@ -2,6 +2,7 @@ package partydj.backend.rest.controller;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -9,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.User;
-import partydj.backend.rest.domain.request.SaveUserRequest;
+import partydj.backend.rest.domain.request.RegisterUserRequest;
 import partydj.backend.rest.domain.request.UpdateUserRequest;
 import partydj.backend.rest.domain.response.UserResponse;
 import partydj.backend.rest.mapper.UserMapper;
@@ -33,11 +34,8 @@ public class UserController {
     // Register
     @PostMapping(consumes = "application/x-www-form-urlencoded")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse save(final SaveUserRequest userRequest) {
-        userValidator.validateOnPost(userRequest);
-
-        User user = userMapper.mapSaveUserRequestToUser(userRequest);
-        User savedUser = userService.register(user);
+    public UserResponse save(@Valid final RegisterUserRequest userRequest) {
+        final User savedUser = userService.register(userRequest);
 
         return userMapper.mapUserToUserResponse(savedUser);
     }

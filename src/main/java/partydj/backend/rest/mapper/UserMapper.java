@@ -2,13 +2,9 @@ package partydj.backend.rest.mapper;
 
 import org.springframework.stereotype.Component;
 import partydj.backend.rest.domain.User;
-import partydj.backend.rest.domain.enums.UserType;
-import partydj.backend.rest.domain.request.SaveUserRequest;
 import partydj.backend.rest.domain.response.UserInPartyResponse;
 import partydj.backend.rest.domain.response.UserInPartyTrackInQueueResponse;
 import partydj.backend.rest.domain.response.UserResponse;
-
-import java.util.HashSet;
 
 @Component
 public class UserMapper {
@@ -18,16 +14,6 @@ public class UserMapper {
                 .email(user.getEmail())
                 .username(user.getUsername())
                 .isSpotifyConnected(user.getSpotifyCredential() != null)
-                .build();
-    }
-
-    public User mapSaveUserRequestToUser(final SaveUserRequest userRequest) {
-        return User.builder()
-                .email(userRequest.getEmail())
-                .username(userRequest.getUsername())
-                .password(userRequest.getPassword())
-                .addedTracks(new HashSet<>())
-                .userType(UserType.NORMAL)
                 .build();
     }
 

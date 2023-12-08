@@ -10,6 +10,10 @@ import java.util.regex.Pattern;
 public class NameValidator implements ConstraintValidator<Name, String> {
     @Override
     public boolean isValid(final String name, final ConstraintValidatorContext context) {
+        if (name == null || name.isEmpty()) {
+            return false;
+        }
+
         String regex = "^[a-zA-Z0-9-_]+$";
         final Pattern p = Pattern.compile(regex);
         final Matcher m = p.matcher(name);
