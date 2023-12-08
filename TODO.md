@@ -57,6 +57,18 @@ Auth required for every endpoint
 | [X]  | GetToken     | GET    | /platforms/spotify/token    | Returns the user's Spotify token                        |
 | [X]  | RefreshToken | PATCH  | /platforms/spotify/token    | Makes the backend refresh the user's Spotify token      |
 
+* Rework validation:
+    * Constraints
+      [X] Set correct constraints at model level
+        * Replace validator classes:
+            * Create new single-mode constraints
+            * Create new method-type constraints
+            * -> Remove validators
+    * Delete Requests, save directly to model -> remove relevant mappers
+    * -> Remove Requests
+    * Customize exceptions
+    * Customize default error messages
+
 * Recommend songs when no tracks in queue
 * Add tests
     * Models
@@ -65,8 +77,7 @@ Auth required for every endpoint
     * Services
     * Controllers
 * Add readme (introduction, configuring, running)
-* [SHELVED] Fix UniqueUsernameValidator/Email: maybe try: entityManager.setFlushMode(FlushModeType.COMMIT);
-* [SHELVED] UserController#67
+
 * Add YouTube support
 * When frontend comes alive: remove PageController
 * When frontend comes alive: Enable CSRF protection

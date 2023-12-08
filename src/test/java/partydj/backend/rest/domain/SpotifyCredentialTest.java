@@ -16,7 +16,7 @@ public class SpotifyCredentialTest {
     public void shouldSerialize() {
         final SpotifyCredential spotifyCredential = SpotifyCredential.builder()
                 .id(1)
-                .state("state")
+                .state("1593bead-e671-4a0b-a195-b5165aed6410")
                 .token("token")
                 .refreshToken("refreshToken")
                 .owner(null)
@@ -39,7 +39,7 @@ public class SpotifyCredentialTest {
 
         final SpotifyCredential expected = SpotifyCredential.builder()
                 .id(1)
-                .state("state")
+                .state("1593bead-e671-4a0b-a195-b5165aed6410")
                 .token("token")
                 .refreshToken("refreshToken")
                 .owner(null)

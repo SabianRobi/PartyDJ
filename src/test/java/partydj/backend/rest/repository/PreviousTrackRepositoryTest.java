@@ -34,6 +34,7 @@ public class PreviousTrackRepositoryTest {
     @Test
     public void givenNewPreviousTrack_whenSave_thenSuccess() {
         PreviousTrack savedTrack = repository.save(track);
+        // TODO: Why doesn't it throw any exception, uri format clearly wrong
 
         assertThat(entityManager.find(PreviousTrack.class, savedTrack.getId())).isEqualTo(track);
     }

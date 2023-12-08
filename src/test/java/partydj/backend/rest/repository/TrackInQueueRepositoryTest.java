@@ -5,12 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import partydj.backend.rest.domain.Artist;
 import partydj.backend.rest.domain.Party;
 import partydj.backend.rest.domain.TrackInQueue;
+import partydj.backend.rest.domain.User;
 
-import java.util.HashSet;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static partydj.backend.rest.helper.DataGenerator.*;
 
 @DataJpaTest
 public class TrackInQueueRepositoryTest {
@@ -18,18 +21,24 @@ public class TrackInQueueRepositoryTest {
     private TrackInQueueRepository repository;
 
     @Autowired
-    TestEntityManager entityManager;
+    private TestEntityManager entityManager;
 
+    private User user;
+    private Party party;
+    private Artist artist;
     private TrackInQueue track;
 
     @BeforeEach
-    void init() {
-        track = TrackInQueue.builder().uri("uri").title("title").coverUri("coverUri").length(0).score(0).build();
+    public void init() {
+        user = entityManager.persist(generateUser(""));
+        artist = entityManager.persist(generateArtist(""));
+        party = entityManager.persist(generateParty("", Set.of(user)));
+        track = generateTrackInQueue("", party, user, Set.of(artist));
     }
 
     @Test
     public void givenNewTrackInQueue_whenSave_thenSuccess() {
-        TrackInQueue savedTrack = repository.save(track);
+        final TrackInQueue savedTrack = repository.save(track);
 
         assertThat(entityManager.find(TrackInQueue.class, savedTrack.getId())).isEqualTo(track);
     }
@@ -47,37 +56,29 @@ public class TrackInQueueRepositoryTest {
     public void givenTrackInQueue_whenFindById_thenSuccess() {
         entityManager.persist(track);
 
-        TrackInQueue found = repository.findById(track.getId());
+        final TrackInQueue found = repository.findById(track.getId());
 
         assertThat(found).isEqualTo(track);
     }
 
     @Test
     public void givenTrackInQueues_whenGetNextTrack_thenSuccess() {
-        Party party = Party.builder().name("party").tracksInQueue(new HashSet<>()).build();
-        entityManager.persist(party);
-        track.setParty(party);
-        TrackInQueue track1 = TrackInQueue.builder()
-                .party(party)
-                .isPlaying(false)
-                .uri("uri").title("title").coverUri("coverUri").length(0).score(10).build();
         entityManager.persist(track);
+        final TrackInQueue track1 = generateTrackInQueue("2", party, user, Set.of(artist));
+        track1.setScore(10);
         entityManager.persist(track1);
 
-        TrackInQueue nextTrack = repository.findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc("party");
+        final TrackInQueue nextTrack = repository.findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc("party");
 
         assertThat(nextTrack).isEqualTo(track1);
     }
 
     @Test
     public void givenTrackInQueues_whenGetNowPlayingTrack_thenSuccess() {
-        Party party = Party.builder().name("party").tracksInQueue(new HashSet<>()).build();
-        entityManager.persist(party);
-        track.setParty(party);
         track.setPlaying(true);
         entityManager.persist(track);
 
-        TrackInQueue nowPlayingTrack = repository.findByPartyNameAndIsPlayingIsTrue("party");
+        final TrackInQueue nowPlayingTrack = repository.findByPartyNameAndIsPlayingIsTrue("party");
 
         assertThat(nowPlayingTrack).isEqualTo(track);
     }

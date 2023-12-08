@@ -6,13 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import partydj.backend.rest.domain.Artist;
+import partydj.backend.rest.domain.Party;
 import partydj.backend.rest.domain.TrackInQueue;
+import partydj.backend.rest.domain.User;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static partydj.backend.rest.helper.DataGenerator.*;
 
 @DataJpaTest
 public class ArtistRepositoryTest {
@@ -20,18 +23,18 @@ public class ArtistRepositoryTest {
     private ArtistRepository artistRepository;
 
     @Autowired
-    TestEntityManager entityManager;
+    private TestEntityManager entityManager;
 
     private Artist artist;
 
     @BeforeEach
     void init() {
-        artist = Artist.builder().name("name").tracks(new HashSet<>()).build();
+        artist = generateArtist("");
     }
 
     @Test
     public void givenNewArtist_whenSave_thenSuccess() {
-        Artist savedArtist = artistRepository.save(artist);
+        final Artist savedArtist = artistRepository.save(artist);
 
         assertThat(entityManager.find(Artist.class, savedArtist.getId())).isEqualTo(artist);
     }
@@ -47,12 +50,12 @@ public class ArtistRepositoryTest {
 
     @Test
     public void givenNewArtists_whenSaveAll_thenSuccess() {
-        Artist artist2 = Artist.builder().name("name2").tracks(new HashSet<>()).build();
+        final Artist artist2 = Artist.builder().name("name2").tracks(new HashSet<>()).build();
 
-        Iterable<Artist> artists = artistRepository.saveAll(Set.of(artist, artist2));
+        final Iterable<Artist> artists = artistRepository.saveAll(Set.of(artist, artist2));
 
-        Artist savedArtist1 = entityManager.find(Artist.class, artist.getId());
-        Artist savedArtist2 = entityManager.find(Artist.class, artist2.getId());
+        final Artist savedArtist1 = entityManager.find(Artist.class, artist.getId());
+        final Artist savedArtist2 = entityManager.find(Artist.class, artist2.getId());
         assertThat(artists).containsAll(Set.of(savedArtist1, savedArtist2)).hasSize(2);
     }
 
@@ -63,20 +66,22 @@ public class ArtistRepositoryTest {
         entityManager.persist(artist);
         entityManager.persist(artist2);
 
-        HashSet<Artist> artists = artistRepository.findAllByNameIn(names);
+        final HashSet<Artist> artists = artistRepository.findAllByNameIn(names);
 
         assertThat(artists).contains(artist2).doesNotContain(artist);
     }
 
     @Test
     public void givenArtists_whenFindAllByTracksContainingTrack_thenSuccess() {
-        final TrackInQueue track = TrackInQueue.builder().title("title").uri("uri").coverUri("coverUri").build();
-        final Artist artist2 = Artist.builder().name("name2").tracks(Set.of(track)).build();
-        entityManager.persist(track);
-        entityManager.persist(artist);
+        final User user = entityManager.persist(generateUser(""));
+        final Artist artist = entityManager.persist(generateArtist(""));
+        final Party party = entityManager.persist(generateParty("", Set.of(user)));
+        final TrackInQueue track = entityManager.persist(generateTrackInQueue("", party, user, new HashSet<>()));
+
+        final Artist artist2 = Artist.builder().name("artist2").tracks(Set.of(track)).build();
         entityManager.persist(artist2);
 
-        HashSet<Artist> artists = artistRepository.findAllByTracksContaining(track);
+        final HashSet<Artist> artists = artistRepository.findAllByTracksContaining(track);
 
         assertThat(artists).contains(artist2).doesNotContain(artist);
     }

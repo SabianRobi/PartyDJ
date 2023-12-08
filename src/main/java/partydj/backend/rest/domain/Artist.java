@@ -1,10 +1,8 @@
 package partydj.backend.rest.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.Set;
@@ -15,14 +13,17 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Artist {
+
     @Id
     @GeneratedValue
     private int id;
 
     @NotBlank
+    @Column(unique = true)
     private String name;
 
     @EqualsAndHashCode.Exclude
+    @NotNull
     @ManyToMany
     private Set<Track> tracks;
 

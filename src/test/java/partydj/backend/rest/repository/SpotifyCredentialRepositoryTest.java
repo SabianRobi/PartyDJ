@@ -7,11 +7,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import partydj.backend.rest.domain.SpotifyCredential;
 import partydj.backend.rest.domain.User;
-import partydj.backend.rest.domain.enums.UserType;
-
-import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static partydj.backend.rest.helper.DataGenerator.generateSpotifyCredential;
+import static partydj.backend.rest.helper.DataGenerator.generateUser;
 
 @DataJpaTest
 public class SpotifyCredentialRepositoryTest {
@@ -19,19 +18,20 @@ public class SpotifyCredentialRepositoryTest {
     private SpotifyCredentialRepository repository;
 
     @Autowired
-    TestEntityManager entityManager;
+    private TestEntityManager entityManager;
 
     private SpotifyCredential spotifyCredential;
+    private User user;
 
     @BeforeEach
     void init() {
-        spotifyCredential = SpotifyCredential.builder().owner(null).state("state")
-                .token("token").refreshToken("refreshToken").build();
+        user = entityManager.persist(generateUser(""));
+        spotifyCredential = generateSpotifyCredential(user);
     }
 
     @Test
     public void givenNewSpotifyCredential_whenSave_thenSuccess() {
-        SpotifyCredential savedCredential = repository.save(spotifyCredential);
+        final SpotifyCredential savedCredential = repository.save(spotifyCredential);
 
         assertThat(entityManager.find(SpotifyCredential.class, savedCredential.getId())).isEqualTo(spotifyCredential);
     }
@@ -47,14 +47,9 @@ public class SpotifyCredentialRepositoryTest {
 
     @Test
     public void givenSpotifyCredential_whenFindByOwner_thenSuccess() {
-        User user = User.builder()
-                .email("us@e.r").username("user").password("password")
-                .userType(UserType.NORMAL).addedTracks(new HashSet<>()).build();
-        spotifyCredential.setOwner(user);
-        entityManager.persist(user);
         entityManager.persist(spotifyCredential);
 
-        SpotifyCredential found = repository.findByOwner(user);
+        final SpotifyCredential found = repository.findByOwner(user);
 
         assertThat(found).isEqualTo(spotifyCredential);
     }
@@ -63,10 +58,8 @@ public class SpotifyCredentialRepositoryTest {
     public void givenSpotifyCredential_whenFindByState_thenSuccess() {
         entityManager.persist(spotifyCredential);
 
-        SpotifyCredential found = repository.findByState("state");
+        final SpotifyCredential found = repository.findByState("1593bead-e671-4a0b-a195-b5165aed6410");
 
         assertThat(found).isEqualTo(spotifyCredential);
     }
-
-
 }
