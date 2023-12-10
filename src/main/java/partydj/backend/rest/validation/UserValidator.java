@@ -7,10 +7,6 @@ import partydj.backend.rest.domain.User;
 
 @Service
 public class UserValidator {
-    public void validateOnGet(final User user) {
-        VerifyUserNotNull(user);
-    }
-
     public void validateOnDelete(final User toBeDeletedUser, final User loggedInUser) {
         VerifyUserNotNull(toBeDeletedUser);
         VerifySameUser(toBeDeletedUser, loggedInUser);

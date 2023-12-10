@@ -52,7 +52,7 @@ public class UserController {
 
         // Update logged in user infos
         userPrincipal.setUser(updatedUser);
-        Authentication newAuth = new UsernamePasswordAuthenticationToken(
+        final Authentication newAuth = new UsernamePasswordAuthenticationToken(
                 userPrincipal, auth.getCredentials(), auth.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(newAuth);
 
@@ -61,10 +61,8 @@ public class UserController {
 
     // Listing user infos
     @GetMapping("/{username}")
-    public UserResponse get(@PathVariable final String username) {
-        User toGetUser = userService.findByUsername(username);
-
-        userValidator.validateOnGet(toGetUser);
+    public UserResponse get(@PathVariable @Name final String username) {
+        final User toGetUser = userService.findByUsername(username);
 
         return userMapper.mapUserToUserResponse(toGetUser);
     }

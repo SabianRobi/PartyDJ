@@ -1,5 +1,6 @@
 package partydj.backend.rest.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
@@ -76,7 +77,13 @@ public class UserService {
     }
 
     public User findByUsername(final String username) {
-        return userRepository.findByUsername(username);
+        final User user = userRepository.findByUsername(username);
+
+        if (user == null) {
+            throw new EntityNotFoundException("User does not exists.");
+        }
+
+        return user;
     }
 
     public void saveAll(final Set<User> users) {
