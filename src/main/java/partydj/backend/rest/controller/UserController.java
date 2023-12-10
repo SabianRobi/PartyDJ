@@ -15,7 +15,6 @@ import partydj.backend.rest.domain.response.UserResponse;
 import partydj.backend.rest.mapper.UserMapper;
 import partydj.backend.rest.security.UserPrincipal;
 import partydj.backend.rest.service.UserService;
-import partydj.backend.rest.validation.UserValidator;
 import partydj.backend.rest.validation.constraint.Name;
 
 @RestController
@@ -24,9 +23,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private UserValidator userValidator;
 
     @Autowired
     private UserMapper userMapper;
@@ -69,19 +65,17 @@ public class UserController {
 
     // Delete
     @DeleteMapping("/{username}")
-    public UserResponse delete(@PathVariable final String username, final Authentication auth,
+    public UserResponse delete(@PathVariable @Name final String username, final Authentication auth,
                                final HttpServletRequest request) {
         User loggedInUser = userService.findByUsername(auth.getName());
         User toBeDeletedUser = userService.findByUsername(username);
 
-        userValidator.validateOnDelete(toBeDeletedUser, loggedInUser);
-
-        userService.delete(toBeDeletedUser);
+        userService.delete(loggedInUser, toBeDeletedUser);
 
         // Log out the user
         try {
             request.logout();
-        } catch (ServletException ignored) {
+        } catch (final ServletException ignored) {
         }
 
         return userMapper.mapUserToUserResponse(toBeDeletedUser);

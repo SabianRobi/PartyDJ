@@ -49,7 +49,11 @@ public class UserService {
         }
     }
 
-    public void delete(final User user) {
+    public void delete(final User user, final User user2) {
+        if (user != user2) {
+            throw new AccessDeniedException("You can not make changes to other user profiles.");
+        }
+
         if (user.getPartyRole() != null) {
             if (user.getPartyRole() == PartyRole.CREATOR) {
                 partyService.delete(user.getParty());
