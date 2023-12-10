@@ -3,7 +3,10 @@ package partydj.backend.rest.controller;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.neovisionaries.i18n.CountryCode;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.apache.hc.core5.http.ParseException;
+import org.hibernate.validator.constraints.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -18,16 +21,10 @@ import partydj.backend.rest.mapper.TrackMapper;
 import partydj.backend.rest.service.ArtistService;
 import partydj.backend.rest.service.SpotifyCredentialService;
 import partydj.backend.rest.service.TrackService;
-import partydj.backend.rest.service.UserService;
-import partydj.backend.rest.validation.SpotifyCredentialValidator;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
-import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
 import se.michaelthelin.spotify.model_objects.specification.Paging;
-import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRefreshRequest;
-import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
-import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import se.michaelthelin.spotify.requests.data.player.StartResumeUsersPlaybackRequest;
 import se.michaelthelin.spotify.requests.data.search.simplified.SearchTracksRequest;
 import se.michaelthelin.spotify.requests.data.tracks.GetTrackRequest;
@@ -41,19 +38,10 @@ import java.util.*;
 public class SpotifyController {
 
     @Autowired
-    private UserService userService;
-
-    @Autowired
     private SpotifyCredentialService spotifyCredentialService;
 
     @Autowired
     private SpotifyCredentialMapper spotifyCredentialMapper;
-
-    @Autowired
-    private SpotifyCredentialValidator spotifyCredentialValidator;
-
-    @Autowired
-    private Map<String, String> spotifyConfigs;
 
     @Autowired
     private TrackMapper trackMapper;
@@ -77,103 +65,34 @@ public class SpotifyController {
 
     @GetMapping("/login")
     public SpotifyLoginUriResponse getLoginURI(final Authentication auth) {
-        User loggedInUser = userService.findByUsername(auth.getName());
-        SpotifyCredential spotifyCredential = spotifyCredentialService.findByOwner(loggedInUser);
-
-        spotifyCredentialValidator.validateOnGetLoginURI(spotifyCredential);
-
-        final String state = UUID.randomUUID().toString();
-
-        if (spotifyCredential != null) {
-            spotifyCredential.setState(state);
-        } else {
-            spotifyCredential = SpotifyCredential.builder()
-                    .state(state)
-                    .owner(loggedInUser)
-                    .build();
-        }
-
-        spotifyCredentialService.save(spotifyCredential);
-        loggedInUser.setSpotifyCredential(spotifyCredential);
-        userService.save(loggedInUser);
-
-        final AuthorizationCodeUriRequest authorizationCodeUriRequest = spotifyApi.authorizationCodeUri()
-                .scope(spotifyConfigs.get("scopes"))
-                .show_dialog(true)
-                .state(state)
-                .build();
-        URI uri = authorizationCodeUriRequest.execute();
-        return new SpotifyLoginUriResponse(uri.toString());
+        return new SpotifyLoginUriResponse(spotifyCredentialService.getLoginUri(auth));
     }
 
     @GetMapping("/callback")
     @ResponseStatus(HttpStatus.CREATED)
-    public SpotifyCredentialResponse processCallback(@RequestParam(required = false) final String code,
-                                                     @RequestParam(required = false) final String state) {
-        SpotifyCredential spotifyCredential = spotifyCredentialService.findByState(state);
-
-        spotifyCredentialValidator.validateOnCallback(code, state, spotifyCredential);
-        AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(code).build();
-
-        try {
-            // Get user token
-            final AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRequest.execute();
-
-            // Save tokens
-            spotifyCredential.setToken(authorizationCodeCredentials.getAccessToken());
-            spotifyCredential.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
-            spotifyCredential.setState(null);
-
-            spotifyCredentialService.save(spotifyCredential);
-        } catch (IOException | SpotifyWebApiException | ParseException e) {
-            throw new ThirdPartyApiException("Failed to log in with Spotify: " + e.getMessage());
-        }
+    public SpotifyCredentialResponse processCallback(@RequestParam @NotNull @NotBlank final String code,
+                                                     @RequestParam @NotNull @UUID final java.util.UUID state) {
+        final SpotifyCredential spotifyCredential = spotifyCredentialService.processCallback(code, state);
 
         return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }
 
     @PostMapping("/logout")
     public SpotifyCredentialResponse logout(final Authentication auth) {
-        User loggedInUser = userService.findByUsername(auth.getName());
-        SpotifyCredential spotifyCredential = spotifyCredentialService.findByOwner(loggedInUser);
-
-        spotifyCredentialValidator.validateOnLogout(spotifyCredential);
-
-        loggedInUser.setSpotifyCredential(null);
-        userService.save(loggedInUser);
-        spotifyCredentialService.delete(spotifyCredential);
-
+        final SpotifyCredential spotifyCredential = spotifyCredentialService.logout(auth);
         return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }
 
     @GetMapping("/token")
     public SpotifyCredentialResponse getToken(final Authentication auth) {
-        User loggedInUser = userService.findByUsername(auth.getName());
-        SpotifyCredential spotifyCredential = spotifyCredentialService.findByOwner(loggedInUser);
-
-        spotifyCredentialValidator.validateOnGetToken(spotifyCredential);
+        final SpotifyCredential spotifyCredential = spotifyCredentialService.getToken(auth);
 
         return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }
 
     @PatchMapping("/token")
     public SpotifyCredentialResponse refreshToken(final Authentication auth) {
-        User loggedInUser = userService.findByUsername(auth.getName());
-        SpotifyCredential spotifyCredential = spotifyCredentialService.findByOwner(loggedInUser);
-
-        spotifyCredentialValidator.validateOnRefreshToken(spotifyCredential);
-
-        spotifyApi.setRefreshToken(spotifyCredential.getRefreshToken());
-        AuthorizationCodeRefreshRequest authorizationCodeRefreshRequest = spotifyApi.authorizationCodeRefresh()
-                .build();
-        try {
-            final AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRefreshRequest.execute();
-
-            spotifyCredential.setToken(authorizationCodeCredentials.getAccessToken());
-            spotifyCredentialService.save(spotifyCredential);
-        } catch (IOException | SpotifyWebApiException | ParseException e) {
-            throw new ThirdPartyApiException("Failed to refresh Spotify token: " + e.getMessage());
-        }
+        final SpotifyCredential spotifyCredential = spotifyCredentialService.refreshToken(auth);
 
         return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }

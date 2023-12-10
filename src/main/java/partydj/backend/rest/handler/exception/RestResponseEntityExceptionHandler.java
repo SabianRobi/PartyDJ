@@ -12,6 +12,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -92,6 +93,15 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         HashMap<String, String> errors = new HashMap<>();
         errors.put(ex.getKey(), ex.getMessage());
         return generateResponseBody(ex, new HttpHeaders(), HttpStatus.CONFLICT, errors, request);
+    }
+
+    // Required GET parameter missing
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(final MissingServletRequestParameterException ex,
+                                                                          final HttpHeaders headers,
+                                                                          final HttpStatusCode status,
+                                                                          final WebRequest request) {
+        return generateResponseBody(ex, headers, status, ex.getMessage(), request);
     }
 
     private ResponseEntity<Object> generateResponseBody(final Exception ex,
