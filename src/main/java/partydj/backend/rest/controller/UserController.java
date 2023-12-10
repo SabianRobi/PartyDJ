@@ -10,13 +10,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.domain.User;
-import partydj.backend.rest.domain.request.RegisterUserRequest;
-import partydj.backend.rest.domain.request.UpdateUserRequest;
+import partydj.backend.rest.domain.request.UserRequest;
 import partydj.backend.rest.domain.response.UserResponse;
 import partydj.backend.rest.mapper.UserMapper;
 import partydj.backend.rest.security.UserPrincipal;
 import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.UserValidator;
+import partydj.backend.rest.validation.constraint.Name;
 
 @RestController
 @RequestMapping(value = "/api/v1/user", produces = "application/json")
@@ -34,22 +34,21 @@ public class UserController {
     // Register
     @PostMapping(consumes = "application/x-www-form-urlencoded")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse save(@Valid final RegisterUserRequest userRequest) {
+    public UserResponse save(@Valid final UserRequest userRequest) {
         final User savedUser = userService.register(userRequest);
 
         return userMapper.mapUserToUserResponse(savedUser);
     }
 
     // Update
-    @PatchMapping(value = "/{username}", consumes = "application/x-www-form-urlencoded")
-    public UserResponse update(final UpdateUserRequest userRequest, @PathVariable final String username,
-                               final Authentication auth, final UserPrincipal userPrincipal) {
-        User loggedInUser = userService.findByUsername(auth.getName());
-        User toBeUpdatedUser = userService.findByUsername(username);
+    @PutMapping(value = "/{givenUsername}", consumes = "application/x-www-form-urlencoded")
+    public UserResponse update(@Valid final UserRequest userRequest,
+                               @PathVariable @Name final String givenUsername,
+                               final Authentication auth,
+                               final UserPrincipal userPrincipal) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        userValidator.validateOnPatch(userRequest, toBeUpdatedUser, loggedInUser);
-
-        User updatedUser = userService.update(toBeUpdatedUser, userRequest);
+        final User updatedUser = userService.update(givenUsername, loggedInUser, userRequest);
 
         // Update logged in user infos
         userPrincipal.setUser(updatedUser);

@@ -32,13 +32,13 @@ public class User {
 
     @NotBlank
     @Column(unique = true)
-    @Size(min = USERNAME_MIN_LENGTH, message = "Should be at least " + USERNAME_MIN_LENGTH + " characters long.")
-    @Size(max = USERNAME_MAX_LENGTH, message = "Should be maximum " + USERNAME_MAX_LENGTH + " characters long.")
+    @Size(min = USERNAME_MIN_LENGTH, message = "Should be at least {min} characters long.")
+    @Size(max = USERNAME_MAX_LENGTH, message = "Should be maximum {max} characters long.")
     @Name
     private String username;
 
     @NotBlank
-    @Size(min = PASSWORD_MIN_LENGTH, message = "Should be at least " + PASSWORD_MIN_LENGTH + " characters long.")
+    @Size(min = PASSWORD_MIN_LENGTH, message = "Should be at least {min} characters long.")
     private String password;
 
     @NotNull

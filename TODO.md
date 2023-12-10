@@ -23,7 +23,7 @@ localhost:8080/api/v1/
 | [X]  | Login    | POST   | /login           | Validates the submitted data & updates DB  | no             |
 | [X]  | Logout   | POST   | /logout          | Logs out the user                          | yes            |
 | [X]  | Profile  | GET    | /user/{username} | Returns the user infos                     | yes            |
-| [X]  | Profile  | PATCH  | /user/{username} | Updates the user infos                     | yes            |
+| [X]  | Profile  | PUT    | /user/{username} | Updates the user infos                     | yes            |
 | [X]  | Profile  | DELETE | /user/{username} | Deletes the profile                        | yes            |
 
 ### Party

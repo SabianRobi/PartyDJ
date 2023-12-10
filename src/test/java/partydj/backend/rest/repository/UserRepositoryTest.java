@@ -47,47 +47,11 @@ public class UserRepositoryTest {
     }
 
     @Test
-    public void givenUser_whenFindById_thenSuccess() {
-        entityManager.persist(user);
-
-        User foundUser = repository.findById(user.getId());
-
-        assertThat(foundUser).isNotNull().isEqualTo(user);
-    }
-
-    @Test
     public void givenUser_whenFindByUsername_thenSuccess() {
         entityManager.persist(user);
 
         User foundUser = repository.findByUsername(user.getUsername());
 
         assertThat(foundUser).isNotNull().isEqualTo(user);
-    }
-
-    @Test
-    public void givenUser_whenFindByEmail_thenSuccess() {
-        entityManager.persist(user);
-
-        User foundUser = repository.findByEmail(user.getEmail());
-
-        assertThat(foundUser).isNotNull().isEqualTo(user);
-    }
-
-    @Test
-    public void givenUser_whenExistsByUsername_thenSuccess() {
-        entityManager.persist(user);
-
-        boolean isFound = repository.existsByUsername(user.getUsername());
-
-        assertThat(isFound).isTrue();
-    }
-
-    @Test
-    public void givenUser_whenExistsByEmail_thenSuccess() {
-        entityManager.persist(user);
-
-        boolean isFound = repository.existsByEmail(user.getEmail());
-
-        assertThat(isFound).isTrue();
     }
 }

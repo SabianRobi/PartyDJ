@@ -15,7 +15,7 @@ import static partydj.backend.rest.config.UserConfig.*;
 @Builder
 @Getter
 @Setter
-public class RegisterUserRequest {
+public class UserRequest {
 
     @NotNull
     @NotBlank
@@ -26,8 +26,8 @@ public class RegisterUserRequest {
     @NotNull
     @NotBlank
     @Column(unique = true)
-    @Size(min = USERNAME_MIN_LENGTH, message = "Should be at least " + USERNAME_MIN_LENGTH + " characters long.")
-    @Size(max = USERNAME_MAX_LENGTH, message = "Should be maximum " + USERNAME_MAX_LENGTH + " characters long.")
+    @Size(min = USERNAME_MIN_LENGTH, message = "Should be at least {min} characters long.")
+    @Size(max = USERNAME_MAX_LENGTH, message = "Should be maximum {max} characters long.")
     @Name
     private String username;
 

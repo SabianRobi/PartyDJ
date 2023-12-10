@@ -6,13 +6,5 @@ import partydj.backend.rest.domain.User;
 
 @Repository
 public interface UserRepository extends CrudRepository<User, Integer> {
-    User findById(final int id);
-
-    boolean existsByUsername(final String username);
-
-    boolean existsByEmail(final String email);
-
     User findByUsername(final String username);
-
-    User findByEmail(final String email);
 }
