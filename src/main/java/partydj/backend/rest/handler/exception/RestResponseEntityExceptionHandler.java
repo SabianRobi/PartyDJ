@@ -10,12 +10,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import partydj.backend.rest.domain.error.*;
 import partydj.backend.rest.domain.response.ErrorResponse;
@@ -68,7 +71,16 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return generateResponseBody(ex, new HttpHeaders(), HttpStatus.BAD_REQUEST, errors, request);
     }
 
-    // Types are ok, but invalid
+    // Not unique
+    @ExceptionHandler(value = NotUniqueException.class)
+    protected ResponseEntity<Object> handleNotUniqueExceptionException(final NotUniqueException ex,
+                                                                       final WebRequest request) {
+        HashMap<String, String> errors = new HashMap<>();
+        errors.put(ex.getKey(), ex.getMessage());
+        return generateResponseBody(ex, new HttpHeaders(), HttpStatus.CONFLICT, errors, request);
+    }
+
+    // Types are ok, but invalid (received String instead of boolean)
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(final MethodArgumentNotValidException ex,
                                                                   final HttpHeaders headers,
@@ -86,22 +98,51 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return generateResponseBody(ex, headers, status, errors, request);
     }
 
-    // Not unique
-    @ExceptionHandler(value = NotUniqueException.class)
-    protected ResponseEntity<Object> handleNotUniqueExceptionException(final NotUniqueException ex,
-                                                                       final WebRequest request) {
-        HashMap<String, String> errors = new HashMap<>();
-        errors.put(ex.getKey(), ex.getMessage());
-        return generateResponseBody(ex, new HttpHeaders(), HttpStatus.CONFLICT, errors, request);
-    }
-
-    // Required GET parameter missing
+    // Required GET parameter missing (received ...?foo=bar instead of ...?foo=bar&some=thing )
     @Override
     protected ResponseEntity<Object> handleMissingServletRequestParameter(final MissingServletRequestParameterException ex,
                                                                           final HttpHeaders headers,
                                                                           final HttpStatusCode status,
                                                                           final WebRequest request) {
         return generateResponseBody(ex, headers, status, ex.getMessage(), request);
+    }
+
+
+    // Method not supported (received PUT request instead of PATCH)
+    @Override
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(final HttpRequestMethodNotSupportedException ex,
+                                                                         final HttpHeaders headers,
+                                                                         final HttpStatusCode status,
+                                                                         final WebRequest request) {
+        return generateResponseBody(ex, new HttpHeaders(), status, ex.getMessage(), request);
+    }
+
+
+    // Media type not supported (json data received instead of form-data)
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(final HttpMediaTypeNotSupportedException ex,
+                                                                     final HttpHeaders headers,
+                                                                     final HttpStatusCode status,
+                                                                     final WebRequest request) {
+        return generateResponseBody(ex, new HttpHeaders(), status, ex.getMessage(), request);
+    }
+
+    // No common media type between frontend and backend (frontend only accepts xml, but backend can send only json)
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(final HttpMediaTypeNotAcceptableException ex,
+                                                                      final HttpHeaders headers,
+                                                                      final HttpStatusCode status,
+                                                                      final WebRequest request) {
+        return generateResponseBody(ex, new HttpHeaders(), status, ex.getMessage(), request);
+    }
+
+    // No mapping for a request
+    @Override
+    protected ResponseEntity<Object> handleNoHandlerFoundException(final NoHandlerFoundException ex,
+                                                                   final HttpHeaders headers,
+                                                                   final HttpStatusCode status,
+                                                                   final WebRequest request) {
+        return generateResponseBody(ex, new HttpHeaders(), status, ex.getMessage(), request);
     }
 
     private ResponseEntity<Object> generateResponseBody(final Exception ex,

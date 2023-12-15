@@ -57,11 +57,12 @@ Auth required for every endpoint
 | [X]  | GetToken     | GET    | /platforms/spotify/token    | Returns the user's Spotify token                        |
 | [X]  | RefreshToken | PATCH  | /platforms/spotify/token    | Makes the backend refresh the user's Spotify token      |
 
-* Customize exceptions
 * Services should return only views / responses, instead of models
+* when login fails -> response is 200 and no errors returned (does not log in)
 * Add tests
     * Models
         * Relation cascading tests
+      * Constraints
     * Repositories
     * Services
     * Controllers
