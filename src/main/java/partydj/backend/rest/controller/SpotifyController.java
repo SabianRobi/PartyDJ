@@ -21,6 +21,7 @@ import partydj.backend.rest.mapper.TrackMapper;
 import partydj.backend.rest.service.ArtistService;
 import partydj.backend.rest.service.SpotifyCredentialService;
 import partydj.backend.rest.service.TrackService;
+import partydj.backend.rest.service.UserService;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
@@ -52,6 +53,9 @@ public class SpotifyController {
     @Autowired
     private TrackService trackService;
 
+    @Autowired
+    private UserService userService;
+
     private final SpotifyApi spotifyApi;
 
     @Autowired
@@ -65,7 +69,9 @@ public class SpotifyController {
 
     @GetMapping("/login")
     public SpotifyLoginUriResponse getLoginURI(final Authentication auth) {
-        return new SpotifyLoginUriResponse(spotifyCredentialService.getLoginUri(auth));
+        final User loggedInUser = userService.findByUsername(auth.getName());
+
+        return new SpotifyLoginUriResponse(spotifyCredentialService.getLoginUri(loggedInUser));
     }
 
     @GetMapping("/callback")
@@ -79,20 +85,28 @@ public class SpotifyController {
 
     @PostMapping("/logout")
     public SpotifyCredentialResponse logout(final Authentication auth) {
-        final SpotifyCredential spotifyCredential = spotifyCredentialService.logout(auth);
+        final User loggedInUser = userService.findByUsername(auth.getName());
+
+        final SpotifyCredential spotifyCredential = spotifyCredentialService.logout(loggedInUser);
+
         return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }
 
     @GetMapping("/token")
     public SpotifyCredentialResponse getToken(final Authentication auth) {
-        final SpotifyCredential spotifyCredential = spotifyCredentialService.getToken(auth);
+        final User loggedInUser = userService.findByUsername(auth.getName());
+
+
+        final SpotifyCredential spotifyCredential = spotifyCredentialService.getToken(loggedInUser);
 
         return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }
 
     @PatchMapping("/token")
     public SpotifyCredentialResponse refreshToken(final Authentication auth) {
-        final SpotifyCredential spotifyCredential = spotifyCredentialService.refreshToken(auth);
+        final User loggedInUser = userService.findByUsername(auth.getName());
+
+        final SpotifyCredential spotifyCredential = spotifyCredentialService.refreshToken(loggedInUser);
 
         return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }
@@ -139,10 +153,8 @@ public class SpotifyController {
         TrackInQueue track = trackMapper.mapSpotifyTrackToTrack(spotifyTrack, loggedInUser, party, artists);
         trackService.save(track);
 
-        artists.forEach(artist -> {
-            artist.addTrack(track);
-            artistService.save(artist);
-        });
+        artists.forEach(artist -> artist.addTrack(track));
+        artistService.saveAll(artists);
 
         return track;
     }

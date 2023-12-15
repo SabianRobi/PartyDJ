@@ -3,7 +3,6 @@ package partydj.backend.rest.service;
 import jakarta.persistence.EntityNotFoundException;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.SpotifyCredential;
 import partydj.backend.rest.domain.User;
@@ -71,8 +70,7 @@ public class SpotifyCredentialService {
     }
 
 
-    public String getLoginUri(final Authentication auth) {
-        final User loggedInUser = userService.findByUsername(auth.getName());
+    public String getLoginUri(final User loggedInUser) {
         SpotifyCredential spotifyCredential = repository.findByOwner(loggedInUser);
 
         if (spotifyCredential != null && spotifyCredential.getToken() != null) {
@@ -124,8 +122,7 @@ public class SpotifyCredentialService {
         return spotifyCredential;
     }
 
-    public SpotifyCredential logout(final Authentication auth) {
-        final User loggedInUser = userService.findByUsername(auth.getName());
+    public SpotifyCredential logout(final User loggedInUser) {
         final SpotifyCredential spotifyCredential = findByOwner(loggedInUser);
 
         loggedInUser.setSpotifyCredential(null);
@@ -135,8 +132,7 @@ public class SpotifyCredentialService {
         return spotifyCredential;
     }
 
-    public SpotifyCredential getToken(final Authentication auth) {
-        final User loggedInUser = userService.findByUsername(auth.getName());
+    public SpotifyCredential getToken(final User loggedInUser) {
         final SpotifyCredential spotifyCredential = findByOwner(loggedInUser);
 
         verifyLoggedIn(spotifyCredential);
@@ -144,8 +140,7 @@ public class SpotifyCredentialService {
         return spotifyCredential;
     }
 
-    public SpotifyCredential refreshToken(final Authentication auth) {
-        final User loggedInUser = userService.findByUsername(auth.getName());
+    public SpotifyCredential refreshToken(final User loggedInUser) {
         final SpotifyCredential spotifyCredential = findByOwner(loggedInUser);
 
         verifyLoggedIn(spotifyCredential);
