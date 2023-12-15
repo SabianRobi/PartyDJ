@@ -56,7 +56,7 @@ public class UserService {
 
         if (loggedInUser.getPartyRole() != null) {
             if (loggedInUser.getPartyRole() == PartyRole.CREATOR) {
-                partyService.delete(loggedInUser.getParty());
+                partyService.deleteByName(loggedInUser, loggedInUser.getParty().getName());
             } else {
                 loggedInUser.getAddedTracks().forEach(track ->
                         loggedInUser.getParty().removeTrackFromQueue(track));

@@ -1,31 +1,34 @@
 package partydj.backend.rest.controller;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import partydj.backend.rest.domain.*;
-import partydj.backend.rest.domain.enums.PartyRole;
+import partydj.backend.rest.domain.Party;
+import partydj.backend.rest.domain.PreviousTrack;
+import partydj.backend.rest.domain.TrackInQueue;
+import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.enums.PlatformType;
 import partydj.backend.rest.domain.request.AddTrackRequest;
-import partydj.backend.rest.domain.request.JoinPartyRequest;
-import partydj.backend.rest.domain.request.SavePartyRequest;
+import partydj.backend.rest.domain.request.PartyRequest;
 import partydj.backend.rest.domain.request.SetSpotifyDeviceIdRequest;
 import partydj.backend.rest.domain.response.*;
 import partydj.backend.rest.editor.PlatformTypeEditor;
 import partydj.backend.rest.mapper.PartyMapper;
 import partydj.backend.rest.mapper.TrackMapper;
-import partydj.backend.rest.service.ArtistService;
 import partydj.backend.rest.service.PartyService;
-import partydj.backend.rest.service.TrackService;
 import partydj.backend.rest.service.UserService;
-import partydj.backend.rest.validation.PartyValidator;
+import partydj.backend.rest.validation.constraint.Name;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static partydj.backend.rest.config.PartyConfig.DEFAULT_LIMIT;
 
@@ -36,51 +39,31 @@ public class PartyController {
     private PartyService partyService;
 
     @Autowired
-    private PartyValidator partyValidator;
-
-    @Autowired
     private PartyMapper partyMapper;
 
     @Autowired
     private UserService userService;
 
     @Autowired
-    private SpotifyController spotifyController;
-
-    @Autowired
     private TrackMapper trackMapper;
-
-    @Autowired
-    private TrackService trackService;
-
-    @Autowired
-    private ArtistService artistService;
 
     // Create
     @PostMapping(consumes = "application/x-www-form-urlencoded")
     @ResponseStatus(HttpStatus.CREATED)
-    public PartyResponse save(final SavePartyRequest savePartyRequest, final Authentication auth) {
-        User loggedInUser = userService.findByUsername(auth.getName());
-        partyValidator.validateOnPost(savePartyRequest, loggedInUser);
+    public PartyResponse save(@Valid final PartyRequest savePartyRequest, final Authentication auth) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        Party party = partyMapper.mapPartyRequestToParty(savePartyRequest);
+        final Party party = partyService.create(loggedInUser, savePartyRequest);
 
-        party.addUser(loggedInUser);
-        Party savedParty = partyService.register(party);
-        loggedInUser.setParty(savedParty);
-        loggedInUser.setPartyRole(PartyRole.CREATOR);
-        userService.save(loggedInUser);
-
-        return partyMapper.mapPartyToPartyResponse(savedParty);
+        return partyMapper.mapPartyToPartyResponse(party);
     }
 
     // Get
     @GetMapping("/{partyName}")
-    public PartyResponse get(@PathVariable final String partyName, final Authentication auth) {
-        User loggedInUser = userService.findByUsername(auth.getName());
-        Party party = partyService.findByName(partyName);
+    public PartyResponse get(@PathVariable @Name final String partyName, final Authentication auth) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        partyValidator.validateOnGet(party, loggedInUser);
+        final Party party = partyService.load(loggedInUser, partyName);
 
         return partyMapper.mapPartyToPartyResponse(party);
     }
@@ -88,181 +71,115 @@ public class PartyController {
     // Delete
     @Transactional
     @DeleteMapping("/{partyName}")
-    public PartyResponse delete(@PathVariable final String partyName, final Authentication auth) {
-        User loggedInUser = userService.findByUsername(auth.getName());
-        Party party = partyService.findByName(partyName);
+    public PartyResponse delete(@PathVariable @Name final String partyName, final Authentication auth) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        partyValidator.validateOnDelete(party, loggedInUser);
+        final Party deletedParty = partyService.deleteByName(loggedInUser, partyName);
 
-        partyService.delete(party);
-
-        return partyMapper.mapPartyToPartyResponse(party);
+        return partyMapper.mapPartyToPartyResponse(deletedParty);
     }
 
     // Join
     @PostMapping(value = "/*/join", consumes = "application/x-www-form-urlencoded")
-    public PartyResponse join(final JoinPartyRequest joinRequest, final Authentication auth) {
-        User loggedInUser = userService.findByUsername(auth.getName());
+    public PartyResponse join(@Valid final PartyRequest joinRequest, final Authentication auth) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        partyValidator.validateOnJoin(joinRequest, loggedInUser);
+        final Party joinedParty = partyService.join(loggedInUser, joinRequest);
 
-        Party party = partyService.findByName(joinRequest.getName());
-        party.addUser(loggedInUser);
-        loggedInUser.setPartyRole(PartyRole.PARTICIPANT);
-        userService.save(loggedInUser);
-        partyService.save(party);
-
-        return partyMapper.mapPartyToPartyResponse(party);
+        return partyMapper.mapPartyToPartyResponse(joinedParty);
     }
 
     // Leave
     @PostMapping("/{partyName}/leave")
-    public PartyResponse leave(@PathVariable final String partyName, final Authentication auth) {
-        Party party = partyService.findByName(partyName);
-        User loggedInUser = userService.findByUsername(auth.getName());
+    public PartyResponse leave(@PathVariable @Name final String partyName, final Authentication auth) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        partyValidator.validateOnLeave(party, loggedInUser);
+        final Party leftParty = partyService.leave(loggedInUser, partyName);
 
-        party.removeUser(loggedInUser);
-        loggedInUser.setPartyRole(null);
-        userService.save(loggedInUser);
-        partyService.save(party);
-        return partyMapper.mapPartyToPartyResponse(party);
+        return partyMapper.mapPartyToPartyResponse(leftParty);
     }
 
     // Search
     @GetMapping("/{partyName}/search")
-    public Collection<TrackSearchResultResponse> search(@RequestParam(required = false) final String query,
-                                                        @RequestParam(required = false) final List<PlatformType> platforms,
-                                                        @RequestParam(required = false, defaultValue = "0") final int offset,
-                                                        @RequestParam(required = false, defaultValue = DEFAULT_LIMIT + "") final int limit,
-                                                        @PathVariable final String partyName,
+    public Collection<TrackSearchResultResponse> search(@RequestParam @NotNull @Min(3) final String query,
+                                                        @RequestParam(defaultValue = "0") @Min(0) final int offset,
+                                                        @RequestParam(defaultValue = DEFAULT_LIMIT + "") @Min(1) final int limit,
+                                                        @RequestParam @NotNull @NotEmpty final Set<@NotNull PlatformType> platforms,
+                                                        @PathVariable @Name final String partyName,
                                                         final Authentication auth) {
-        Party party = partyService.findByName(partyName);
-        User loggedInUser = userService.findByUsername(auth.getName());
+        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        partyValidator.validateOnSearch(party, loggedInUser, query, platforms, offset, limit);
-
-        Collection<TrackSearchResultResponse> results = new ArrayList<>();
-        if (platforms.contains(PlatformType.SPOTIFY)) {
-            results.addAll(spotifyController.search(query, offset, limit, loggedInUser));
-        }
-
-        return results;
+        return partyService.search(loggedInUser, partyName, query, offset, limit, platforms);
     }
 
     // Add track to queue
     @PostMapping(value = "/{partyName}/tracks", consumes = "application/x-www-form-urlencoded")
     @ResponseStatus(HttpStatus.CREATED)
-    public TrackInQueueResponse addTrack(final AddTrackRequest addTrackRequest,
-                                         @PathVariable final String partyName,
+    public TrackInQueueResponse addTrack(@Valid final AddTrackRequest addTrackRequest,
+                                         @PathVariable @Name final String partyName,
                                          final Authentication auth) {
-        Party party = partyService.findByName(partyName);
-        User loggedInUser = userService.findByUsername(auth.getName());
+        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        partyValidator.validateOnAddTrack(addTrackRequest, party, loggedInUser);
+        final TrackInQueue addedTrack = partyService.addTrack(loggedInUser, addTrackRequest, partyName);
 
-        TrackInQueue track = spotifyController.fetchAndSafeTrackInfo(addTrackRequest.getUri(), loggedInUser, party);
-        party.addTrackToQueue(track);
-        partyService.save(party);
-
-        loggedInUser.addAddedTrack(track);
-        userService.save(loggedInUser);
-
-        return trackMapper.mapTrackToTrackInQueueResponse(track);
+        return trackMapper.mapTrackToTrackInQueueResponse(addedTrack);
     }
 
     // Get tracks in queue
     @GetMapping("/{partyName}/tracks")
-    public Collection<TrackInQueueResponse> getTracks(@PathVariable final String partyName,
-                                                      final Authentication auth) {
-        Party party = partyService.findByName(partyName);
-        User loggedInUser = userService.findByUsername(auth.getName());
+    public Set<TrackInQueueResponse> getTracks(@PathVariable @Name final String partyName,
+                                               final Authentication auth) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        partyValidator.validateOnGetTracks(party, loggedInUser);
+        final Set<TrackInQueue> tracks = partyService.getTracks(loggedInUser, partyName);
 
-        Collection<TrackInQueue> tracks = party.getTracksInQueue();
-        return tracks.stream().map(track -> trackMapper.mapTrackToTrackInQueueResponse(track)).toList();
+        return tracks.stream().map(track -> trackMapper.mapTrackToTrackInQueueResponse(track))
+                .collect(Collectors.toSet());
     }
 
     // Get previous tracks
     @GetMapping("/{partyName}/tracks/previous")
-    public Collection<PreviousTrackResponse> getPreviousTracks(@PathVariable final String partyName,
-                                                               final Authentication auth) {
-        Party party = partyService.findByName(partyName);
-        User loggedInUser = userService.findByUsername(auth.getName());
+    public Set<PreviousTrackResponse> getPreviousTracks(@PathVariable @Name final String partyName,
+                                                        final Authentication auth) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        partyValidator.validateOnGetPreviousTracks(party, loggedInUser);
+        final Set<PreviousTrack> tracks = partyService.getPreviousTracks(loggedInUser, partyName);
 
-        Collection<PreviousTrack> tracks = party.getPreviousTracks();
-        return tracks.stream().map(track -> trackMapper.mapPreviousTrackToPreviousTrackResponse(track)).toList();
+        return tracks.stream().map(track -> trackMapper.mapPreviousTrackToPreviousTrackResponse(track))
+                .collect(Collectors.toSet());
     }
 
     // Set Spotify device id
     @PostMapping(value = "/{partyName}/spotifyDeviceId", consumes = "application/x-www-form-urlencoded")
-    public SpotifyDeviceIdResponse setSpotifyDeviceId(final SetSpotifyDeviceIdRequest request,
-                                                      @PathVariable final String partyName,
+    public SpotifyDeviceIdResponse setSpotifyDeviceId(@Valid final SetSpotifyDeviceIdRequest request,
+                                                      @PathVariable @Name final String partyName,
                                                       final Authentication auth) {
-        Party party = partyService.findByName(partyName);
-        User loggedInUser = userService.findByUsername(auth.getName());
+        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        partyValidator.validateOnSetSpotifyDeviceId(request, party, loggedInUser);
+        final Party updatedParty = partyService.setSpotifyDeviceId(loggedInUser, request, partyName);
 
-        party.setSpotifyDeviceId(request.getDeviceId());
-        Party savedParty = partyService.save(party);
-        return partyMapper.mapPartyToSpotifyDeviceId(savedParty);
+        return partyMapper.mapPartyToSpotifyDeviceId(updatedParty);
     }
 
     // Remove track from queue
     @DeleteMapping("/{partyName}/tracks/{trackId}")
-    public TrackInQueueResponse removeTrackFromQueue(@PathVariable String partyName,
+    public TrackInQueueResponse removeTrackFromQueue(@PathVariable @Name String partyName,
                                                      @PathVariable int trackId,
-                                                     Authentication auth) {
-        Party party = partyService.findByName(partyName);
-        User loggedInUser = userService.findByUsername(auth.getName());
-        TrackInQueue track = trackService.findById(trackId);
+                                                     final Authentication auth) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        partyValidator.validateOnRemoveTrackFromQueue(track, party, loggedInUser);
+        final TrackInQueue deletedTrack = partyService.removeTrackFromQueue(loggedInUser, partyName, trackId);
 
-        party.removeTrackFromQueue(track);
-        partyService.save(party);
-        trackService.delete(track);
-        return trackMapper.mapTrackToTrackInQueueResponse(track);
+        return trackMapper.mapTrackToTrackInQueueResponse(deletedTrack);
     }
 
     // Skip track, play next
     @PostMapping("/{partyName}/tracks/playNext")
-    public TrackInQueueResponse playNextTrack(@PathVariable String partyName,
-                                              Authentication auth) {
-        Party party = partyService.findByName(partyName);
-        User loggedInUser = userService.findByUsername(auth.getName());
-        TrackInQueue nowPlayingTrack = trackService.getNowPlaying(partyName);
-        TrackInQueue nextTrack = trackService.getNextTrack(partyName);
+    public TrackInQueueResponse playNextTrack(@PathVariable @Name String partyName,
+                                              final Authentication auth) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        partyValidator.validateOnPlayNextTrack(party, loggedInUser, nextTrack);
-
-        if (nextTrack.getPlatformType() == PlatformType.SPOTIFY) {
-            spotifyController.playNextTrack(party, nextTrack, loggedInUser);
-        }
-
-        if (nowPlayingTrack != null) {
-            PreviousTrack prevTrack = trackMapper.mapTrackInQueueToPreviousTrack(nowPlayingTrack);
-            trackService.save(prevTrack);
-
-            for (final Artist artist : nowPlayingTrack.getArtists()) {
-                artist.addTrack(prevTrack);
-                artistService.save(artist);
-            }
-
-            party.addTrackToPreviousTracks(prevTrack);
-            party.removeTrackFromQueue(nowPlayingTrack);
-            partyService.save(party);
-
-            trackService.delete(nowPlayingTrack);
-        }
-
-        nextTrack.setPlaying(true);
-        trackService.save(nextTrack);
+        final TrackInQueue nextTrack = partyService.playNextTrack(loggedInUser, partyName);
 
         return trackMapper.mapTrackToTrackInQueueResponse(nextTrack);
     }

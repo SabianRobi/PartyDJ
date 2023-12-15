@@ -24,6 +24,8 @@ public class TrackService {
     @Autowired
     private UserService userService;
 
+    // Repository handlers
+
     public Track save(final Track track) {
         if (track instanceof TrackInQueue) {
             return trackInQueueRepository.save((TrackInQueue) track);
@@ -51,11 +53,24 @@ public class TrackService {
     }
 
     public TrackInQueue findById(final int trackId) {
-        return trackInQueueRepository.findById(trackId);
+        final TrackInQueue track = trackInQueueRepository.findById(trackId);
+
+        if (track == null) {
+            throw new IllegalStateException("Track does not exists.");
+        }
+
+        return track;
     }
 
     public TrackInQueue getNextTrack(final String partyName) {
-        return trackInQueueRepository.findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc(partyName);
+        final TrackInQueue track =
+                trackInQueueRepository.findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc(partyName);
+
+        if (track == null) {
+            throw new IllegalStateException("There is no track in queue.");
+        }
+
+        return track;
     }
 
     public TrackInQueue getNowPlaying(final String partyName) {
