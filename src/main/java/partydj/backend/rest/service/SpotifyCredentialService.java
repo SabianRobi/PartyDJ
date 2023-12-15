@@ -8,6 +8,7 @@ import partydj.backend.rest.domain.SpotifyCredential;
 import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.error.ThirdPartyApiException;
 import partydj.backend.rest.repository.SpotifyCredentialRepository;
+import partydj.backend.rest.validation.SpotifyCredentialValidator;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
@@ -30,6 +31,10 @@ public class SpotifyCredentialService {
 
     @Autowired
     private Map<String, String> spotifyConfigs;
+
+    @Autowired
+    private SpotifyCredentialValidator validator;
+
     private final SpotifyApi spotifyApi;
 
     @Autowired
@@ -40,6 +45,8 @@ public class SpotifyCredentialService {
                 .setRedirectUri(URI.create(spotifyConfigs.get("redirect-uri")))
                 .build();
     }
+
+    // Repository handlers
 
     public SpotifyCredential findByOwner(final User owner) {
         final SpotifyCredential spotifyCredential = repository.findByOwner(owner);
@@ -69,6 +76,8 @@ public class SpotifyCredentialService {
         repository.delete(spotifyCredential);
     }
 
+
+    // Controller handlers
 
     public String getLoginUri(final User loggedInUser) {
         SpotifyCredential spotifyCredential = repository.findByOwner(loggedInUser);
@@ -135,7 +144,7 @@ public class SpotifyCredentialService {
     public SpotifyCredential getToken(final User loggedInUser) {
         final SpotifyCredential spotifyCredential = findByOwner(loggedInUser);
 
-        verifyLoggedIn(spotifyCredential);
+        validator.verifyLoggedIn(spotifyCredential);
 
         return spotifyCredential;
     }
@@ -143,7 +152,7 @@ public class SpotifyCredentialService {
     public SpotifyCredential refreshToken(final User loggedInUser) {
         final SpotifyCredential spotifyCredential = findByOwner(loggedInUser);
 
-        verifyLoggedIn(spotifyCredential);
+        validator.verifyLoggedIn(spotifyCredential);
 
         spotifyApi.setRefreshToken(spotifyCredential.getRefreshToken());
         final AuthorizationCodeRefreshRequest authorizationCodeRefreshRequest =
@@ -158,11 +167,5 @@ public class SpotifyCredentialService {
         }
 
         return spotifyCredential;
-    }
-
-    private void verifyLoggedIn(final SpotifyCredential spotifyCredential) {
-        if (spotifyCredential.getToken() == null) {
-            throw new IllegalStateException("You have not connected your Spotify account.");
-        }
     }
 }

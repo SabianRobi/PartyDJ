@@ -1,31 +1,23 @@
-package partydj.backend.rest.controller;
+package partydj.backend.rest.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.neovisionaries.i18n.CountryCode;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import org.apache.hc.core5.http.ParseException;
-import org.hibernate.validator.constraints.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-import partydj.backend.rest.domain.*;
+import org.springframework.stereotype.Service;
+import partydj.backend.rest.domain.Artist;
+import partydj.backend.rest.domain.Party;
+import partydj.backend.rest.domain.TrackInQueue;
+import partydj.backend.rest.domain.User;
 import partydj.backend.rest.domain.error.ThirdPartyApiException;
-import partydj.backend.rest.domain.response.SpotifyCredentialResponse;
-import partydj.backend.rest.domain.response.SpotifyLoginUriResponse;
 import partydj.backend.rest.domain.response.TrackSearchResultResponse;
-import partydj.backend.rest.mapper.SpotifyCredentialMapper;
 import partydj.backend.rest.mapper.TrackMapper;
-import partydj.backend.rest.service.ArtistService;
-import partydj.backend.rest.service.SpotifyCredentialService;
-import partydj.backend.rest.service.TrackService;
-import partydj.backend.rest.service.UserService;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
 import se.michaelthelin.spotify.model_objects.specification.Paging;
+import se.michaelthelin.spotify.model_objects.specification.Track;
 import se.michaelthelin.spotify.requests.data.player.StartResumeUsersPlaybackRequest;
 import se.michaelthelin.spotify.requests.data.search.simplified.SearchTracksRequest;
 import se.michaelthelin.spotify.requests.data.tracks.GetTrackRequest;
@@ -34,15 +26,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.*;
 
-@RestController
-@RequestMapping(value = "/api/v1/platforms/spotify", produces = "application/json")
-public class SpotifyController {
-
-    @Autowired
-    private SpotifyCredentialService spotifyCredentialService;
-
-    @Autowired
-    private SpotifyCredentialMapper spotifyCredentialMapper;
+@Service
+public class SpotifyService {
 
     @Autowired
     private TrackMapper trackMapper;
@@ -52,14 +37,10 @@ public class SpotifyController {
 
     @Autowired
     private TrackService trackService;
-
-    @Autowired
-    private UserService userService;
-
     private final SpotifyApi spotifyApi;
 
     @Autowired
-    public SpotifyController(final Map<String, String> spotifyConfigs) {
+    public SpotifyService(final Map<String, String> spotifyConfigs) {
         spotifyApi = new SpotifyApi.Builder()
                 .setClientId(spotifyConfigs.get("client-id"))
                 .setClientSecret(spotifyConfigs.get("client-secret"))
@@ -67,52 +48,9 @@ public class SpotifyController {
                 .build();
     }
 
-    @GetMapping("/login")
-    public SpotifyLoginUriResponse getLoginURI(final Authentication auth) {
-        final User loggedInUser = userService.findByUsername(auth.getName());
 
-        return new SpotifyLoginUriResponse(spotifyCredentialService.getLoginUri(loggedInUser));
-    }
-
-    @GetMapping("/callback")
-    @ResponseStatus(HttpStatus.CREATED)
-    public SpotifyCredentialResponse processCallback(@RequestParam @NotNull @NotBlank final String code,
-                                                     @RequestParam @NotNull @UUID final java.util.UUID state) {
-        final SpotifyCredential spotifyCredential = spotifyCredentialService.processCallback(code, state);
-
-        return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
-    }
-
-    @PostMapping("/logout")
-    public SpotifyCredentialResponse logout(final Authentication auth) {
-        final User loggedInUser = userService.findByUsername(auth.getName());
-
-        final SpotifyCredential spotifyCredential = spotifyCredentialService.logout(loggedInUser);
-
-        return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
-    }
-
-    @GetMapping("/token")
-    public SpotifyCredentialResponse getToken(final Authentication auth) {
-        final User loggedInUser = userService.findByUsername(auth.getName());
-
-
-        final SpotifyCredential spotifyCredential = spotifyCredentialService.getToken(loggedInUser);
-
-        return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
-    }
-
-    @PatchMapping("/token")
-    public SpotifyCredentialResponse refreshToken(final Authentication auth) {
-        final User loggedInUser = userService.findByUsername(auth.getName());
-
-        final SpotifyCredential spotifyCredential = spotifyCredentialService.refreshToken(loggedInUser);
-
-        return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
-    }
-
-    protected Collection<TrackSearchResultResponse> search(final String query, final int offset,
-                                                           final int limit, final User loggedInUser) {
+    public Collection<TrackSearchResultResponse> search(final User loggedInUser, final String query,
+                                                        final int offset, final int limit) {
         spotifyApi.setAccessToken(loggedInUser.getSpotifyCredential().getToken());
         SearchTracksRequest searchTracksRequest = spotifyApi.searchTracks(query)
                 .market(CountryCode.HU)
@@ -120,7 +58,7 @@ public class SpotifyController {
                 .limit(limit)
                 .build();
 
-        Paging<se.michaelthelin.spotify.model_objects.specification.Track> trackPaging;
+        Paging<Track> trackPaging;
 
         try {
             trackPaging = searchTracksRequest.execute();
@@ -132,7 +70,7 @@ public class SpotifyController {
                 trackMapper.mapSpotifyTrackToTrackSearchResultResponse(track)).toList();
     }
 
-    protected TrackInQueue fetchAndSafeTrackInfo(final String uri, final User loggedInUser, final Party party) {
+    public TrackInQueue fetchAndSafeTrackInfo(final User loggedInUser, final String uri, final Party party) {
         spotifyApi.setAccessToken(loggedInUser.getSpotifyCredential().getToken());
         GetTrackRequest getTrackRequest = spotifyApi.getTrack(uri.split(":")[2])
                 .market(CountryCode.HU)
@@ -159,14 +97,14 @@ public class SpotifyController {
         return track;
     }
 
-    protected void playNextTrack(final Party party, final TrackInQueue track, final User loggedInUser) {
+    public void playNextTrack(final Party party, final TrackInQueue track, final User loggedInUser) {
         spotifyApi.setAccessToken(loggedInUser.getSpotifyCredential().getToken());
 
         JsonArray jsonUri = JsonParser.parseString("[\"" + track.getUri() + "\"]").getAsJsonArray();
 
         StartResumeUsersPlaybackRequest startResumeUsersPlaybackRequest = spotifyApi
                 .startResumeUsersPlayback()
-                .device_id(party.getSpotifyDeviceId())
+//                .device_id(party.getSpotifyDeviceId()) //TODO: UNCOMMENT AFTER DEMO
                 .uris(jsonUri)
                 .build();
 
