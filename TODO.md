@@ -57,19 +57,8 @@ Auth required for every endpoint
 | [X]  | GetToken     | GET    | /platforms/spotify/token    | Returns the user's Spotify token                        |
 | [X]  | RefreshToken | PATCH  | /platforms/spotify/token    | Makes the backend refresh the user's Spotify token      |
 
-* Rework validation:
-    * Constraints
-      [X] Set correct constraints at model level
-        * Replace validator classes:
-            * Create new single-mode constraints
-            * Create new method-type constraints
-            * -> Remove validators
-    * Delete Requests, save directly to model -> remove relevant mappers
-    * -> Remove Requests
-    * Customize exceptions
-    * Customize default error messages
-
-* Recommend songs when no tracks in queue
+* Customize exceptions
+* Services should return only views / responses, instead of models
 * Add tests
     * Models
         * Relation cascading tests
@@ -77,7 +66,9 @@ Auth required for every endpoint
     * Services
     * Controllers
 * Add readme (introduction, configuring, running)
+* Recommend songs when no tracks in queue
 
+* Add option to select playback device id on Spotify
 * Add YouTube support
 * When frontend comes alive: remove PageController
 * When frontend comes alive: Enable CSRF protection

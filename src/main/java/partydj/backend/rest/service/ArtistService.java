@@ -16,6 +16,8 @@ public class ArtistService {
     @Autowired
     private ArtistRepository repository;
 
+    // Repository handlers
+
     public Artist register(final Artist artist) {
         return repository.save(artist);
     }

@@ -1,6 +1,7 @@
 package partydj.backend.rest.service;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,6 +30,8 @@ public class UserService {
     @Autowired
     private PartyService partyService;
 
+    // Repository handlers
+
     public User register(final UserRequest userRequest) {
         User user = User.builder()
                 .email(userRequest.getEmail().trim())
@@ -44,11 +47,23 @@ public class UserService {
     public User save(final User user) {
         try {
             return userRepository.save(user);
-        } catch (DataIntegrityViolationException ex) {
+        } catch (final DataIntegrityViolationException ex) {
             throw new IllegalStateException("Cannot save entity.");
         }
     }
 
+    public User findByUsername(final String username) {
+        final User user = userRepository.findByUsername(username);
+
+        if (user == null) {
+            throw new EntityNotFoundException("User does not exists.");
+        }
+
+        return user;
+    }
+
+    // Controller handlers
+    @Transactional
     public User delete(final User loggedInUser, final String toBeDeletedUsername) {
         if (!Objects.equals(loggedInUser.getUsername(), toBeDeletedUsername)) {
             throw new AccessDeniedException("You can not make changes to other user profiles.");
@@ -81,16 +96,6 @@ public class UserService {
         return tryToSave(loggedInUser, newData);
     }
 
-    public User findByUsername(final String username) {
-        final User user = userRepository.findByUsername(username);
-
-        if (user == null) {
-            throw new EntityNotFoundException("User does not exists.");
-        }
-
-        return user;
-    }
-
     public void saveAll(final Set<User> users) {
         userRepository.saveAll(users);
     }
@@ -99,8 +104,6 @@ public class UserService {
         try {
             return userRepository.save(user);
         } catch (final DataIntegrityViolationException ex) {
-            System.err.println(ex.getMessage());
-
             if (ex.getMessage().contains("Duplicate entry")) {
                 String wrongValue = ex.getMessage().split("'")[1];
 
