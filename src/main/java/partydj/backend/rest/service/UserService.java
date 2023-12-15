@@ -45,39 +45,40 @@ public class UserService {
         try {
             return userRepository.save(user);
         } catch (DataIntegrityViolationException ex) {
-            throw new IllegalStateException("Cannot save entity");
+            throw new IllegalStateException("Cannot save entity.");
         }
     }
 
-    public void delete(final User user, final User user2) {
-        if (user != user2) {
+    public User delete(final User loggedInUser, final String toBeDeletedUsername) {
+        if (!Objects.equals(loggedInUser.getUsername(), toBeDeletedUsername)) {
             throw new AccessDeniedException("You can not make changes to other user profiles.");
         }
 
-        if (user.getPartyRole() != null) {
-            if (user.getPartyRole() == PartyRole.CREATOR) {
-                partyService.delete(user.getParty());
+        if (loggedInUser.getPartyRole() != null) {
+            if (loggedInUser.getPartyRole() == PartyRole.CREATOR) {
+                partyService.delete(loggedInUser.getParty());
             } else {
-                user.getAddedTracks().forEach(track ->
-                        user.getParty().removeTrackFromQueue(track));
-                user.getParty().removeUser(user);
-                partyService.save(user.getParty());
+                loggedInUser.getAddedTracks().forEach(track ->
+                        loggedInUser.getParty().removeTrackFromQueue(track));
+                loggedInUser.getParty().removeUser(loggedInUser);
+                partyService.save(loggedInUser.getParty());
             }
         }
 
-        userRepository.delete(user);
+        userRepository.delete(loggedInUser);
+        return loggedInUser;
     }
 
-    public User update(final String username, final User user, final UserRequest newData) {
-        if (!Objects.equals(username, user.getUsername())) {
+    public User update(final User loggedInUser, final String givenUsername, final UserRequest newData) {
+        if (!Objects.equals(givenUsername, loggedInUser.getUsername())) {
             throw new AccessDeniedException("You can not make changes to other user profiles.");
         }
 
-        user.setEmail(newData.getEmail().trim());
-        user.setUsername(newData.getUsername().trim());
-        user.setPassword(passwordEncoder.encode(newData.getPassword()));
+        loggedInUser.setEmail(newData.getEmail().trim());
+        loggedInUser.setUsername(newData.getUsername().trim());
+        loggedInUser.setPassword(passwordEncoder.encode(newData.getPassword()));
 
-        return tryToSave(user, newData);
+        return tryToSave(loggedInUser, newData);
     }
 
     public User findByUsername(final String username) {
@@ -110,7 +111,7 @@ public class UserService {
                     throw new NotUniqueException("email", "Already in use.");
                 }
             }
-            throw new IllegalStateException("Cannot save entity");
+            throw new IllegalStateException("Cannot save entity.");
         }
     }
 }

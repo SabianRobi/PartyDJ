@@ -39,12 +39,12 @@ public class UserController {
     // Update
     @PutMapping(value = "/{givenUsername}", consumes = "application/x-www-form-urlencoded")
     public UserResponse update(@Valid final UserRequest userRequest,
-                               @PathVariable @Name final String givenUsername,
+                               @PathVariable("givenUsername") @Name final String toBeUpdatedUsername,
                                final Authentication auth,
                                final UserPrincipal userPrincipal) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final User updatedUser = userService.update(givenUsername, loggedInUser, userRequest);
+        final User updatedUser = userService.update(loggedInUser, toBeUpdatedUsername, userRequest);
 
         // Update logged in user infos
         userPrincipal.setUser(updatedUser);
@@ -65,12 +65,11 @@ public class UserController {
 
     // Delete
     @DeleteMapping("/{username}")
-    public UserResponse delete(@PathVariable @Name final String username, final Authentication auth,
+    public UserResponse delete(@PathVariable("username") @Name final String toBeDeletedUsername,
+                               final Authentication auth,
                                final HttpServletRequest request) {
-        User loggedInUser = userService.findByUsername(auth.getName());
-        User toBeDeletedUser = userService.findByUsername(username);
-
-        userService.delete(loggedInUser, toBeDeletedUser);
+        final User loggedInUser = userService.findByUsername(auth.getName());
+        final User deletedUser = userService.delete(loggedInUser, toBeDeletedUsername);
 
         // Log out the user
         try {
@@ -78,6 +77,6 @@ public class UserController {
         } catch (final ServletException ignored) {
         }
 
-        return userMapper.mapUserToUserResponse(toBeDeletedUser);
+        return userMapper.mapUserToUserResponse(deletedUser);
     }
 }
