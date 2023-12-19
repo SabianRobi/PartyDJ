@@ -28,7 +28,7 @@ public class UserResponseTest {
 
     @Test
     @SneakyThrows
-    public void shouldSerialize() {
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(userResponse);
 
         final File jsonFile = ResourceUtils.getFile(path);

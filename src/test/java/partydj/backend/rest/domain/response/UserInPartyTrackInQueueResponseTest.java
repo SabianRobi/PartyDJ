@@ -25,7 +25,7 @@ public class UserInPartyTrackInQueueResponseTest {
 
     @Test
     @SneakyThrows
-    public void shouldSerialize() {
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(userInPartyTrackInQueueResponse);
 
         final File jsonFile = ResourceUtils.getFile(path);

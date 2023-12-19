@@ -37,7 +37,7 @@ public class TrackInQueueResponseTest {
 
     @Test
     @SneakyThrows
-    public void shouldSerialize() {
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(trackInQueueResponse);
 
         final File jsonFile = ResourceUtils.getFile(path);

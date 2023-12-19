@@ -27,7 +27,7 @@ public class AddTrackRequestTest {
 
     @Test
     @SneakyThrows
-    public void shouldSerialize() {
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(addTrackRequest);
 
         final File jsonFile = ResourceUtils.getFile(path);

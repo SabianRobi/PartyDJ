@@ -25,7 +25,7 @@ public class ArtistResponseTest {
 
     @Test
     @SneakyThrows
-    public void shouldSerialize() {
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(artistResponse);
 
         final File jsonFile = ResourceUtils.getFile(path);

@@ -35,7 +35,7 @@ public class TrackSearchResultResponseTest {
 
     @Test
     @SneakyThrows
-    public void shouldSerialize() {
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(trackSearchResultResponse);
 
         final File jsonFile = ResourceUtils.getFile(path);

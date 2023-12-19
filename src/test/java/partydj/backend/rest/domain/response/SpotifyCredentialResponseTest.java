@@ -25,7 +25,7 @@ public class SpotifyCredentialResponseTest {
 
     @Test
     @SneakyThrows
-    public void shouldSerialize() {
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(spotifyCredentialResponse);
 
         final File jsonFile = ResourceUtils.getFile(path);

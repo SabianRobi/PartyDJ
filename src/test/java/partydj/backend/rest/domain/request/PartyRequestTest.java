@@ -26,7 +26,7 @@ public class PartyRequestTest {
 
     @Test
     @SneakyThrows
-    public void shouldSerialize() {
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(partyRequest);
 
         final File jsonFile = ResourceUtils.getFile(path);

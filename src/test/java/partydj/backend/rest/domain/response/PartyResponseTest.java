@@ -32,7 +32,7 @@ public class PartyResponseTest {
 
     @Test
     @SneakyThrows
-    public void shouldSerialize() {
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(partyResponse);
 
         final File jsonFile = ResourceUtils.getFile(path);

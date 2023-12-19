@@ -25,7 +25,7 @@ public class SetSpotifyDeviceIdRequestTest {
 
     @Test
     @SneakyThrows
-    public void shouldSerialize() {
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(setSpotifyDeviceIdRequest);
 
         final File jsonFile = ResourceUtils.getFile(path);
