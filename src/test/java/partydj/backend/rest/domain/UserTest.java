@@ -30,7 +30,7 @@ public class UserTest {
         final ObjectMapper objectMapper = new ObjectMapper();
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(user);
 
-        final File jsonFile = ResourceUtils.getFile("classpath:user.json");
+        final File jsonFile = ResourceUtils.getFile("classpath:domain/user.json");
         final String expected = Files.readString(jsonFile.toPath());
 
         assertThat(actual).isEqualTo(expected);
@@ -42,7 +42,7 @@ public class UserTest {
     void shouldDeserialize() {
         final ObjectMapper objectMapper = new ObjectMapper();
         final User actual = objectMapper.readValue(
-                ResourceUtils.getFile("classpath:user.json"), User.class);
+                ResourceUtils.getFile("classpath:domain/user.json"), User.class);
 
         final User expected = User.builder()
                 .id(1)

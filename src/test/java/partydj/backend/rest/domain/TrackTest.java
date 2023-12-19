@@ -30,7 +30,7 @@ public class TrackTest {
         final ObjectMapper objectMapper = new ObjectMapper();
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(track);
 
-        final File jsonFile = ResourceUtils.getFile("classpath:track.json");
+        final File jsonFile = ResourceUtils.getFile("classpath:domain/track.json");
         final String expected = Files.readString(jsonFile.toPath());
 
         assertThat(actual).isEqualTo(expected);
@@ -41,7 +41,7 @@ public class TrackTest {
     void shouldDeserialize() {
         final ObjectMapper objectMapper = new ObjectMapper();
         final Track actual = objectMapper.readValue(
-                ResourceUtils.getFile("classpath:track.json"), Track.class);
+                ResourceUtils.getFile("classpath:domain/track.json"), Track.class);
 
         final Track expected = Track.builder()
                 .id(1)

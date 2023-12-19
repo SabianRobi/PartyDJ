@@ -28,7 +28,7 @@ public class PartyTest {
         final ObjectMapper objectMapper = new ObjectMapper();
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(party);
 
-        final File jsonFile = ResourceUtils.getFile("classpath:party.json");
+        final File jsonFile = ResourceUtils.getFile("classpath:domain/party.json");
         final String expected = Files.readString(jsonFile.toPath());
 
         assertThat(actual).isEqualTo(expected);
@@ -39,7 +39,7 @@ public class PartyTest {
     void shouldDeserialize() {
         final ObjectMapper objectMapper = new ObjectMapper();
         final Party actual = objectMapper.readValue(
-                ResourceUtils.getFile("classpath:party.json"), Party.class);
+                ResourceUtils.getFile("classpath:domain/party.json"), Party.class);
 
         final Party expected = Party.builder()
                 .id(1)

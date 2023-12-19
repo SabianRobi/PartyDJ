@@ -34,7 +34,7 @@ public class PreviousTrackTest {
         objectMapper.registerModule(new JavaTimeModule());
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(track);
 
-        final File jsonFile = ResourceUtils.getFile("classpath:previousTrack.json");
+        final File jsonFile = ResourceUtils.getFile("classpath:domain/previousTrack.json");
         final String expected = Files.readString(jsonFile.toPath());
 
         assertThat(actual).isEqualTo(expected);
@@ -46,7 +46,7 @@ public class PreviousTrackTest {
         final ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         final PreviousTrack actual = objectMapper.readValue(
-                ResourceUtils.getFile("classpath:previousTrack.json"), PreviousTrack.class);
+                ResourceUtils.getFile("classpath:domain/previousTrack.json"), PreviousTrack.class);
 
         final PreviousTrack expected = PreviousTrack.builder()
                 .id(1)

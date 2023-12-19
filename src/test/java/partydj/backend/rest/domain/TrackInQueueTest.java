@@ -32,7 +32,7 @@ public class TrackInQueueTest {
         final ObjectMapper objectMapper = new ObjectMapper();
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(track);
 
-        final File jsonFile = ResourceUtils.getFile("classpath:trackInQueue.json");
+        final File jsonFile = ResourceUtils.getFile("classpath:domain/trackInQueue.json");
         final String expected = Files.readString(jsonFile.toPath());
 
         assertThat(actual).isEqualTo(expected);
@@ -43,7 +43,7 @@ public class TrackInQueueTest {
     void shouldDeserialize() {
         final ObjectMapper objectMapper = new ObjectMapper();
         final TrackInQueue actual = objectMapper.readValue(
-                ResourceUtils.getFile("classpath:trackInQueue.json"), TrackInQueue.class);
+                ResourceUtils.getFile("classpath:domain/trackInQueue.json"), TrackInQueue.class);
 
         final TrackInQueue expected = TrackInQueue.builder()
                 .id(1)

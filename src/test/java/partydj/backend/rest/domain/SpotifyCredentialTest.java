@@ -24,7 +24,7 @@ public class SpotifyCredentialTest {
         final ObjectMapper objectMapper = new ObjectMapper();
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(spotifyCredential);
 
-        final File jsonFile = ResourceUtils.getFile("classpath:spotifyCredential.json");
+        final File jsonFile = ResourceUtils.getFile("classpath:domain/spotifyCredential.json");
         final String expected = Files.readString(jsonFile.toPath());
 
         assertThat(actual).isEqualTo(expected);
@@ -35,7 +35,7 @@ public class SpotifyCredentialTest {
     void shouldDeserialize() {
         final ObjectMapper objectMapper = new ObjectMapper();
         final SpotifyCredential actual = objectMapper.readValue(
-                ResourceUtils.getFile("classpath:spotifyCredential.json"), SpotifyCredential.class);
+                ResourceUtils.getFile("classpath:domain/spotifyCredential.json"), SpotifyCredential.class);
 
         final SpotifyCredential expected = SpotifyCredential.builder()
                 .id(1)

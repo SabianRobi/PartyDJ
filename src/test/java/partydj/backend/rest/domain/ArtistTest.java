@@ -23,7 +23,7 @@ public class ArtistTest {
         final ObjectMapper objectMapper = new ObjectMapper();
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(artist);
 
-        final File jsonFile = ResourceUtils.getFile("classpath:artist.json");
+        final File jsonFile = ResourceUtils.getFile("classpath:domain/artist.json");
         final String expected = Files.readString(jsonFile.toPath());
 
         assertThat(actual).isEqualTo(expected);
@@ -34,7 +34,7 @@ public class ArtistTest {
     void shouldDeserialize() {
         final ObjectMapper objectMapper = new ObjectMapper();
         final Artist actual = objectMapper.readValue(
-                ResourceUtils.getFile("classpath:artist.json"), Artist.class);
+                ResourceUtils.getFile("classpath:domain/artist.json"), Artist.class);
 
         final Artist expected = Artist.builder()
                 .id(1)
