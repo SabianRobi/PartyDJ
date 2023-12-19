@@ -60,14 +60,13 @@ Auth required for every endpoint
 * Services should return only views / responses, instead of models
 * when login fails -> response is 200 and no errors returned (does not log in)
 * Add tests
-    * Models
-        * Relation cascading tests
-      * Constraints
-    * Repositories
+    * Relation cascading tests
+    * Constraints
     * Services
     * Controllers
 * Add readme (introduction, configuring, running)
 * Recommend songs when no tracks in queue
+* Make documentation
 
 * Add option to select playback device id on Spotify
 * Add YouTube support

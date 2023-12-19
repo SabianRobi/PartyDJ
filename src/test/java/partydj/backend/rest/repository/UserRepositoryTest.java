@@ -7,9 +7,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import partydj.backend.rest.domain.Artist;
 import partydj.backend.rest.domain.User;
-import partydj.backend.rest.domain.enums.UserType;
-
-import java.util.HashSet;
+import partydj.backend.rest.helper.DataGenerator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,15 +17,13 @@ public class UserRepositoryTest {
     private UserRepository repository;
 
     @Autowired
-    TestEntityManager entityManager;
+    private TestEntityManager entityManager;
 
     private User user;
 
     @BeforeEach
     void init() {
-        user = User.builder()
-                .email("em@a.il").username("username").password("password")
-                .userType(UserType.NORMAL).addedTracks(new HashSet<>()).build();
+        user = DataGenerator.generateUser("");
     }
 
     @Test
