@@ -4,17 +4,19 @@ import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import partydj.backend.rest.validation.constraint.Name;
 
 import static partydj.backend.rest.config.PartyConfig.PARTY_NAME_MAX_LENGTH;
 import static partydj.backend.rest.config.PartyConfig.PARTY_NAME_MIN_LENGTH;
 
+@Data
 @Builder
-@Getter
-@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class PartyRequest {
 
     @NotNull

@@ -1,15 +1,17 @@
 package partydj.backend.rest.domain.request;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import partydj.backend.rest.domain.enums.PlatformType;
 import partydj.backend.rest.validation.constraint.TrackUri;
 
-@Getter
-@Setter
+@Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AddTrackRequest {
 
     @NotNull

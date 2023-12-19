@@ -5,16 +5,18 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import partydj.backend.rest.validation.constraint.Name;
 
 import static partydj.backend.rest.config.UserConfig.*;
 
+@Data
 @Builder
-@Getter
-@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserRequest {
 
     @NotNull
@@ -33,6 +35,6 @@ public class UserRequest {
 
     @NotNull
     @NotBlank
-    @Size(min = PASSWORD_MIN_LENGTH, message = "Should be at least " + PASSWORD_MIN_LENGTH + " characters long.")
+    @Size(min = PASSWORD_MIN_LENGTH, message = "Should be at least {min} characters long.")
     private String password;
 }
