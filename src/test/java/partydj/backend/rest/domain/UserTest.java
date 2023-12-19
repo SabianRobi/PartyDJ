@@ -9,14 +9,18 @@ import partydj.backend.rest.domain.enums.UserType;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.HashSet;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static partydj.backend.rest.helper.DataGenerator.*;
 
 public class UserTest {
-    @Test
-    @SneakyThrows
-    public void shouldSerialize() {
-        final User user = User.builder()
+    private final User user;
+    private final ObjectMapper objectMapper;
+    private final String path;
+
+    private UserTest() {
+        user = User.builder()
                 .id(1)
                 .email("email")
                 .username("username")
@@ -27,10 +31,16 @@ public class UserTest {
                 .party(null)
                 .addedTracks(new HashSet<>())
                 .build();
-        final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper();
+        path = "classpath:domain/user.json";
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(user);
 
-        final File jsonFile = ResourceUtils.getFile("classpath:domain/user.json");
+        final File jsonFile = ResourceUtils.getFile(path);
         final String expected = Files.readString(jsonFile.toPath());
 
         assertThat(actual).isEqualTo(expected);
@@ -40,22 +50,34 @@ public class UserTest {
     @Test
     @SneakyThrows
     void shouldDeserialize() {
-        final ObjectMapper objectMapper = new ObjectMapper();
         final User actual = objectMapper.readValue(
-                ResourceUtils.getFile("classpath:domain/user.json"), User.class);
+                ResourceUtils.getFile(path), User.class);
 
-        final User expected = User.builder()
-                .id(1)
-                .email("email")
-                .username("username")
-                .password("password")
-                .userType(UserType.NORMAL)
-                .partyRole(null)
-                .spotifyCredential(null)
-                .party(null)
-                .addedTracks(new HashSet<>())
-                .build();
+        assertThat(actual).isEqualTo(user);
+    }
 
-        assertThat(actual).isEqualTo(expected);
+    @Test
+    void givenUser_whenAddTrack_thenSuccess() {
+        final Artist artist = generateArtist("");
+        final Party party = generateParty("", Set.of(user));
+        final TrackInQueue track = generateTrackInQueue("", party, user, Set.of(artist));
+
+        user.addAddedTrack(track);
+
+        assertThat(user.getAddedTracks()).contains(track);
+    }
+
+    @Test
+    void givenUserWithAddedTrack_whenRemoveTrack_thenSuccess() {
+        final Artist artist = generateArtist("");
+        final Party party = generateParty("", Set.of(user));
+        final TrackInQueue track = generateTrackInQueue("", party, user, Set.of(artist));
+        final HashSet<TrackInQueue> tracks = new HashSet<>();
+        tracks.add(track);
+        user.setAddedTracks(tracks);
+
+        user.removeAddedTrack(track);
+
+        assertThat(user.getAddedTracks()).doesNotContain(track);
     }
 }

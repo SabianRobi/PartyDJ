@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.util.ResourceUtils;
 
 import java.io.File;
@@ -35,7 +36,7 @@ public class ErrorResponseTest {
 
     @Test
     @SneakyThrows
-    public void shouldSerialize() {
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(errorResponse);
 
         final File jsonFile = ResourceUtils.getFile(path);
@@ -52,4 +53,14 @@ public class ErrorResponseTest {
 
         assertThat(actual).isEqualTo(errorResponse);
     }
+
+    @Test
+    void shouldCreateErrorResponse() {
+        final ErrorResponse response = new ErrorResponse(HttpStatusCode.valueOf(418), "I'm a teapot.");
+
+        assertThat(response.getStatus()).isEqualTo(418);
+        assertThat(response.getTimestamp()).isBefore(LocalDateTime.now());
+        assertThat(response.getErrors()).hasSize(1);
+    }
+
 }

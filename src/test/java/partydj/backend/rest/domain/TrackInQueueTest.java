@@ -13,10 +13,12 @@ import java.util.HashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TrackInQueueTest {
-    @Test
-    @SneakyThrows
-    public void shouldSerialize() {
-        final TrackInQueue track = TrackInQueue.builder()
+    private final TrackInQueue track;
+    private final ObjectMapper objectMapper;
+    private final String path;
+
+    private TrackInQueueTest() {
+        track = TrackInQueue.builder()
                 .id(1)
                 .uri("uri")
                 .title("title")
@@ -29,10 +31,16 @@ public class TrackInQueueTest {
                 .score(0)
                 .isPlaying(false)
                 .build();
-        final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper();
+        path = "classpath:domain/trackInQueue.json";
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(track);
 
-        final File jsonFile = ResourceUtils.getFile("classpath:domain/trackInQueue.json");
+        final File jsonFile = ResourceUtils.getFile(path);
         final String expected = Files.readString(jsonFile.toPath());
 
         assertThat(actual).isEqualTo(expected);
@@ -41,24 +49,9 @@ public class TrackInQueueTest {
     @Test
     @SneakyThrows
     void shouldDeserialize() {
-        final ObjectMapper objectMapper = new ObjectMapper();
         final TrackInQueue actual = objectMapper.readValue(
-                ResourceUtils.getFile("classpath:domain/trackInQueue.json"), TrackInQueue.class);
+                ResourceUtils.getFile(path), TrackInQueue.class);
 
-        final TrackInQueue expected = TrackInQueue.builder()
-                .id(1)
-                .uri("uri")
-                .title("title")
-                .coverUri("coverUri")
-                .length(1)
-                .artists(new HashSet<>())
-                .platformType(PlatformType.SPOTIFY)
-                .addedBy(null)
-                .party(null)
-                .score(0)
-                .isPlaying(false)
-                .build();
-
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual).isEqualTo(track);
     }
 }

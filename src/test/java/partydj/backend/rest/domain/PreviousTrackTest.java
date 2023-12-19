@@ -15,10 +15,12 @@ import java.util.HashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class PreviousTrackTest {
-    @Test
-    @SneakyThrows
-    public void shouldSerialize() {
-        final PreviousTrack track = PreviousTrack.builder()
+    private final PreviousTrack previousTrack;
+    private final ObjectMapper objectMapper;
+    private final String path;
+
+    private PreviousTrackTest() {
+        previousTrack = PreviousTrack.builder()
                 .id(1)
                 .uri("uri")
                 .title("title")
@@ -30,11 +32,18 @@ public class PreviousTrackTest {
                 .party(null)
                 .endedAt(LocalDateTime.of(2023, 12, 1, 11, 41, 25))
                 .build();
-        final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(track);
+        path = "classpath:domain/previousTrack.json";
+    }
 
-        final File jsonFile = ResourceUtils.getFile("classpath:domain/previousTrack.json");
+    @Test
+    @SneakyThrows
+    void shouldSerialize() {
+
+        final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(previousTrack);
+
+        final File jsonFile = ResourceUtils.getFile(path);
         final String expected = Files.readString(jsonFile.toPath());
 
         assertThat(actual).isEqualTo(expected);
@@ -43,24 +52,9 @@ public class PreviousTrackTest {
     @Test
     @SneakyThrows
     void shouldDeserialize() {
-        final ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
         final PreviousTrack actual = objectMapper.readValue(
-                ResourceUtils.getFile("classpath:domain/previousTrack.json"), PreviousTrack.class);
+                ResourceUtils.getFile(path), PreviousTrack.class);
 
-        final PreviousTrack expected = PreviousTrack.builder()
-                .id(1)
-                .uri("uri")
-                .title("title")
-                .coverUri("coverUri")
-                .length(1)
-                .artists(new HashSet<>())
-                .platformType(PlatformType.SPOTIFY)
-                .addedBy(null)
-                .party(null)
-                .endedAt(LocalDateTime.of(2023, 12, 1, 11, 41, 25))
-                .build();
-
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual).isEqualTo(previousTrack);
     }
 }

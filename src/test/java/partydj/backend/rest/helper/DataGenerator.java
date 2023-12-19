@@ -9,6 +9,7 @@ import partydj.backend.rest.domain.response.ArtistResponse;
 import partydj.backend.rest.domain.response.UserInPartyResponse;
 import partydj.backend.rest.domain.response.UserInPartyTrackInQueueResponse;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -47,6 +48,22 @@ public class DataGenerator {
                 .addedBy(addedBy)
                 .length(1)
                 .score(0)
+                .build();
+    }
+
+    public static PreviousTrack generatePreviousTrack(final String serial, final Party party,
+                                                      final User addedBy, final Set<Artist> artists) {
+
+        return PreviousTrack.builder()
+                .party(party)
+                .title(serial + "title")
+                .artists(artists)
+                .platformType(PlatformType.SPOTIFY)
+                .uri("spotify:track:something" + serial)
+                .coverUri("https://some-url" + serial + ".com")
+                .addedBy(addedBy)
+                .length(1)
+                .endedAt(LocalDateTime.of(2023, 12, 19, 17, 40, 59))
                 .build();
     }
 

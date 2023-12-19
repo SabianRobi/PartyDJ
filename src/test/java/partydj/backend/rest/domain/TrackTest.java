@@ -13,10 +13,12 @@ import java.util.HashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TrackTest {
-    @Test
-    @SneakyThrows
-    public void shouldSerialize() {
-        final Track track = Track.builder()
+    private final Track track;
+    private final ObjectMapper objectMapper;
+    private final String path;
+
+    private TrackTest() {
+        track = Track.builder()
                 .id(1)
                 .uri("uri")
                 .title("title")
@@ -27,10 +29,16 @@ public class TrackTest {
                 .addedBy(null)
                 .party(null)
                 .build();
-        final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper();
+        path = "classpath:domain/track.json";
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldSerialize() {
         final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(track);
 
-        final File jsonFile = ResourceUtils.getFile("classpath:domain/track.json");
+        final File jsonFile = ResourceUtils.getFile(path);
         final String expected = Files.readString(jsonFile.toPath());
 
         assertThat(actual).isEqualTo(expected);
@@ -39,22 +47,9 @@ public class TrackTest {
     @Test
     @SneakyThrows
     void shouldDeserialize() {
-        final ObjectMapper objectMapper = new ObjectMapper();
         final Track actual = objectMapper.readValue(
-                ResourceUtils.getFile("classpath:domain/track.json"), Track.class);
+                ResourceUtils.getFile(path), Track.class);
 
-        final Track expected = Track.builder()
-                .id(1)
-                .uri("uri")
-                .title("title")
-                .coverUri("coverUri")
-                .length(1)
-                .artists(new HashSet<>())
-                .platformType(PlatformType.SPOTIFY)
-                .addedBy(null)
-                .party(null)
-                .build();
-
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual).isEqualTo(track);
     }
 }
