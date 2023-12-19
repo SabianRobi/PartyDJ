@@ -1,20 +1,45 @@
 package partydj.backend.rest.domain.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import lombok.*;
+import org.hibernate.validator.constraints.URL;
 import partydj.backend.rest.domain.enums.PlatformType;
+import partydj.backend.rest.validation.constraint.TrackUri;
 
 import java.util.Collection;
 
-@Getter
-@Setter
+@Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TrackSearchResultResponse {
+
+    @NotNull
+    @NotBlank
+    @TrackUri
     private String uri;
+
+    @NotNull
+    @NotBlank
     private String title;
-    private Collection<String> artists;
+
+    @EqualsAndHashCode.Exclude
+    @NotNull
+    @NotEmpty
+    private Collection<@NotNull @NotBlank String> artists;
+
+    @NotNull
+    @NotBlank
+    @URL
     private String coverUri;
+
+    @NotNull
+    @Positive
     private int length;
+
+    @NotNull
     private PlatformType platformType;
 }

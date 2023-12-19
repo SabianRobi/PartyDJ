@@ -1,0 +1,7 @@
+{
+  "timestamp" : "2023-12-19 13:21:16",
+  "status" : 418,
+  "errors" : {
+    "general" : "segmentation fault"
+  }
+}

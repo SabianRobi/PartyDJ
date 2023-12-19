@@ -2,8 +2,12 @@ package partydj.backend.rest.helper;
 
 import org.springframework.stereotype.Component;
 import partydj.backend.rest.domain.*;
+import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.PlatformType;
 import partydj.backend.rest.domain.enums.UserType;
+import partydj.backend.rest.domain.response.ArtistResponse;
+import partydj.backend.rest.domain.response.UserInPartyResponse;
+import partydj.backend.rest.domain.response.UserInPartyTrackInQueueResponse;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -59,6 +63,26 @@ public class DataGenerator {
                 .tracksInQueue(new HashSet<>())
                 .previousTracks(new HashSet<>())
                 .participants(new HashSet<>(participants))
+                .build();
+    }
+
+    public static UserInPartyResponse generateUserInPartyResponse() {
+        return UserInPartyResponse.builder()
+                .id(1)
+                .username("username")
+                .partyRole(PartyRole.PARTICIPANT)
+                .build();
+    }
+
+    public static ArtistResponse generateArtistResponse() {
+        return ArtistResponse.builder()
+                .name("artist")
+                .build();
+    }
+
+    public static UserInPartyTrackInQueueResponse generateUserInPartyTrackInQueueResponse() {
+        return UserInPartyTrackInQueueResponse.builder()
+                .username("username")
                 .build();
     }
 }

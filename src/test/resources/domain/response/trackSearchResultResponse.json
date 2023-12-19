@@ -1,0 +1,8 @@
+{
+  "uri" : "spotify:track:something",
+  "title" : "title",
+  "artists" : [ "artist" ],
+  "coverUri" : "https://cover.uri",
+  "length" : 420,
+  "platformType" : "SPOTIFY"
+}

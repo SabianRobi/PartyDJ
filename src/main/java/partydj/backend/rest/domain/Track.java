@@ -1,9 +1,9 @@
 package partydj.backend.rest.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -37,7 +37,7 @@ public class Track {
     @NotBlank
     private String coverUri;
 
-    @Min(1)
+    @Positive
     @NotNull
     private int length;
 

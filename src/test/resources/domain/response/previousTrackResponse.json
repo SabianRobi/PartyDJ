@@ -1,0 +1,13 @@
+{
+  "title" : "title",
+  "coverUri" : "https://cover.uri",
+  "length" : 420,
+  "artists" : [ {
+    "name" : "artist"
+  } ],
+  "platformType" : "SPOTIFY",
+  "addedBy" : {
+    "username" : "username"
+  },
+  "endedAt" : "2023-12-19 14:15:16"
+}
