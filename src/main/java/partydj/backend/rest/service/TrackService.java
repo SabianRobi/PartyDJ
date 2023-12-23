@@ -1,17 +1,18 @@
 package partydj.backend.rest.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.*;
 import partydj.backend.rest.repository.PreviousTrackRepository;
 import partydj.backend.rest.repository.TrackInQueueRepository;
+import partydj.backend.rest.validation.TrackValidator;
 
 import java.util.Set;
 
 @Service
 public class TrackService {
+
     @Autowired
     private TrackInQueueRepository trackInQueueRepository;
 
@@ -20,6 +21,9 @@ public class TrackService {
 
     @Autowired
     private ArtistService artistService;
+
+    @Autowired
+    private TrackValidator validator;
 
     @Lazy
     @Autowired
@@ -42,6 +46,7 @@ public class TrackService {
         artistService.saveAll(artists);
 
         if (track instanceof PreviousTrack) {
+            track.getParty().removePreviousTrack((PreviousTrack) track);
             previousTrackRepository.delete((PreviousTrack) track);
         } else {
             // Remove this track from user's addedTracks
@@ -56,9 +61,7 @@ public class TrackService {
     public TrackInQueue findById(final int trackId) {
         final TrackInQueue track = trackInQueueRepository.findById(trackId);
 
-        if (track == null) {
-            throw new EntityNotFoundException("Track does not exists.");
-        }
+        validator.verifyNotNull(track);
 
         return track;
     }
@@ -67,14 +70,12 @@ public class TrackService {
         final TrackInQueue track =
                 trackInQueueRepository.findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc(partyName);
 
-        if (track == null) {
-            throw new EntityNotFoundException("There is no track in queue.");
-        }
+        validator.verifyNotNull(track, "There is no track in queue.");
 
         return track;
     }
 
-    public TrackInQueue getNowPlaying(final String partyName) {
+    public TrackInQueue getIfExistsNowPlaying(final String partyName) {
         return trackInQueueRepository.findByPartyNameAndIsPlayingIsTrue(partyName);
     }
 }

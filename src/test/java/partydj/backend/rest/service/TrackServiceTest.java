@@ -1,6 +1,5 @@
 package partydj.backend.rest.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,27 +9,31 @@ import partydj.backend.rest.domain.*;
 import partydj.backend.rest.helper.DataGenerator;
 import partydj.backend.rest.repository.PreviousTrackRepository;
 import partydj.backend.rest.repository.TrackInQueueRepository;
+import partydj.backend.rest.validation.TrackValidator;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class TrackServiceTest {
-    @Mock
-    private PreviousTrackRepository previousTrackRepository;
 
     @Mock
     private TrackInQueueRepository trackInQueueRepository;
 
     @Mock
+    private PreviousTrackRepository previousTrackRepository;
+
+    @Mock
     private ArtistService artistService;
+
+    @Mock
+    private TrackValidator validator;
 
     @Mock
     private UserService userService;
@@ -75,7 +78,6 @@ public class TrackServiceTest {
         user.setAddedTracks(tracksInQueue);
         artist.setTracks(tracks);
         party.setTracksInQueue(tracksInQueue);
-        when(userService.save(any())).thenReturn(user);
 
         trackService.delete(track);
 
@@ -98,6 +100,7 @@ public class TrackServiceTest {
         trackService.delete(track);
 
         assertThat(artist.getTracks()).isEmpty();
+        assertThat(party.getPreviousTracks()).isEmpty();
     }
 
     @Test
@@ -105,18 +108,12 @@ public class TrackServiceTest {
         final User user = DataGenerator.generateUserWithId();
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final Artist artist = DataGenerator.generateArtist();
-        final TrackInQueue track = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));
-        track.setId(1);
+        final TrackInQueue track = DataGenerator.generateTrackInQueueWithId("", party, user, Set.of(artist));
         when(trackInQueueRepository.findById(anyInt())).thenReturn(track);
 
         final TrackInQueue foundTrack = trackService.findById(track.getId());
 
         assertThat(foundTrack).isSameAs(track);
-    }
-
-    @Test
-    void givenTrack_whenFindById_thenThrowsEntityNotFoundException() {
-        assertThrows(EntityNotFoundException.class, () -> trackService.findById(1));
     }
 
     @Test
@@ -133,11 +130,6 @@ public class TrackServiceTest {
     }
 
     @Test
-    void givenEmptyQueue_whenGetNext_thenThrowsEntityNotFoundException() {
-        assertThrows(EntityNotFoundException.class, () -> trackService.getNextTrack("testParty"));
-    }
-
-    @Test
     void givenPopulatedQueue_whenGetNowPlaying_thenSuccess() {
         final User user = DataGenerator.generateUserWithId();
         final Party party = DataGenerator.generateParty("", Set.of(user));
@@ -145,14 +137,14 @@ public class TrackServiceTest {
         final TrackInQueue track = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));
         when(trackInQueueRepository.findByPartyNameAndIsPlayingIsTrue(any())).thenReturn(track);
 
-        final TrackInQueue foundTrack = trackService.getNowPlaying(party.getName());
+        final TrackInQueue foundTrack = trackService.getIfExistsNowPlaying(party.getName());
 
         assertThat(foundTrack).isSameAs(track);
     }
 
     @Test
-    void givenEmptyQueue_whenGetNowPlaying_thenThrowsEntityNotFoundException() {
-        final TrackInQueue track = trackService.getNowPlaying("testParty");
+    void givenEmptyQueue_whenGetNowPlaying_thenReturnsNull() {
+        final TrackInQueue track = trackService.getIfExistsNowPlaying("testParty");
 
         assertNull(track);
     }
