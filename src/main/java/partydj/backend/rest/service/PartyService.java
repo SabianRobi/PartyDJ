@@ -82,11 +82,14 @@ public class PartyService {
         });
         userService.saveAll(users);
 
-        // Deletes tracks
+        // Removes tracks from artists & Deletes tracks
         HashSet<Track> tracks = new HashSet<>(party.getTracksInQueue());
         tracks.addAll(party.getPreviousTracks());
 
-        tracks.forEach(track -> trackService.delete(track));
+        tracks.forEach(track -> {
+            track.getArtists().forEach(artist -> artist.removeTrack(track));
+            trackService.delete(track);
+        });
 
         repository.delete(party);
 

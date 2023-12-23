@@ -89,13 +89,15 @@ public class PartyServiceTest {
         final User user = DataGenerator.generateUserWithId();
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final Artist artist = DataGenerator.generateArtist();
-        TrackInQueue track = DataGenerator.generateTrackInQueueWithId("", party, user, Set.of(artist));
-        PreviousTrack previousTrack = DataGenerator.generatePreviousTrack("", party, user, Set.of(artist));
+        final TrackInQueue track = DataGenerator.generateTrackInQueueWithId("", party, user, Set.of(artist));
+        final PreviousTrack previousTrack = DataGenerator.generatePreviousTrack("", party, user, Set.of(artist));
+        final Set<Track> tracks = new HashSet<>(Set.of(track));
         user.setParty(party);
         user.setPartyRole(PartyRole.CREATOR);
         user.addAddedTrack(track);
         party.addTrackToQueue(track);
         party.addTrackToPreviousTracks(previousTrack);
+        artist.setTracks(tracks);
 
         when(partyRepository.findByName(any())).thenReturn(party);
         when(userService.saveAll(any())).thenReturn(Set.of(user));
@@ -115,6 +117,7 @@ public class PartyServiceTest {
         assertThat(party.getTracksInQueue()).isEmpty();
         assertThat(party.getPreviousTracks()).isEmpty();
         assertThat(user.getAddedTracks()).isEmpty();
+        assertThat(artist.getTracks()).isEmpty();
     }
 
     @Test
