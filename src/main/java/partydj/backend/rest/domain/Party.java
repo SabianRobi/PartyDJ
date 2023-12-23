@@ -71,6 +71,10 @@ public class Party {
         tracksInQueue.remove(track);
     }
 
+    public void removePreviousTrack(final PreviousTrack track) {
+        previousTracks.remove(track);
+    }
+
     public void removeUser(final User user) {
         participants.remove(user);
     }

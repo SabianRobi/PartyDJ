@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class PartyServiceTest {
@@ -88,14 +88,33 @@ public class PartyServiceTest {
     void givenParty_whenDeleteByName_thenSuccess() {
         final User user = DataGenerator.generateUserWithId();
         final Party party = DataGenerator.generateParty("", Set.of(user));
+        final Artist artist = DataGenerator.generateArtist();
+        TrackInQueue track = DataGenerator.generateTrackInQueueWithId("", party, user, Set.of(artist));
+        PreviousTrack previousTrack = DataGenerator.generatePreviousTrack("", party, user, Set.of(artist));
+        user.setParty(party);
+        user.setPartyRole(PartyRole.CREATOR);
+        user.addAddedTrack(track);
+        party.addTrackToQueue(track);
+        party.addTrackToPreviousTracks(previousTrack);
+
         when(partyRepository.findByName(any())).thenReturn(party);
         when(userService.saveAll(any())).thenReturn(Set.of(user));
+        doAnswer(invocation -> {
+            // DB would handle this
+            party.removeTrackFromQueue(track);
+            party.removePreviousTrack(previousTrack);
+            user.removeAddedTrack(track);
+            return null;
+        }).when(trackService).delete(any(Track.class));
 
         final Party deletedParty = partyService.deleteByName(user, party.getName());
 
         assertThat(deletedParty).isSameAs(party);
         assertThat(user.getParty()).isNull();
         assertThat(user.getPartyRole()).isNull();
+        assertThat(party.getTracksInQueue()).isEmpty();
+        assertThat(party.getPreviousTracks()).isEmpty();
+        assertThat(user.getAddedTracks()).isEmpty();
     }
 
     @Test
@@ -111,6 +130,8 @@ public class PartyServiceTest {
 
     @Test
     void givenParty_whenFindByName_thenThrowsEntityNotFoundException() {
+        doThrow(EntityNotFoundException.class).when(validator).verifyNotNull(any());
+
         assertThrows(EntityNotFoundException.class, () -> partyService.findByName("testParty"));
     }
 
@@ -150,7 +171,6 @@ public class PartyServiceTest {
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final PartyRequest partyRequest = DataGenerator.generatePartyRequest();
         when(partyRepository.save(any())).thenReturn(party);
-        when(userService.save(any())).thenReturn(user);
 
         final Party createdParty = partyService.create(user, partyRequest);
 
@@ -163,30 +183,11 @@ public class PartyServiceTest {
     void shouldLoadParty() {
         final User user = DataGenerator.generateUserWithId();
         final Party party = DataGenerator.generateParty("", Set.of(user));
-        user.setParty(party);
-        user.setPartyRole(PartyRole.CREATOR);
         when(partyRepository.findByName(any())).thenReturn(party);
 
         final Party foundParty = partyService.load(user, party.getName());
 
         assertThat(foundParty).isSameAs(party);
-    }
-
-    @Test
-    void givenUserInOtherParty_whenLoad_thenThrowsException() {
-        final User user = DataGenerator.generateUser("1");
-        final Party party = DataGenerator.generateParty("", Set.of(user));
-        user.setParty(party);
-        user.setPartyRole(PartyRole.CREATOR);
-
-        assertThrows(IllegalStateException.class, () -> partyService.load(user, "otherPartyName"));
-    }
-
-    @Test
-    void givenUserNotInParty_whenLoad_thenThrowsException() {
-        final User user = DataGenerator.generateUserWithId();
-
-        assertThrows(IllegalStateException.class, () -> partyService.load(user, "partyName"));
     }
 
     @Test
@@ -196,7 +197,6 @@ public class PartyServiceTest {
         final Party party = DataGenerator.generateParty("", Set.of(user1));
         final PartyRequest partyRequest = DataGenerator.generatePartyRequest();
         when(partyRepository.findByName(any())).thenReturn(party);
-        when(userService.save(any())).thenReturn(user2);
 
         final Party joinedParty = partyService.join(user2, partyRequest);
 
@@ -209,12 +209,10 @@ public class PartyServiceTest {
     @Test
     void givenParty_whenLeave_thenSuccess() {
         final User user = DataGenerator.generateUserWithId();
-        user.setPartyRole(PartyRole.CREATOR);
+        user.setPartyRole(PartyRole.PARTICIPANT);
         final Party party = DataGenerator.generateParty("", Set.of(user));
         user.setParty(party);
         when(partyRepository.findByName(any())).thenReturn(party);
-        when(partyRepository.save(any())).thenReturn(party);
-        when(userService.save(any())).thenReturn(user);
 
         final Party leftParty = partyService.leave(user, party.getName());
 
@@ -228,11 +226,11 @@ public class PartyServiceTest {
     void givenSearchQuery_whenSearch_thenSuccess() {
         final User user = DataGenerator.generateUserWithId();
         final Party party = DataGenerator.generateParty("", Set.of(user));
-        final Artist artist = DataGenerator.generateArtist();
         final String query = "query";
         final int offset = 0;
         final int limit = 1;
         final HashSet<PlatformType> platforms = new HashSet<>(Set.of(PlatformType.SPOTIFY));
+        final Artist artist = DataGenerator.generateArtist();
         final HashSet<TrackSearchResultResponse> response = new HashSet<>();
         final TrackSearchResultResponse trackResponse = DataGenerator.generateTrackSearchResultResponse(Set.of(artist));
         response.add(trackResponse);
@@ -249,14 +247,12 @@ public class PartyServiceTest {
     @Test
     void givenParty_whenAddTrack_thenSuccess() {
         final User user = DataGenerator.generateUserWithId();
+        final AddTrackRequest trackRequest = DataGenerator.generateAddTrackRequest();
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final Artist artist = DataGenerator.generateArtist();
-        final AddTrackRequest trackRequest = DataGenerator.generateAddTrackRequest();
         final TrackInQueue track = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));
         when(partyRepository.findByName(any())).thenReturn(party);
         when(spotifyService.fetchAndSafeTrackInfo(any(), any(), any())).thenReturn(track);
-        when(partyRepository.save(any())).thenReturn(party);
-        when(userService.save(any())).thenReturn(user);
 
         final TrackInQueue addedTrack = partyService.addTrack(user, trackRequest, party.getName());
 
@@ -295,8 +291,8 @@ public class PartyServiceTest {
     @Test
     void givenParty_whenSetSpotifyDeviceId_thenSuccess() {
         final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
         final SetSpotifyDeviceIdRequest spotifyRequest = DataGenerator.generateSpotifyRequest();
+        final Party party = DataGenerator.generateParty("", Set.of(user));
         when(partyRepository.findByName(any())).thenReturn(party);
         when(partyRepository.save(any())).thenReturn(party);
 
@@ -317,7 +313,6 @@ public class PartyServiceTest {
         user.setAddedTracks(tracks);
         when(partyRepository.findByName(any())).thenReturn(party);
         when(trackService.findById(anyInt())).thenReturn(track);
-        when(partyRepository.save(any())).thenReturn(party);
 
         partyService.removeTrackFromQueue(user, party.getName(), track.getId());
 
@@ -340,7 +335,7 @@ public class PartyServiceTest {
         final PreviousTrack prevTrack = DataGenerator.generatePreviousTrack("", party, user, Set.of(artist));
 
         when(partyRepository.findByName(any())).thenReturn(party);
-        when(trackService.getNowPlaying(any())).thenReturn(nowPlayingTrack);
+        when(trackService.getIfExistsNowPlaying(any())).thenReturn(nowPlayingTrack);
         when(trackService.getNextTrack(any())).thenReturn(nextTrack);
         when(trackMapper.mapTrackInQueueToPreviousTrack(any())).thenReturn(prevTrack);
         when(trackService.save(any())).thenReturn(nextTrack);

@@ -1,6 +1,5 @@
 package partydj.backend.rest.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -23,6 +22,7 @@ import java.util.*;
 
 @Service
 public class PartyService {
+
     @Autowired
     private PartyRepository repository;
 
@@ -96,9 +96,7 @@ public class PartyService {
     public Party findByName(final String name) {
         final Party party = repository.findByName(name);
 
-        if (party == null) {
-            throw new EntityNotFoundException("Party does not exists.");
-        }
+        validator.verifyNotNull(party);
 
         return party;
     }
@@ -110,20 +108,14 @@ public class PartyService {
             if (ex.getMessage().contains("Duplicate entry")) {
                 String wrongValue = ex.getMessage().split("'")[1];
 
-                if (partyRequest != null) {
-                    if (Objects.equals(wrongValue, partyRequest.getName())) {
-                        throw new NotUniqueException("name", "Already taken.");
-                    }
-                } else {
-                    if (Objects.equals(wrongValue, party.getName())) {
-                        throw new NotUniqueException("name", "Already taken.");
-                    }
+                if ((partyRequest != null && Objects.equals(wrongValue, partyRequest.getName())) ||
+                        (partyRequest == null && Objects.equals(wrongValue, party.getName()))) {
+                    throw new NotUniqueException("name", "Already taken.");
                 }
             }
             throw new IllegalStateException("Cannot save entity.");
         }
     }
-
 
     // Controller handlers
 
@@ -141,12 +133,7 @@ public class PartyService {
     }
 
     public Party load(final User loggedInUser, final String partyName) {
-        if (loggedInUser.getParty() == null) {
-            throw new IllegalStateException("You are not in a party.");
-        }
-        if (!Objects.equals(loggedInUser.getParty().getName(), partyName)) {
-            throw new IllegalStateException("You are not in the given party.");
-        }
+        validator.validateOnLoad(loggedInUser, partyName);
 
         return findByName(partyName);
     }
@@ -250,7 +237,7 @@ public class PartyService {
 
     public TrackInQueue playNextTrack(final User loggedInUser, final String partyName) {
         final Party party = findByName(partyName);
-        final TrackInQueue nowPlayingTrack = trackService.getNowPlaying(partyName); // can be null
+        final TrackInQueue nowPlayingTrack = trackService.getIfExistsNowPlaying(partyName); // can be null
         final TrackInQueue nextTrack = trackService.getNextTrack(partyName);
 
         validator.validateOnPlayNextTrack(party, loggedInUser);

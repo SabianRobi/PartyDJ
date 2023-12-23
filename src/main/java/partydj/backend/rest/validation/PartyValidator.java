@@ -1,5 +1,6 @@
 package partydj.backend.rest.validation;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,6 +14,7 @@ import partydj.backend.rest.domain.error.RequiredFieldInvalidException;
 import partydj.backend.rest.domain.request.AddTrackRequest;
 import partydj.backend.rest.domain.request.PartyRequest;
 
+import java.util.Objects;
 import java.util.Set;
 
 @Component
@@ -35,6 +37,16 @@ public class PartyValidator {
         }
     }
 
+    // Load
+    public void validateOnLoad(final User loggedInUser, final String partyName) {
+        if (loggedInUser.getParty() == null) {
+            throw new IllegalStateException("You are not in a party.");
+        }
+        if (!Objects.equals(loggedInUser.getParty().getName(), partyName)) {
+            throw new IllegalStateException("You are not in the given party.");
+        }
+    }
+
     // Join
     public void validateOnJoin(final User loggedInUser, final PartyRequest joinRequest, final Party party) {
         verifyUserIsNotInAParty(loggedInUser);
@@ -53,7 +65,6 @@ public class PartyValidator {
             throw new IllegalStateException("You are not in a party.");
         }
 
-//        if (!party.getParticipants().contains(loggedInUser)) {
         if (loggedInUser.getParty() != party) {
             throw new IllegalStateException("You are not in the given party.");
         }
@@ -128,8 +139,13 @@ public class PartyValidator {
         }
     }
 
-
     // Helper verifiers
+
+    public void verifyNotNull(final Party party) {
+        if (party == null) {
+            throw new EntityNotFoundException("Party does not exists.");
+        }
+    }
 
     private void verifyUserIsNotInAParty(final User user) {
         if (user.getParty() != null) {
