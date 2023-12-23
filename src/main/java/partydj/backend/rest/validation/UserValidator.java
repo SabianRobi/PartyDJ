@@ -3,7 +3,7 @@ package partydj.backend.rest.validation;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
-import partydj.backend.rest.domain.User;
+import partydj.backend.rest.entity.User;
 
 import java.util.Objects;
 

@@ -1,15 +1,18 @@
 package partydj.backend.rest.helper;
 
 import org.springframework.stereotype.Component;
-import partydj.backend.rest.domain.*;
-import partydj.backend.rest.domain.enums.PartyRole;
-import partydj.backend.rest.domain.enums.PlatformType;
-import partydj.backend.rest.domain.enums.UserType;
-import partydj.backend.rest.domain.request.AddTrackRequest;
-import partydj.backend.rest.domain.request.PartyRequest;
-import partydj.backend.rest.domain.request.SetSpotifyDeviceIdRequest;
-import partydj.backend.rest.domain.request.UserRequest;
-import partydj.backend.rest.domain.response.*;
+import partydj.backend.rest.entity.*;
+import partydj.backend.rest.entity.enums.PartyRole;
+import partydj.backend.rest.entity.enums.PlatformType;
+import partydj.backend.rest.entity.enums.UserType;
+import partydj.backend.rest.entity.request.AddTrackRequest;
+import partydj.backend.rest.entity.request.PartyRequest;
+import partydj.backend.rest.entity.request.SetSpotifyDeviceIdRequest;
+import partydj.backend.rest.entity.request.UserRequest;
+import partydj.backend.rest.entity.response.ArtistResponse;
+import partydj.backend.rest.entity.response.TrackSearchResultResponse;
+import partydj.backend.rest.entity.response.UserInPartyResponse;
+import partydj.backend.rest.entity.response.UserInPartyTrackInQueueResponse;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -178,15 +181,6 @@ public class DataGenerator {
         return SpotifyCredential.builder()
                 .owner(user)
                 .state(UUID.randomUUID().toString())
-                .build();
-    }
-
-    public static UserResponse generateUserResponse() {
-        return UserResponse.builder()
-                .id(1)
-                .email("user@test.com")
-                .username("username")
-                .isSpotifyConnected(false)
                 .build();
     }
 }

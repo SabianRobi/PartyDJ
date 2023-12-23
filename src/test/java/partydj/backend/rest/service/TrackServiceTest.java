@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import partydj.backend.rest.domain.*;
+import partydj.backend.rest.entity.*;
 import partydj.backend.rest.helper.DataGenerator;
 import partydj.backend.rest.repository.PreviousTrackRepository;
 import partydj.backend.rest.repository.TrackInQueueRepository;

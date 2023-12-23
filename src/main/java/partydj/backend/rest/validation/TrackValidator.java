@@ -2,7 +2,7 @@ package partydj.backend.rest.validation;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Component;
-import partydj.backend.rest.domain.TrackInQueue;
+import partydj.backend.rest.entity.TrackInQueue;
 
 @Component
 public class TrackValidator {

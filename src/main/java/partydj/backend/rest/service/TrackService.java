@@ -3,7 +3,7 @@ package partydj.backend.rest.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import partydj.backend.rest.domain.*;
+import partydj.backend.rest.entity.*;
 import partydj.backend.rest.repository.PreviousTrackRepository;
 import partydj.backend.rest.repository.TrackInQueueRepository;
 import partydj.backend.rest.validation.TrackValidator;

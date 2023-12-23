@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import partydj.backend.rest.domain.SpotifyCredential;
-import partydj.backend.rest.domain.User;
+import partydj.backend.rest.entity.SpotifyCredential;
+import partydj.backend.rest.entity.User;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static partydj.backend.rest.helper.DataGenerator.generateSpotifyCredentialWithOnlyState;

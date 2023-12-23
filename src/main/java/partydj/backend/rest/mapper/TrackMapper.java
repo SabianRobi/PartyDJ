@@ -2,11 +2,11 @@ package partydj.backend.rest.mapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import partydj.backend.rest.domain.*;
-import partydj.backend.rest.domain.enums.PlatformType;
-import partydj.backend.rest.domain.response.PreviousTrackResponse;
-import partydj.backend.rest.domain.response.TrackInQueueResponse;
-import partydj.backend.rest.domain.response.TrackSearchResultResponse;
+import partydj.backend.rest.entity.*;
+import partydj.backend.rest.entity.enums.PlatformType;
+import partydj.backend.rest.entity.response.PreviousTrackResponse;
+import partydj.backend.rest.entity.response.TrackInQueueResponse;
+import partydj.backend.rest.entity.response.TrackSearchResultResponse;
 import partydj.backend.rest.service.ArtistService;
 import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
 

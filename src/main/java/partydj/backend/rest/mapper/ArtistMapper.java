@@ -1,8 +1,8 @@
 package partydj.backend.rest.mapper;
 
 import org.springframework.stereotype.Component;
-import partydj.backend.rest.domain.Artist;
-import partydj.backend.rest.domain.response.ArtistResponse;
+import partydj.backend.rest.entity.Artist;
+import partydj.backend.rest.entity.response.ArtistResponse;
 
 @Component
 public class ArtistMapper {

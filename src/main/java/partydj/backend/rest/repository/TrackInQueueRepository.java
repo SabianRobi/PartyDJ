@@ -1,7 +1,7 @@
 package partydj.backend.rest.repository;
 
 import org.springframework.data.repository.CrudRepository;
-import partydj.backend.rest.domain.TrackInQueue;
+import partydj.backend.rest.entity.TrackInQueue;
 
 public interface TrackInQueueRepository extends CrudRepository<TrackInQueue, Integer> {
     TrackInQueue findById(final int id);

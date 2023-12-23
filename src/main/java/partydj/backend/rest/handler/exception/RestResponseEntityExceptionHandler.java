@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import partydj.backend.rest.domain.error.*;
-import partydj.backend.rest.domain.response.ErrorResponse;
+import partydj.backend.rest.entity.error.*;
+import partydj.backend.rest.entity.response.ErrorResponse;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;

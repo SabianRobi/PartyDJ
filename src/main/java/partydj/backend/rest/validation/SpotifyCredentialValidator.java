@@ -2,7 +2,7 @@ package partydj.backend.rest.validation;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Component;
-import partydj.backend.rest.domain.SpotifyCredential;
+import partydj.backend.rest.entity.SpotifyCredential;
 
 @Component
 public class SpotifyCredentialValidator {

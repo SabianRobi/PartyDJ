@@ -5,11 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import partydj.backend.rest.domain.User;
-import partydj.backend.rest.domain.enums.PartyRole;
-import partydj.backend.rest.domain.enums.UserType;
-import partydj.backend.rest.domain.error.NotUniqueException;
-import partydj.backend.rest.domain.request.UserRequest;
+import partydj.backend.rest.entity.User;
+import partydj.backend.rest.entity.enums.PartyRole;
+import partydj.backend.rest.entity.enums.UserType;
+import partydj.backend.rest.entity.error.NotUniqueException;
+import partydj.backend.rest.entity.request.UserRequest;
 import partydj.backend.rest.repository.UserRepository;
 import partydj.backend.rest.validation.UserValidator;
 

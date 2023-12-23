@@ -2,8 +2,8 @@ package partydj.backend.rest.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import partydj.backend.rest.domain.SpotifyCredential;
-import partydj.backend.rest.domain.User;
+import partydj.backend.rest.entity.SpotifyCredential;
+import partydj.backend.rest.entity.User;
 import partydj.backend.rest.repository.SpotifyCredentialRepository;
 import partydj.backend.rest.validation.SpotifyCredentialValidator;
 

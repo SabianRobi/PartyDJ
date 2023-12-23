@@ -2,7 +2,7 @@ package partydj.backend.rest.editor;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
-import partydj.backend.rest.domain.enums.PlatformType;
+import partydj.backend.rest.entity.enums.PlatformType;
 
 import java.beans.PropertyEditorSupport;
 

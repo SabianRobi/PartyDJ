@@ -2,8 +2,8 @@ package partydj.backend.rest.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import partydj.backend.rest.domain.Artist;
-import partydj.backend.rest.domain.Track;
+import partydj.backend.rest.entity.Artist;
+import partydj.backend.rest.entity.Track;
 import partydj.backend.rest.repository.ArtistRepository;
 
 import java.util.HashSet;

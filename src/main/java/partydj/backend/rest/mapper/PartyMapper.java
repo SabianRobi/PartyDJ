@@ -2,9 +2,9 @@ package partydj.backend.rest.mapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import partydj.backend.rest.domain.Party;
-import partydj.backend.rest.domain.response.PartyResponse;
-import partydj.backend.rest.domain.response.SpotifyDeviceIdResponse;
+import partydj.backend.rest.entity.Party;
+import partydj.backend.rest.entity.response.PartyResponse;
+import partydj.backend.rest.entity.response.SpotifyDeviceIdResponse;
 
 @Component
 public class PartyMapper {

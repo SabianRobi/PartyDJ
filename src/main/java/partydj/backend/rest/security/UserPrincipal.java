@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import partydj.backend.rest.domain.User;
+import partydj.backend.rest.entity.User;
 
 import java.util.Collection;
 import java.util.List;

@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import partydj.backend.rest.domain.Artist;
-import partydj.backend.rest.domain.User;
+import partydj.backend.rest.entity.Artist;
+import partydj.backend.rest.entity.User;
 import partydj.backend.rest.helper.DataGenerator;
 
 import static org.assertj.core.api.Assertions.assertThat;

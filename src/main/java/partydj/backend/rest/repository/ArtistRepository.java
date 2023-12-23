@@ -2,8 +2,8 @@ package partydj.backend.rest.repository;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import partydj.backend.rest.domain.Artist;
-import partydj.backend.rest.domain.Track;
+import partydj.backend.rest.entity.Artist;
+import partydj.backend.rest.entity.Track;
 
 import java.util.HashSet;
 import java.util.List;

@@ -1,10 +1,10 @@
 package partydj.backend.rest.mapper;
 
 import org.springframework.stereotype.Component;
-import partydj.backend.rest.domain.User;
-import partydj.backend.rest.domain.response.UserInPartyResponse;
-import partydj.backend.rest.domain.response.UserInPartyTrackInQueueResponse;
-import partydj.backend.rest.domain.response.UserResponse;
+import partydj.backend.rest.entity.User;
+import partydj.backend.rest.entity.response.UserInPartyResponse;
+import partydj.backend.rest.entity.response.UserInPartyTrackInQueueResponse;
+import partydj.backend.rest.entity.response.UserResponse;
 
 @Component
 public class UserMapper {

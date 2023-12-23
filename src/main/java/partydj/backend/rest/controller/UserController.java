@@ -9,9 +9,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import partydj.backend.rest.domain.User;
-import partydj.backend.rest.domain.request.UserRequest;
-import partydj.backend.rest.domain.response.UserResponse;
+import partydj.backend.rest.entity.User;
+import partydj.backend.rest.entity.request.UserRequest;
+import partydj.backend.rest.entity.response.UserResponse;
 import partydj.backend.rest.mapper.UserMapper;
 import partydj.backend.rest.security.UserPrincipal;
 import partydj.backend.rest.service.UserService;

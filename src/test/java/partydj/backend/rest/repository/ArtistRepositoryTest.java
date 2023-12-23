@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import partydj.backend.rest.domain.Artist;
-import partydj.backend.rest.domain.Party;
-import partydj.backend.rest.domain.TrackInQueue;
-import partydj.backend.rest.domain.User;
+import partydj.backend.rest.entity.Artist;
+import partydj.backend.rest.entity.Party;
+import partydj.backend.rest.entity.TrackInQueue;
+import partydj.backend.rest.entity.User;
 
 import java.util.HashSet;
 import java.util.List;
