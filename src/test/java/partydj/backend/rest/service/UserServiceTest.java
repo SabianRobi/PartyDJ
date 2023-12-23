@@ -1,24 +1,20 @@
 package partydj.backend.rest.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import partydj.backend.rest.domain.Artist;
-import partydj.backend.rest.domain.Party;
-import partydj.backend.rest.domain.TrackInQueue;
-import partydj.backend.rest.domain.User;
+import partydj.backend.rest.domain.*;
 import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.UserType;
 import partydj.backend.rest.domain.error.NotUniqueException;
 import partydj.backend.rest.domain.request.UserRequest;
 import partydj.backend.rest.helper.DataGenerator;
 import partydj.backend.rest.repository.UserRepository;
+import partydj.backend.rest.validation.UserValidator;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -40,45 +36,22 @@ public class UserServiceTest {
     @Mock
     private PartyService partyService;
 
+    @Mock
+    private UserValidator validator;
+
     @InjectMocks
     private UserService userService;
 
     @Test
     void givenNewUser_whenRegister_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
         final UserRequest userRequest = DataGenerator.generateUserRequest();
+        final User user = DataGenerator.generateUserWithId();
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         final User registeredUser = userService.register(userRequest);
 
         assertThat(registeredUser).isNotNull();
         assertThat(registeredUser.getUserType()).isEqualTo(UserType.NORMAL);
-    }
-
-    @Test
-    void givenNewUser_whenRegisterWithUsedEmail_thenTrowsException() {
-        final UserRequest userRequest = DataGenerator.generateUserRequest();
-        final String message = "... Duplicate entry '" + userRequest.getEmail() + "' for key ...";
-        when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
-
-        assertThrows(NotUniqueException.class, () -> userService.register(userRequest));
-    }
-
-    @Test
-    void givenNewUser_whenRegisterWithUsedUsername_thenTrowsException() {
-        final UserRequest userRequest = DataGenerator.generateUserRequest();
-        final String message = "... Duplicate entry '" + userRequest.getUsername() + "' for key ...";
-        when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
-
-        assertThrows(NotUniqueException.class, () -> userService.register(userRequest));
-    }
-
-    @Test
-    void givenNewUser_whenRegister_thenTrowsException() {
-        final UserRequest userRequest = DataGenerator.generateUserRequest();
-        when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException("Unknown error."));
-
-        assertThrows(IllegalStateException.class, () -> userService.register(userRequest));
     }
 
     @Test
@@ -92,14 +65,6 @@ public class UserServiceTest {
     }
 
     @Test
-    void givenUser_whenSave_thenThrowsException() {
-        final User user = DataGenerator.generateUserWithId();
-        when(userRepository.save(any())).thenThrow(new DataIntegrityViolationException("Unknown error."));
-
-        assertThrows(IllegalStateException.class, () -> userService.save(user));
-    }
-
-    @Test
     void givenUser_whenFindByUsername_thenSuccess() {
         final User user = DataGenerator.generateUserWithId();
         when(userRepository.findByUsername(any())).thenReturn(user);
@@ -110,47 +75,70 @@ public class UserServiceTest {
     }
 
     @Test
-    void givenUser_whenFindByUsername_thenThrowsException() {
-        assertThrows(EntityNotFoundException.class, () -> userService.findByUsername("someone"));
-    }
-
-    @Test
     void givenUsers_whenSaveAll_thenSuccess() {
         final User user1 = DataGenerator.generateUserWithId("1");
         final User user2 = DataGenerator.generateUserWithId("2");
         final HashSet<User> users = new HashSet<>(Set.of(user1, user2));
-        when(userRepository.saveAll(any())).thenReturn(users);
+        when(userRepository.save(any())).thenReturn(user1).thenReturn(user2);
 
         final Set<User> savedUsers = userService.saveAll(users);
 
-        assertThat(savedUsers).isSameAs(users);
+        assertThat(savedUsers).containsAll(users);
     }
 
     @Test
-    void givenUsers_whenSaveAll_thenThrowsException() {
-        final User user1 = DataGenerator.generateUserWithId("1");
-        final User user2 = DataGenerator.generateUserWithId("2");
-        final HashSet<User> users = new HashSet<>(Set.of(user1, user2));
-        when(userRepository.saveAll(any())).thenThrow(new DataIntegrityViolationException("Unknown error."));
+    void givenUserAndUserRequestButUsernameAlreadyUsed_whenTryToSave_thenTrowsNotUniqueException() {
+        final User user = DataGenerator.generateUserWithId();
+        final UserRequest userRequest = DataGenerator.generateUserRequest();
+        final String message = "... Duplicate entry '" + userRequest.getUsername() + "' for key ...";
+        when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
 
-        assertThrows(IllegalStateException.class, () -> userService.saveAll(users));
+        assertThrows(NotUniqueException.class, () -> userService.tryToSave(user, userRequest));
     }
 
     @Test
-    void givenUser_whenDelete_thenSuccess() {
+    void givenUserButUsernameAlreadyUsed_whenTryToSave_thenTrowsNotUniqueException() {
+        final User user = DataGenerator.generateUserWithId();
+        final String message = "... Duplicate entry '" + user.getUsername() + "' for key ...";
+        when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
+
+        assertThrows(NotUniqueException.class, () -> userService.tryToSave(user, null));
+    }
+
+    @Test
+    void givenUserAndUserRequestButEmailAlreadyUsed_whenTryToSave_thenTrowsNotUniqueException() {
+        final User user = DataGenerator.generateUserWithId();
+        final UserRequest userRequest = DataGenerator.generateUserRequest();
+        final String message = "... Duplicate entry '" + userRequest.getEmail() + "' for key ...";
+        when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
+
+        assertThrows(NotUniqueException.class, () -> userService.tryToSave(user, userRequest));
+    }
+
+    @Test
+    void givenUserButEmailAlreadyUsed_whenTryToSave_thenTrowsNotUniqueException() {
+        final User user = DataGenerator.generateUserWithId();
+        final String message = "... Duplicate entry '" + user.getEmail() + "' for key ...";
+        when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
+
+        assertThrows(NotUniqueException.class, () -> userService.tryToSave(user, null));
+    }
+
+    @Test
+    void givenUser_whenTryToSave_thenTrowsIllegalStateException() {
+        final User user = DataGenerator.generateUserWithId();
+        when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException("Unknown error."));
+
+        assertThrows(IllegalStateException.class, () -> userService.tryToSave(user, null));
+    }
+
+    @Test
+    void givenUserNotInParty_whenDelete_thenSuccess() {
         final User user = DataGenerator.generateUserWithId();
 
         final User deletedUser = userService.delete(user, user.getUsername());
 
         assertThat(deletedUser).isSameAs(user);
-    }
-
-    @Test
-    void givenUser_whenDeleteOtherUser_thenAccessDeniedException() {
-        final User user1 = DataGenerator.generateUserWithId();
-        final User user2 = DataGenerator.generateUserWithId("2");
-
-        assertThrows(AccessDeniedException.class, () -> userService.delete(user1, user2.getUsername()));
     }
 
     @Test
@@ -159,14 +147,20 @@ public class UserServiceTest {
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final Artist artist = DataGenerator.generateArtist();
         final TrackInQueue track = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));
+        final HashSet<TrackInQueue> tracks = new HashSet<>(Set.of(track));
+        final HashSet<Track> tracksForArtist = new HashSet<>(Set.of(track));
         user.setParty(party);
         user.setPartyRole(PartyRole.PARTICIPANT);
-        user.addAddedTrack(track);
-        party.addTrackToQueue(track);
+        user.setAddedTracks(tracks);
+        party.setTracksInQueue(tracks);
+        artist.setTracks(tracksForArtist);
 
         final User deletedUser = userService.delete(user, user.getUsername());
 
         assertThat(deletedUser).isSameAs(user);
+        assertThat(deletedUser.getAddedTracks()).isEmpty();
+        assertThat(party.getTracksInQueue()).isEmpty();
+        assertThat(artist.getTracks()).isEmpty();
     }
 
     @Test
@@ -185,21 +179,14 @@ public class UserServiceTest {
     @Test
     void givenUser_whenUpdate_thenSuccess() {
         final User user = DataGenerator.generateUserWithId();
+        final String toBeUpdatedUsername = user.getUsername();
         final UserRequest userRequest = DataGenerator.generateUserRequest();
         userRequest.setUsername("otherUsername");
+        when(passwordEncoder.encode(any())).thenReturn(user.getPassword());
         when(userRepository.save(any())).thenReturn(user);
 
-        final User updatedUser = userService.update(user, user.getUsername(), userRequest);
+        final User updatedUser = userService.update(user, toBeUpdatedUsername, userRequest);
 
         assertThat(updatedUser.getUsername()).isSameAs(userRequest.getUsername());
-    }
-
-    @Test
-    void givenUser_whenUpdateOtherUser_thenAccessDeniedException() {
-        final User user1 = DataGenerator.generateUserWithId("1");
-        final User user2 = DataGenerator.generateUserWithId("2");
-        final UserRequest userRequest = DataGenerator.generateUserRequest();
-
-        assertThrows(AccessDeniedException.class, () -> userService.update(user1, user2.getUsername(), userRequest));
     }
 }

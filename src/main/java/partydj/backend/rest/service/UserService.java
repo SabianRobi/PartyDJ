@@ -1,10 +1,8 @@
 package partydj.backend.rest.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.User;
@@ -13,10 +11,12 @@ import partydj.backend.rest.domain.enums.UserType;
 import partydj.backend.rest.domain.error.NotUniqueException;
 import partydj.backend.rest.domain.request.UserRequest;
 import partydj.backend.rest.repository.UserRepository;
+import partydj.backend.rest.validation.UserValidator;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -29,6 +29,9 @@ public class UserService {
 
     @Autowired
     private PartyService partyService;
+
+    @Autowired
+    private UserValidator validator;
 
     // Repository handlers
 
@@ -45,36 +48,56 @@ public class UserService {
     }
 
     public User save(final User user) {
-        try {
-            return userRepository.save(user);
-        } catch (final DataIntegrityViolationException ex) {
-            throw new IllegalStateException("Cannot save entity.");
-        }
+        return tryToSave(user, null);
     }
 
     public User findByUsername(final String username) {
         final User user = userRepository.findByUsername(username);
 
-        if (user == null) {
-            throw new EntityNotFoundException("User does not exists.");
-        }
+        validator.verifyNotNull(user);
 
         return user;
     }
 
+    public Set<User> saveAll(final Set<User> users) {
+        return users.stream().map(user -> tryToSave(user, null)).collect(Collectors.toSet());
+    }
+
+    public User tryToSave(final User user, final UserRequest userRequest) {
+        try {
+            return userRepository.save(user);
+        } catch (final DataIntegrityViolationException ex) {
+            if (ex.getMessage().contains("Duplicate entry")) {
+                String wrongValue = ex.getMessage().split("'")[1];
+
+                if ((userRequest != null && Objects.equals(wrongValue, userRequest.getUsername())) ||
+                        (userRequest == null && Objects.equals(wrongValue, user.getUsername()))) {
+                    throw new NotUniqueException("username", "Already taken.");
+                }
+                if ((userRequest != null && Objects.equals(wrongValue, userRequest.getEmail())) ||
+                        (userRequest == null && Objects.equals(wrongValue, user.getEmail()))) {
+                    throw new NotUniqueException("email", "Already in use.");
+                }
+
+            }
+            throw new IllegalStateException("Cannot save entity.");
+        }
+    }
+
     // Controller handlers
+
     @Transactional
     public User delete(final User loggedInUser, final String toBeDeletedUsername) {
-        if (!Objects.equals(loggedInUser.getUsername(), toBeDeletedUsername)) {
-            throw new AccessDeniedException("You can not make changes to other user profiles.");
-        }
+        validator.verifySameUser(loggedInUser, toBeDeletedUsername);
 
         if (loggedInUser.getPartyRole() != null) {
             if (loggedInUser.getPartyRole() == PartyRole.CREATOR) {
                 partyService.deleteByName(loggedInUser, loggedInUser.getParty().getName());
             } else {
-                loggedInUser.getAddedTracks().forEach(track ->
-                        loggedInUser.getParty().removeTrackFromQueue(track));
+                loggedInUser.getAddedTracks().forEach(track -> {
+                    loggedInUser.getParty().removeTrackFromQueue(track);
+                    track.getArtists().forEach(artist -> artist.removeTrack(track));
+                });
                 loggedInUser.getParty().removeUser(loggedInUser);
                 partyService.save(loggedInUser.getParty());
             }
@@ -85,40 +108,12 @@ public class UserService {
     }
 
     public User update(final User loggedInUser, final String givenUsername, final UserRequest newData) {
-        if (!Objects.equals(givenUsername, loggedInUser.getUsername())) {
-            throw new AccessDeniedException("You can not make changes to other user profiles.");
-        }
+        validator.verifySameUser(loggedInUser, givenUsername);
 
         loggedInUser.setEmail(newData.getEmail().trim());
         loggedInUser.setUsername(newData.getUsername().trim());
         loggedInUser.setPassword(passwordEncoder.encode(newData.getPassword()));
 
         return tryToSave(loggedInUser, newData);
-    }
-
-    public Set<User> saveAll(final Set<User> users) {
-        try {
-            return (Set<User>) userRepository.saveAll(users);
-        } catch (final DataIntegrityViolationException ex) {
-            throw new IllegalStateException("Cannot save entities.");
-        }
-    }
-
-    private User tryToSave(final User user, final UserRequest userRequest) {
-        try {
-            return userRepository.save(user);
-        } catch (final DataIntegrityViolationException ex) {
-            if (ex.getMessage().contains("Duplicate entry")) {
-                String wrongValue = ex.getMessage().split("'")[1];
-
-                if (Objects.equals(wrongValue, userRequest.getUsername())) {
-                    throw new NotUniqueException("username", "Already taken.");
-                }
-                if (Objects.equals(wrongValue, userRequest.getEmail())) {
-                    throw new NotUniqueException("email", "Already in use.");
-                }
-            }
-            throw new IllegalStateException("Cannot save entity.");
-        }
     }
 }
