@@ -1,6 +1,5 @@
 package partydj.backend.rest.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.domain.SpotifyCredential;
@@ -28,25 +27,21 @@ public class SpotifyCredentialService {
     // Repository handlers
 
     public SpotifyCredential findByOwner(final User owner) {
-        return findByOwner(owner, true);
-    }
-
-    public SpotifyCredential findByOwner(final User owner, final boolean throwException) {
         final SpotifyCredential spotifyCredential = repository.findByOwner(owner);
 
-        if (throwException && spotifyCredential == null) {
-            throw new IllegalStateException("You have not connected your Spotify account.");
-        }
+        validator.verifyLoggedIn(spotifyCredential);
 
         return spotifyCredential;
+    }
+
+    public SpotifyCredential findByOwnerWithoutExceptionThrowing(final User owner) {
+        return repository.findByOwner(owner);
     }
 
     public SpotifyCredential findByState(final UUID state) {
         final SpotifyCredential spotifyCredential = repository.findByState(state.toString());
 
-        if (spotifyCredential == null) {
-            throw new EntityNotFoundException("Failed to log in with Spotify. Please try again.");
-        }
+        validator.verifyNotNull(spotifyCredential);
 
         return spotifyCredential;
     }
@@ -64,11 +59,9 @@ public class SpotifyCredentialService {
     // Controller handlers
 
     public String getLoginUri(final User loggedInUser) {
-        SpotifyCredential spotifyCredential = findByOwner(loggedInUser, false);
+        SpotifyCredential spotifyCredential = findByOwnerWithoutExceptionThrowing(loggedInUser);
 
-        if (spotifyCredential != null && spotifyCredential.getToken() != null) {
-            throw new IllegalStateException("You have already connected your Spotify account.");
-        }
+        validator.verifyNotLoggedIn(spotifyCredential);
 
         final String state = UUID.randomUUID().toString();
 
@@ -105,17 +98,11 @@ public class SpotifyCredentialService {
     }
 
     public SpotifyCredential getToken(final User loggedInUser) {
-        final SpotifyCredential spotifyCredential = findByOwner(loggedInUser);
-
-        validator.verifyLoggedIn(spotifyCredential);
-
-        return spotifyCredential;
+        return findByOwner(loggedInUser);
     }
 
     public SpotifyCredential refreshToken(final User loggedInUser) {
         final SpotifyCredential spotifyCredential = findByOwner(loggedInUser);
-
-        validator.verifyLoggedIn(spotifyCredential);
 
         return spotifyService.refreshToken(spotifyCredential);
     }

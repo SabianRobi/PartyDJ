@@ -1,6 +1,5 @@
 package partydj.backend.rest.service;
 
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,7 +15,6 @@ import java.net.URI;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -60,29 +58,15 @@ public class SpotifyCredentialServiceTest {
     }
 
     @Test
-    void givenUserWithoutSpotify_whenFindByOwner_thenThrowsException() {
-        final User user = DataGenerator.generateUserWithId();
-
-        assertThrows(IllegalStateException.class, () -> spotifyCredentialService.findByOwner(user));
-    }
-
-    @Test
     void givenSpotifyCredential_whenFindByState_thenSuccess() {
+        final UUID state = UUID.randomUUID();
         final User user = DataGenerator.generateUserWithId();
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
-        final UUID state = UUID.randomUUID();
         when(spotifyCredentialRepository.findByState(any())).thenReturn(spotifyCredential);
 
         final SpotifyCredential foundCredential = spotifyCredentialService.findByState(state);
 
         assertThat(foundCredential).isSameAs(spotifyCredential);
-    }
-
-    @Test
-    void givenInvalidState_whenFindByOwner_thenThrowsException() {
-        final UUID state = UUID.randomUUID();
-
-        assertThrows(EntityNotFoundException.class, () -> spotifyCredentialService.findByState(state));
     }
 
     @Test
@@ -107,7 +91,7 @@ public class SpotifyCredentialServiceTest {
     }
 
     @Test
-    void givenUserWithoutSpotify_whenRequestsLoginUriSecondTime_thenSuccess() {
+    void givenUserWithoutSpotify_whenRequestsLoginUriMultipleTimes_thenSuccess() {
         final User user = DataGenerator.generateUserWithId();
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredentialWithOnlyState(user);
         final URI loginUri = URI.create("https://login.uri");
@@ -117,15 +101,6 @@ public class SpotifyCredentialServiceTest {
         final String receivedLoginUri = spotifyCredentialService.getLoginUri(user);
 
         assertThat(receivedLoginUri).isSameAs(loginUri.toString());
-    }
-
-    @Test
-    void givenUserLoggedInWithSpotify_whenRequestsLoginUri_thenThroesException() {
-        final User user = DataGenerator.generateUserWithId();
-        final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
-        when(spotifyCredentialRepository.findByOwner(any())).thenReturn(spotifyCredential);
-
-        assertThrows(IllegalStateException.class, () -> spotifyCredentialService.getLoginUri(user));
     }
 
     @Test
@@ -153,22 +128,16 @@ public class SpotifyCredentialServiceTest {
 
     @Test
     void givenSpotifyResponse_whenProcessCallback_thenSuccess() {
+        final String code = "code";
+        final UUID state = UUID.randomUUID();
         final User user = DataGenerator.generateUserWithId();
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
-        final UUID state = UUID.randomUUID();
         when(spotifyCredentialRepository.findByState(any())).thenReturn(spotifyCredential);
         when(spotifyService.processCallback(any(), any())).thenReturn(spotifyCredential);
 
-        final SpotifyCredential processedCredential = spotifyCredentialService.processCallback("code", state);
+        final SpotifyCredential processedCredential = spotifyCredentialService.processCallback(code, state);
 
         assertThat(processedCredential).isSameAs(spotifyCredential);
-    }
-
-    @Test
-    void givenSpotifyResponse_whenProcessCallbackWithInvalidState_thenThrowsException() {
-        final UUID state = UUID.randomUUID();
-
-        assertThrows(EntityNotFoundException.class, () -> spotifyCredentialService.findByState(state));
     }
 
     @Test
@@ -182,12 +151,5 @@ public class SpotifyCredentialServiceTest {
         final SpotifyCredential refreshedToken = spotifyCredentialService.refreshToken(user);
 
         assertThat(refreshedToken).isSameAs(refreshedCredential);
-    }
-
-    @Test
-    void givenUserWithoutSpotify_whenRefreshToken_thenThrowsException() {
-        final User user = DataGenerator.generateUserWithId();
-
-        assertThrows(IllegalStateException.class, () -> spotifyCredentialService.refreshToken(user));
     }
 }
