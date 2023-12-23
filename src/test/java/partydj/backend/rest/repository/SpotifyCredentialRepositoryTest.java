@@ -9,7 +9,7 @@ import partydj.backend.rest.domain.SpotifyCredential;
 import partydj.backend.rest.domain.User;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static partydj.backend.rest.helper.DataGenerator.generateSpotifyCredential;
+import static partydj.backend.rest.helper.DataGenerator.generateSpotifyCredentialWithOnlyState;
 import static partydj.backend.rest.helper.DataGenerator.generateUser;
 
 @DataJpaTest
@@ -26,7 +26,7 @@ public class SpotifyCredentialRepositoryTest {
     @BeforeEach
     void init() {
         user = entityManager.persist(generateUser(""));
-        spotifyCredential = generateSpotifyCredential(user);
+        spotifyCredential = generateSpotifyCredentialWithOnlyState(user);
     }
 
     @Test
@@ -58,7 +58,7 @@ public class SpotifyCredentialRepositoryTest {
     public void givenSpotifyCredential_whenFindByState_thenSuccess() {
         entityManager.persist(spotifyCredential);
 
-        final SpotifyCredential found = repository.findByState("1593bead-e671-4a0b-a195-b5165aed6410");
+        final SpotifyCredential found = repository.findByState(spotifyCredential.getState());
 
         assertThat(found).isEqualTo(spotifyCredential);
     }

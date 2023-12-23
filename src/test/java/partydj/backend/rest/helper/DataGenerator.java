@@ -14,6 +14,7 @@ import partydj.backend.rest.domain.response.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -176,7 +177,7 @@ public class DataGenerator {
     public static SpotifyCredential generateSpotifyCredentialWithOnlyState(final User user) {
         return SpotifyCredential.builder()
                 .owner(user)
-                .state("state")
+                .state(UUID.randomUUID().toString())
                 .build();
     }
 
