@@ -31,7 +31,7 @@ public class TrackInQueueRepositoryTest {
     @BeforeEach
     public void init() {
         user = entityManager.persist(generateUser(""));
-        artist = entityManager.persist(generateArtist(""));
+        artist = entityManager.persist(generateArtist());
         party = entityManager.persist(generateParty("", Set.of(user)));
         track = generateTrackInQueue("", party, user, Set.of(artist));
     }

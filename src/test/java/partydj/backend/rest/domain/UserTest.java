@@ -58,7 +58,7 @@ public class UserTest {
 
     @Test
     void givenUser_whenAddTrack_thenSuccess() {
-        final Artist artist = generateArtist("");
+        final Artist artist = generateArtist();
         final Party party = generateParty("", Set.of(user));
         final TrackInQueue track = generateTrackInQueue("", party, user, Set.of(artist));
 
@@ -69,7 +69,7 @@ public class UserTest {
 
     @Test
     void givenUserWithAddedTrack_whenRemoveTrack_thenSuccess() {
-        final Artist artist = generateArtist("");
+        final Artist artist = generateArtist();
         final Party party = generateParty("", Set.of(user));
         final TrackInQueue track = generateTrackInQueue("", party, user, Set.of(artist));
         final HashSet<TrackInQueue> tracks = new HashSet<>();

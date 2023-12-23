@@ -98,7 +98,7 @@ public class PartyTest {
     @Test
     void givenParty_whenAddTrackToQueue_thenSuccess() {
         final User user = generateUser("");
-        final Artist artist = generateArtist("");
+        final Artist artist = generateArtist();
         final TrackInQueue track = generateTrackInQueue("", party, user, Set.of(artist));
 
         party.addTrackToQueue(track);
@@ -109,7 +109,7 @@ public class PartyTest {
     @Test
     void givenParty_whenAddTrackToPreviousTracks_thenSuccess() {
         final User user = generateUser("");
-        final Artist artist = generateArtist("");
+        final Artist artist = generateArtist();
         final PreviousTrack track = DataGenerator.generatePreviousTrack("", party, user, Set.of(artist));
 
         party.addTrackToPreviousTracks(track);
@@ -120,7 +120,7 @@ public class PartyTest {
     @Test
     void givenPartyWithTracksInQueue_whenRemoveTrackFromQueue_thenSuccess() {
         final User user = generateUser("");
-        final Artist artist = generateArtist("");
+        final Artist artist = generateArtist();
         final TrackInQueue track = generateTrackInQueue("", party, user, Set.of(artist));
         final HashSet<TrackInQueue> tracks = new HashSet<>();
         tracks.add(track);

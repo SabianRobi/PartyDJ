@@ -1,5 +1,6 @@
 package partydj.backend.rest.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,7 @@ public class TrackService {
         final TrackInQueue track = trackInQueueRepository.findById(trackId);
 
         if (track == null) {
-            throw new IllegalStateException("Track does not exists.");
+            throw new EntityNotFoundException("Track does not exists.");
         }
 
         return track;
@@ -67,7 +68,7 @@ public class TrackService {
                 trackInQueueRepository.findTop1ByPartyNameAndIsPlayingIsFalseOrderByScoreDesc(partyName);
 
         if (track == null) {
-            throw new IllegalStateException("There is no track in queue.");
+            throw new EntityNotFoundException("There is no track in queue.");
         }
 
         return track;

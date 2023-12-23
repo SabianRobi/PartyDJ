@@ -13,6 +13,7 @@ import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 @Component
 public class TrackMapper {
@@ -56,7 +57,7 @@ public class TrackMapper {
             final se.michaelthelin.spotify.model_objects.specification.Track track) {
         return TrackSearchResultResponse.builder()
                 .title(track.getName())
-                .artists(Arrays.stream(track.getArtists()).map(ArtistSimplified::getName).toList())
+                .artists(Arrays.stream(track.getArtists()).map(ArtistSimplified::getName).collect(Collectors.toSet()))
                 .coverUri(track.getAlbum().getImages()[1].getUrl())
                 .length(track.getDurationMs())
                 .platformType(PlatformType.SPOTIFY)

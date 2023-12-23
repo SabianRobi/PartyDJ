@@ -62,26 +62,11 @@ public class PartyService {
             party.setPassword(passwordEncoder.encode(savePartyRequest.getPassword().trim()));
         }
 
-        try {
-            return repository.save(party);
-        } catch (final DataIntegrityViolationException ex) {
-            if (ex.getMessage().contains("Duplicate entry")) {
-                String wrongValue = ex.getMessage().split("'")[1];
-
-                if (Objects.equals(wrongValue, savePartyRequest.getName())) {
-                    throw new NotUniqueException("name", "Already taken.");
-                }
-            }
-            throw new IllegalStateException("Cannot save entity.");
-        }
+        return tryToSave(party, savePartyRequest);
     }
 
     public Party save(final Party party) {
-        try {
-            return repository.save(party);
-        } catch (final DataIntegrityViolationException ex) {
-            throw new IllegalStateException("Cannot save entity.");
-        }
+        return tryToSave(party, null);
     }
 
     public Party deleteByName(final User loggedInUser, final String partyName) {
@@ -118,6 +103,27 @@ public class PartyService {
         return party;
     }
 
+    public Party tryToSave(final Party party, final PartyRequest partyRequest) {
+        try {
+            return repository.save(party);
+        } catch (final DataIntegrityViolationException ex) {
+            if (ex.getMessage().contains("Duplicate entry")) {
+                String wrongValue = ex.getMessage().split("'")[1];
+
+                if (partyRequest != null) {
+                    if (Objects.equals(wrongValue, partyRequest.getName())) {
+                        throw new NotUniqueException("name", "Already taken.");
+                    }
+                } else {
+                    if (Objects.equals(wrongValue, party.getName())) {
+                        throw new NotUniqueException("name", "Already taken.");
+                    }
+                }
+            }
+            throw new IllegalStateException("Cannot save entity.");
+        }
+    }
+
 
     // Controller handlers
 
@@ -152,6 +158,7 @@ public class PartyService {
 
         party.addUser(loggedInUser);
         save(party);
+        loggedInUser.setParty(party);
         loggedInUser.setPartyRole(PartyRole.PARTICIPANT);
         userService.save(loggedInUser);
 
@@ -165,6 +172,7 @@ public class PartyService {
 
         party.removeUser(loggedInUser);
         save(party);
+        loggedInUser.setParty(null);
         loggedInUser.setPartyRole(null);
         userService.save(loggedInUser);
 
@@ -243,7 +251,7 @@ public class PartyService {
     public TrackInQueue playNextTrack(final User loggedInUser, final String partyName) {
         final Party party = findByName(partyName);
         final TrackInQueue nowPlayingTrack = trackService.getNowPlaying(partyName); // can be null
-        final TrackInQueue nextTrack = trackService.getNextTrack(partyName); // can be null
+        final TrackInQueue nextTrack = trackService.getNextTrack(partyName);
 
         validator.validateOnPlayNextTrack(party, loggedInUser);
 

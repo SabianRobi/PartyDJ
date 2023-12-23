@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @EnableWebSecurity
@@ -37,9 +36,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers(
-                                AntPathRequestMatcher.antMatcher("/css/**"),
-                                AntPathRequestMatcher.antMatcher("/error/**"),
-                                AntPathRequestMatcher.antMatcher("/h2-console/**"),
+                                AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/css/**"),
+                                AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/error/**"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/favicon.ico"),
                                 AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/v1/user"),

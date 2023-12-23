@@ -53,6 +53,7 @@ public class User {
     @OneToOne(cascade = CascadeType.REMOVE, orphanRemoval = true)
     private SpotifyCredential spotifyCredential;
 
+    @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @ManyToOne
     private Party party;

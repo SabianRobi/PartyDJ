@@ -96,8 +96,12 @@ public class UserService {
         return tryToSave(loggedInUser, newData);
     }
 
-    public void saveAll(final Set<User> users) {
-        userRepository.saveAll(users);
+    public Set<User> saveAll(final Set<User> users) {
+        try {
+            return (Set<User>) userRepository.saveAll(users);
+        } catch (final DataIntegrityViolationException ex) {
+            throw new IllegalStateException("Cannot save entities.");
+        }
     }
 
     private User tryToSave(final User user, final UserRequest userRequest) {

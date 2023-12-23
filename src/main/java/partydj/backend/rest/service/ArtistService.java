@@ -34,7 +34,7 @@ public class ArtistService {
         return repository.findAllByNameIn(artistNames);
     }
 
-    public void saveAll(final Set<Artist> artists) {
-        repository.saveAll(artists);
+    public HashSet<Artist> saveAll(final Set<Artist> artists) {
+        return (HashSet<Artist>) repository.saveAll(artists);
     }
 }

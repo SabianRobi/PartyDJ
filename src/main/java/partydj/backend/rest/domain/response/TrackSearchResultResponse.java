@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.URL;
 import partydj.backend.rest.domain.enums.PlatformType;
 import partydj.backend.rest.validation.constraint.TrackUri;
 
-import java.util.Collection;
+import java.util.Set;
 
 @Data
 @Builder
@@ -29,7 +29,7 @@ public class TrackSearchResultResponse {
     @EqualsAndHashCode.Exclude
     @NotNull
     @NotEmpty
-    private Collection<@NotNull @NotBlank String> artists;
+    private Set<@NotNull @NotBlank String> artists;
 
     @NotNull
     @NotBlank

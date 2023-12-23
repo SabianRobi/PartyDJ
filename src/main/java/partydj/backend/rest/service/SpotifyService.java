@@ -5,19 +5,21 @@ import com.google.gson.JsonParser;
 import com.neovisionaries.i18n.CountryCode;
 import org.apache.hc.core5.http.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import partydj.backend.rest.domain.Artist;
-import partydj.backend.rest.domain.Party;
-import partydj.backend.rest.domain.TrackInQueue;
-import partydj.backend.rest.domain.User;
+import partydj.backend.rest.domain.*;
 import partydj.backend.rest.domain.error.ThirdPartyApiException;
 import partydj.backend.rest.domain.response.TrackSearchResultResponse;
 import partydj.backend.rest.mapper.TrackMapper;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
+import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
 import se.michaelthelin.spotify.model_objects.specification.Paging;
 import se.michaelthelin.spotify.model_objects.specification.Track;
+import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRefreshRequest;
+import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
+import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import se.michaelthelin.spotify.requests.data.player.StartResumeUsersPlaybackRequest;
 import se.michaelthelin.spotify.requests.data.search.simplified.SearchTracksRequest;
 import se.michaelthelin.spotify.requests.data.tracks.GetTrackRequest;
@@ -37,6 +39,14 @@ public class SpotifyService {
 
     @Autowired
     private TrackService trackService;
+
+    @Lazy
+    @Autowired
+    private SpotifyCredentialService spotifyCredentialService;
+
+    @Autowired
+    private Map<String, String> spotifyConfigs;
+
     private final SpotifyApi spotifyApi;
 
     @Autowired
@@ -46,6 +56,50 @@ public class SpotifyService {
                 .setClientSecret(spotifyConfigs.get("client-secret"))
                 .setRedirectUri(URI.create(spotifyConfigs.get("redirect-uri")))
                 .build();
+    }
+
+    public URI generateLoginUri(final String state) {
+        final AuthorizationCodeUriRequest authorizationCodeUriRequest = spotifyApi.authorizationCodeUri()
+                .scope(spotifyConfigs.get("scopes"))
+                .show_dialog(true)
+                .state(state)
+                .build();
+        return authorizationCodeUriRequest.execute();
+    }
+
+    public SpotifyCredential processCallback(final SpotifyCredential spotifyCredential, final String code) {
+        final AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(code).build();
+
+        try {
+            // Get user token
+            final AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRequest.execute();
+
+            // Save tokens
+            spotifyCredential.setToken(authorizationCodeCredentials.getAccessToken());
+            spotifyCredential.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
+            spotifyCredential.setState(null);
+
+            spotifyCredentialService.save(spotifyCredential);
+        } catch (IOException | SpotifyWebApiException | ParseException ex) {
+            throw new ThirdPartyApiException("Failed to log in with Spotify: " + ex.getMessage());
+        }
+
+        return spotifyCredential;
+    }
+
+    public SpotifyCredential refreshToken(final SpotifyCredential spotifyCredential) {
+        spotifyApi.setRefreshToken(spotifyCredential.getRefreshToken());
+        final AuthorizationCodeRefreshRequest authorizationCodeRefreshRequest =
+                spotifyApi.authorizationCodeRefresh().build();
+        try {
+            final AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRefreshRequest.execute();
+
+            spotifyCredential.setToken(authorizationCodeCredentials.getAccessToken());
+            spotifyCredentialService.save(spotifyCredential);
+        } catch (IOException | SpotifyWebApiException | ParseException ex) {
+            throw new ThirdPartyApiException("Failed to refresh Spotify token: " + ex.getMessage());
+        }
+        return spotifyCredential;
     }
 
 

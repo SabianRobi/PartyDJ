@@ -5,20 +5,23 @@ import partydj.backend.rest.domain.*;
 import partydj.backend.rest.domain.enums.PartyRole;
 import partydj.backend.rest.domain.enums.PlatformType;
 import partydj.backend.rest.domain.enums.UserType;
-import partydj.backend.rest.domain.response.ArtistResponse;
-import partydj.backend.rest.domain.response.UserInPartyResponse;
-import partydj.backend.rest.domain.response.UserInPartyTrackInQueueResponse;
+import partydj.backend.rest.domain.request.AddTrackRequest;
+import partydj.backend.rest.domain.request.PartyRequest;
+import partydj.backend.rest.domain.request.SetSpotifyDeviceIdRequest;
+import partydj.backend.rest.domain.request.UserRequest;
+import partydj.backend.rest.domain.response.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class DataGenerator {
 
     public static User generateUser(final String serial) {
         return User.builder()
-                .email(serial + "_us@e.r")
+                .email(serial + "user@test.com")
                 .username(serial + "user")
                 .password(serial + "password")
                 .userType(UserType.NORMAL)
@@ -26,10 +29,27 @@ public class DataGenerator {
                 .build();
     }
 
+    public static User generateUserWithId() {
+        User user = generateUser("");
+        user.setId(1);
+        return user;
+    }
+
+    public static User generateUserWithId(final String serial) {
+        User user = generateUser(serial);
+        user.setId(1);
+        return user;
+    }
+
+    public static SpotifyCredential generateSpotifyCredential(final User user, final String serial) {
+        final SpotifyCredential spotifyCredential = generateSpotifyCredential(user);
+        spotifyCredential.setToken(serial + spotifyCredential.getToken());
+        return spotifyCredential;
+    }
+
     public static SpotifyCredential generateSpotifyCredential(final User user) {
         return SpotifyCredential.builder()
                 .owner(user)
-                .state("1593bead-e671-4a0b-a195-b5165aed6410")
                 .token("token")
                 .refreshToken("refreshToken")
                 .build();
@@ -51,6 +71,13 @@ public class DataGenerator {
                 .build();
     }
 
+    public static TrackInQueue generateTrackInQueueWithId(final String serial, final Party party,
+                                                          final User addedBy, final Set<Artist> artists) {
+        final TrackInQueue track = generateTrackInQueue(serial, party, addedBy, artists);
+        track.setId(1);
+        return track;
+    }
+
     public static PreviousTrack generatePreviousTrack(final String serial, final Party party,
                                                       final User addedBy, final Set<Artist> artists) {
 
@@ -67,9 +94,13 @@ public class DataGenerator {
                 .build();
     }
 
+    public static Artist generateArtist() {
+        return generateArtist("");
+    }
+
     public static Artist generateArtist(final String serial) {
         return Artist.builder()
-                .name("artist" + serial)
+                .name(serial + "artist")
                 .tracks(new HashSet<>())
                 .build();
     }
@@ -100,6 +131,61 @@ public class DataGenerator {
     public static UserInPartyTrackInQueueResponse generateUserInPartyTrackInQueueResponse() {
         return UserInPartyTrackInQueueResponse.builder()
                 .username("username")
+                .build();
+    }
+
+    public static UserRequest generateUserRequest() {
+        return UserRequest.builder()
+                .email("user@test.com")
+                .username("username")
+                .password("password")
+                .build();
+    }
+
+    public static PartyRequest generatePartyRequest() {
+        return PartyRequest.builder()
+                .name("testParty")
+                .password("password")
+                .build();
+    }
+
+    public static TrackSearchResultResponse generateTrackSearchResultResponse(final Set<Artist> artists) {
+        return TrackSearchResultResponse.builder()
+                .uri("spotify:track:something")
+                .title("title")
+                .artists(artists.stream().map(Artist::getName).collect(Collectors.toSet()))
+                .coverUri("https://cover.uri")
+                .length(420)
+                .platformType(PlatformType.SPOTIFY)
+                .build();
+    }
+
+    public static AddTrackRequest generateAddTrackRequest() {
+        return AddTrackRequest.builder()
+                .uri("spotify:track:something")
+                .platformType(PlatformType.SPOTIFY)
+                .build();
+    }
+
+    public static SetSpotifyDeviceIdRequest generateSpotifyRequest() {
+        return SetSpotifyDeviceIdRequest.builder()
+                .deviceId("deviceId")
+                .build();
+    }
+
+    public static SpotifyCredential generateSpotifyCredentialWithOnlyState(final User user) {
+        return SpotifyCredential.builder()
+                .owner(user)
+                .state("state")
+                .build();
+    }
+
+    public static UserResponse generateUserResponse() {
+        return UserResponse.builder()
+                .id(1)
+                .email("user@test.com")
+                .username("username")
+                .isSpotifyConnected(false)
                 .build();
     }
 }
