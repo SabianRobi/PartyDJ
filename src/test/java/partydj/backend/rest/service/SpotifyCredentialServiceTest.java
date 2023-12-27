@@ -91,10 +91,12 @@ public class SpotifyCredentialServiceTest {
     @Test
     void givenUserWithoutSpotify_whenRequestsLoginUri_thenSuccess() {
         final URI loginUri = URI.create("https://login.uri");
-        when(spotifyService.generateLoginUri(any())).thenReturn(loginUri);
+        final SpotifyLoginUriResponse uriResponse = DataGenerator.generateSpotifyLoginUriResponse(loginUri);
+        when(spotifyService.generateLoginUri(any())).thenReturn(uriResponse);
 
         final SpotifyLoginUriResponse response = spotifyCredentialService.getLoginUri(user);
 
+        assertThat(response).isSameAs(uriResponse);
         assertThat(response.getUri()).isSameAs(loginUri.toString());
     }
 
@@ -102,8 +104,9 @@ public class SpotifyCredentialServiceTest {
     void givenUserWithoutSpotify_whenRequestsLoginUriMultipleTimes_thenSuccess() {
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredentialWithOnlyState(user);
         final URI loginUri = URI.create("https://login.uri");
+        final SpotifyLoginUriResponse uriResponse = DataGenerator.generateSpotifyLoginUriResponse(loginUri);
         when(spotifyCredentialRepository.findByOwner(any())).thenReturn(spotifyCredential);
-        when(spotifyService.generateLoginUri(any())).thenReturn(loginUri);
+        when(spotifyService.generateLoginUri(any())).thenReturn(uriResponse);
 
         final SpotifyLoginUriResponse response = spotifyCredentialService.getLoginUri(user);
 
@@ -136,9 +139,10 @@ public class SpotifyCredentialServiceTest {
     void givenSpotifyResponse_whenProcessCallback_thenSuccess() {
         final String code = "code";
         final UUID state = UUID.randomUUID();
+        final SpotifyCredentialResponse credentialResponse =
+                DataGenerator.generateSpotifyCredentialResponse(spotifyCredential);
         when(spotifyCredentialRepository.findByState(any())).thenReturn(spotifyCredential);
-        when(spotifyService.processCallback(any(), any())).thenReturn(spotifyCredential);
-        when(spotifyCredentialMapper.mapCredentialToCredentialResponse(any())).thenReturn(spotifyCredentialResponse);
+        when(spotifyService.processCallback(any(), any())).thenReturn(credentialResponse);
 
         final SpotifyCredentialResponse response = spotifyCredentialService.processCallback(code, state);
 
@@ -149,9 +153,10 @@ public class SpotifyCredentialServiceTest {
     void givenUserWithSpotify_whenRefreshToken_thenSuccess() {
         final SpotifyCredential refreshedCredential = DataGenerator.generateSpotifyCredential(user, "refreshed");
         spotifyCredentialResponse.setToken(refreshedCredential.getToken());
+        final SpotifyCredentialResponse refreshedCredentialResponse =
+                DataGenerator.generateSpotifyCredentialResponse(refreshedCredential);
         when(spotifyCredentialRepository.findByOwner(any())).thenReturn(spotifyCredential);
-        when(spotifyService.refreshToken(any())).thenReturn(refreshedCredential);
-        when(spotifyCredentialMapper.mapCredentialToCredentialResponse(any())).thenReturn(spotifyCredentialResponse);
+        when(spotifyService.refreshToken(any())).thenReturn(refreshedCredentialResponse);
 
         final SpotifyCredentialResponse response = spotifyCredentialService.refreshToken(user);
 

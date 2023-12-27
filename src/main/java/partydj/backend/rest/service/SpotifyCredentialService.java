@@ -84,14 +84,13 @@ public class SpotifyCredentialService {
         loggedInUser.setSpotifyCredential(spotifyCredential);
         userService.save(loggedInUser);
 
-        return new SpotifyLoginUriResponse(spotifyService.generateLoginUri(state).toString());
+        return spotifyService.generateLoginUri(state);
     }
 
     public SpotifyCredentialResponse processCallback(final String code, final UUID state) {
         final SpotifyCredential spotifyCredential = findByState(state);
 
-        return spotifyCredentialMapper.mapCredentialToCredentialResponse(
-                spotifyService.processCallback(spotifyCredential, code));
+        return spotifyService.processCallback(spotifyCredential, code);
     }
 
     public SpotifyCredentialResponse logout(final User loggedInUser) {
@@ -112,7 +111,6 @@ public class SpotifyCredentialService {
     public SpotifyCredentialResponse refreshToken(final User loggedInUser) {
         final SpotifyCredential spotifyCredential = findByOwner(loggedInUser);
 
-        return spotifyCredentialMapper.mapCredentialToCredentialResponse(
-                spotifyService.refreshToken(spotifyCredential));
+        return spotifyService.refreshToken(spotifyCredential);
     }
 }

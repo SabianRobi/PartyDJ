@@ -10,6 +10,7 @@ import partydj.backend.rest.entity.request.SetSpotifyDeviceIdRequest;
 import partydj.backend.rest.entity.request.UserRequest;
 import partydj.backend.rest.entity.response.*;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -250,5 +251,9 @@ public class DataGenerator {
         return SpotifyCredentialResponse.builder()
                 .token(spotifyCredential.getToken())
                 .build();
+    }
+
+    public static SpotifyLoginUriResponse generateSpotifyLoginUriResponse(final URI loginUri) {
+        return new SpotifyLoginUriResponse(loginUri.toString());
     }
 }
