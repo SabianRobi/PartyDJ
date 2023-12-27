@@ -29,7 +29,7 @@ public class ArtistRepositoryTest {
 
     @BeforeEach
     void init() {
-        artist = generateArtist();
+        artist = generateArtistWithoutId("");
     }
 
     @Test
@@ -73,10 +73,10 @@ public class ArtistRepositoryTest {
 
     @Test
     public void givenArtists_whenFindAllByTracksContainingTrack_thenSuccess() {
-        final User user = entityManager.persist(generateUser(""));
-        final Artist artist = entityManager.persist(generateArtist());
-        final Party party = entityManager.persist(generateParty("", Set.of(user)));
-        final TrackInQueue track = entityManager.persist(generateTrackInQueue("", party, user, new HashSet<>()));
+        final User user = entityManager.persist(generateUserWithoutId(""));
+        final Artist artist = entityManager.persist(generateArtistWithoutId(""));
+        final Party party = entityManager.persist(generatePartyWithoutId("", Set.of(user)));
+        final TrackInQueue track = entityManager.persist(generateTrackInQueueWithoutId("", party, user, new HashSet<>()));
 
         final Artist artist2 = Artist.builder().name("artist2").tracks(Set.of(track)).build();
         entityManager.persist(artist2);

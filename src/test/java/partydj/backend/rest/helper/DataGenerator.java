@@ -19,9 +19,18 @@ import java.util.stream.Collectors;
 @Component
 public class DataGenerator {
 
+    public static User generateUser() {
+        return generateUser("");
+    }
+
     public static User generateUser(final String serial) {
+        User user = generateUserWithoutId(serial);
+        user.setId(1);
+        return user;
+    }
+
+    public static User generateUserWithoutId(final String serial) {
         return User.builder()
-                .id(1)
                 .email(serial + "user@test.com")
                 .username(serial + "username")
                 .password(serial + "password")
@@ -30,9 +39,6 @@ public class DataGenerator {
                 .build();
     }
 
-    public static User generateUser() {
-        return generateUser("");
-    }
 
     public static SpotifyCredential generateSpotifyCredential(final User user, final String serial) {
         final SpotifyCredential spotifyCredential = generateSpotifyCredential(user);
@@ -50,8 +56,14 @@ public class DataGenerator {
 
     public static TrackInQueue generateTrackInQueue(final String serial, final Party party,
                                                     final User addedBy, final Set<Artist> artists) {
+        TrackInQueue track = generateTrackInQueueWithoutId(serial, party, addedBy, artists);
+        track.setId(1);
+        return track;
+    }
+
+    public static TrackInQueue generateTrackInQueueWithoutId(final String serial, final Party party,
+                                                             final User addedBy, final Set<Artist> artists) {
         return TrackInQueue.builder()
-                .id(1)
                 .party(party)
                 .isPlaying(false)
                 .title(serial + "title")
@@ -82,11 +94,19 @@ public class DataGenerator {
                 .build();
     }
 
-    public static Artist generateArtist() {
-        return generateArtist("");
+    public static Artist generateArtist(final String serial) {
+        Artist artist = generateArtistWithoutId(serial);
+        artist.setId(1);
+        return artist;
     }
 
-    public static Artist generateArtist(final String serial) {
+    public static Artist generateArtist() {
+        Artist artist = generateArtistWithoutId("");
+        artist.setId(1);
+        return artist;
+    }
+
+    public static Artist generateArtistWithoutId(final String serial) {
         return Artist.builder()
                 .name(serial + "artist")
                 .tracks(new HashSet<>())
@@ -94,8 +114,13 @@ public class DataGenerator {
     }
 
     public static Party generateParty(final String serial, final Set<User> participants) {
+        Party party = generatePartyWithoutId(serial, participants);
+        party.setId(1);
+        return party;
+    }
+
+    public static Party generatePartyWithoutId(final String serial, final Set<User> participants) {
         return Party.builder()
-                .id(1)
                 .name("party" + serial)
                 .tracksInQueue(new HashSet<>())
                 .previousTracks(new HashSet<>())

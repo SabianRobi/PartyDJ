@@ -10,7 +10,7 @@ import partydj.backend.rest.entity.User;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static partydj.backend.rest.helper.DataGenerator.generateSpotifyCredentialWithOnlyState;
-import static partydj.backend.rest.helper.DataGenerator.generateUser;
+import static partydj.backend.rest.helper.DataGenerator.generateUserWithoutId;
 
 @DataJpaTest
 public class SpotifyCredentialRepositoryTest {
@@ -25,7 +25,7 @@ public class SpotifyCredentialRepositoryTest {
 
     @BeforeEach
     void init() {
-        user = entityManager.persist(generateUser(""));
+        user = entityManager.persist(generateUserWithoutId(""));
         spotifyCredential = generateSpotifyCredentialWithOnlyState(user);
     }
 

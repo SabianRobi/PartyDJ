@@ -30,10 +30,10 @@ public class TrackInQueueRepositoryTest {
 
     @BeforeEach
     public void init() {
-        user = entityManager.persist(generateUser(""));
-        artist = entityManager.persist(generateArtist());
-        party = entityManager.persist(generateParty("", Set.of(user)));
-        track = generateTrackInQueue("", party, user, Set.of(artist));
+        user = entityManager.persist(generateUserWithoutId(""));
+        artist = entityManager.persist(generateArtistWithoutId(""));
+        party = entityManager.persist(generatePartyWithoutId("", Set.of(user)));
+        track = generateTrackInQueueWithoutId("", party, user, Set.of(artist));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class TrackInQueueRepositoryTest {
     @Test
     public void givenTrackInQueues_whenGetNextTrack_thenSuccess() {
         entityManager.persist(track);
-        final TrackInQueue track1 = generateTrackInQueue("2", party, user, Set.of(artist));
+        final TrackInQueue track1 = generateTrackInQueueWithoutId("2", party, user, Set.of(artist));
         track1.setScore(10);
         entityManager.persist(track1);
 

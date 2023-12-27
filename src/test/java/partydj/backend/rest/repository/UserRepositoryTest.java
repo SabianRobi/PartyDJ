@@ -23,7 +23,7 @@ public class UserRepositoryTest {
 
     @BeforeEach
     void init() {
-        user = DataGenerator.generateUser("");
+        user = DataGenerator.generateUserWithoutId("");
     }
 
     @Test

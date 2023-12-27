@@ -12,8 +12,8 @@ import partydj.backend.rest.entity.User;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static partydj.backend.rest.helper.DataGenerator.generateParty;
-import static partydj.backend.rest.helper.DataGenerator.generateUser;
+import static partydj.backend.rest.helper.DataGenerator.generatePartyWithoutId;
+import static partydj.backend.rest.helper.DataGenerator.generateUserWithoutId;
 
 @DataJpaTest
 public class PartyRepositoryTest {
@@ -48,8 +48,8 @@ public class PartyRepositoryTest {
 
     @Test
     public void givenParty_whenFindByName_thenSuccess() {
-        final User user = entityManager.persist(generateUser(""));
-        final Party party = entityManager.persist(generateParty("", Set.of(user)));
+        final User user = entityManager.persist(generateUserWithoutId(""));
+        final Party party = entityManager.persist(generatePartyWithoutId("", Set.of(user)));
         entityManager.persist(party);
 
         final Party foundParty = partyRepository.findByName(party.getName());
