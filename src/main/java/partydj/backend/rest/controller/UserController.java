@@ -31,9 +31,7 @@ public class UserController {
     @PostMapping(consumes = "application/x-www-form-urlencoded")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponse save(@Valid final UserRequest userRequest) {
-        final User savedUser = userService.register(userRequest);
-
-        return userMapper.mapUserToUserResponse(savedUser);
+        return userService.register(userRequest);
     }
 
     // Update
@@ -44,15 +42,15 @@ public class UserController {
                                final UserPrincipal userPrincipal) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final User updatedUser = userService.update(loggedInUser, toBeUpdatedUsername, userRequest);
+        final UserResponse response = userService.update(loggedInUser, toBeUpdatedUsername, userRequest);
 
         // Update logged in user infos
-        userPrincipal.setUser(updatedUser);
+        userPrincipal.setUser(loggedInUser);
         final Authentication newAuth = new UsernamePasswordAuthenticationToken(
                 userPrincipal, auth.getCredentials(), auth.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(newAuth);
 
-        return userMapper.mapUserToUserResponse(updatedUser);
+        return response;
     }
 
     // Listing user infos
@@ -69,7 +67,8 @@ public class UserController {
                                final Authentication auth,
                                final HttpServletRequest request) {
         final User loggedInUser = userService.findByUsername(auth.getName());
-        final User deletedUser = userService.delete(loggedInUser, toBeDeletedUsername);
+
+        final UserResponse response = userService.delete(loggedInUser, toBeDeletedUsername);
 
         // Log out the user
         try {
@@ -77,6 +76,6 @@ public class UserController {
         } catch (final ServletException ignored) {
         }
 
-        return userMapper.mapUserToUserResponse(deletedUser);
+        return response;
     }
 }

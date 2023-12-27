@@ -123,6 +123,7 @@ public class DataGenerator {
     public static Party generatePartyWithoutId(final String serial, final Set<User> participants) {
         return Party.builder()
                 .name("party" + serial)
+                .password("password")
                 .tracksInQueue(new HashSet<>())
                 .previousTracks(new HashSet<>())
                 .participants(new HashSet<>(participants))
@@ -255,5 +256,14 @@ public class DataGenerator {
 
     public static SpotifyLoginUriResponse generateSpotifyLoginUriResponse(final URI loginUri) {
         return new SpotifyLoginUriResponse(loginUri.toString());
+    }
+
+    public static UserResponse generateUserResponse(final User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .isSpotifyConnected(user.getSpotifyCredential() != null)
+                .build();
     }
 }

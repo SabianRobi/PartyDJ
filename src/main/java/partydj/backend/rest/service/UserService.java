@@ -10,6 +10,8 @@ import partydj.backend.rest.entity.enums.PartyRole;
 import partydj.backend.rest.entity.enums.UserType;
 import partydj.backend.rest.entity.error.NotUniqueException;
 import partydj.backend.rest.entity.request.UserRequest;
+import partydj.backend.rest.entity.response.UserResponse;
+import partydj.backend.rest.mapper.UserMapper;
 import partydj.backend.rest.repository.UserRepository;
 import partydj.backend.rest.validation.UserValidator;
 
@@ -33,20 +35,10 @@ public class UserService {
     @Autowired
     private UserValidator validator;
 
+    @Autowired
+    private UserMapper userMapper;
+
     // Repository handlers
-
-    public User register(final UserRequest userRequest) {
-        User user = User.builder()
-                .email(userRequest.getEmail().trim())
-                .username(userRequest.getUsername().trim())
-                .password(passwordEncoder.encode(userRequest.getPassword()))
-                .userType(UserType.NORMAL)
-                .addedTracks(new HashSet<>())
-                .build();
-
-        return tryToSave(user, userRequest);
-    }
-
     public User save(final User user) {
         return tryToSave(user, null);
     }
@@ -86,8 +78,20 @@ public class UserService {
 
     // Controller handlers
 
+    public UserResponse register(final UserRequest userRequest) {
+        User user = User.builder()
+                .email(userRequest.getEmail().trim())
+                .username(userRequest.getUsername().trim())
+                .password(passwordEncoder.encode(userRequest.getPassword()))
+                .userType(UserType.NORMAL)
+                .addedTracks(new HashSet<>())
+                .build();
+
+        return userMapper.mapUserToUserResponse(tryToSave(user, userRequest));
+    }
+
     @Transactional
-    public User delete(final User loggedInUser, final String toBeDeletedUsername) {
+    public UserResponse delete(final User loggedInUser, final String toBeDeletedUsername) {
         validator.verifySameUser(loggedInUser, toBeDeletedUsername);
 
         if (loggedInUser.getPartyRole() != null) {
@@ -104,16 +108,16 @@ public class UserService {
         }
 
         userRepository.delete(loggedInUser);
-        return loggedInUser;
+        return userMapper.mapUserToUserResponse(loggedInUser);
     }
 
-    public User update(final User loggedInUser, final String givenUsername, final UserRequest newData) {
+    public UserResponse update(final User loggedInUser, final String givenUsername, final UserRequest newData) {
         validator.verifySameUser(loggedInUser, givenUsername);
 
         loggedInUser.setEmail(newData.getEmail().trim());
         loggedInUser.setUsername(newData.getUsername().trim());
         loggedInUser.setPassword(passwordEncoder.encode(newData.getPassword()));
 
-        return tryToSave(loggedInUser, newData);
+        return userMapper.mapUserToUserResponse(tryToSave(loggedInUser, newData));
     }
 }

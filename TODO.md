@@ -57,8 +57,8 @@ Auth required for every endpoint
 | [X]  | GetToken     | GET    | /platforms/spotify/token    | Returns the user's Spotify token                        |
 | [X]  | RefreshToken | PATCH  | /platforms/spotify/token    | Makes the backend refresh the user's Spotify token      |
 
-* Services should return only views / responses, instead of models
-* when login fails -> response is 200 and no errors returned (does not log in)
+* Separate model, service, web layer into separate projects
+    * Service repository methods should be private
 * Add tests
     * Relation cascading tests
     * Constraints
@@ -67,8 +67,12 @@ Auth required for every endpoint
 * Add readme (introduction, configuring, running)
 * Recommend songs when no tracks in queue
 * Make documentation
+* Introduce ModelMapper instead of creating them manually
 
 * Add option to select playback device id on Spotify
 * Add YouTube support
-* When frontend comes alive: remove PageController
-* When frontend comes alive: Enable CSRF protection
+* When frontend comes alive
+    * Remove PageController
+    * Enable CSRF protection
+    * Check: when login fails -> response is 200 and no errors returned (does not log in)
+  
