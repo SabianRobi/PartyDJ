@@ -245,4 +245,10 @@ public class DataGenerator {
                 .endedAt(previousTrack.getEndedAt())
                 .build();
     }
+
+    public static SpotifyCredentialResponse generateSpotifyCredentialResponse(final SpotifyCredential spotifyCredential) {
+        return SpotifyCredentialResponse.builder()
+                .token(spotifyCredential.getToken())
+                .build();
+    }
 }

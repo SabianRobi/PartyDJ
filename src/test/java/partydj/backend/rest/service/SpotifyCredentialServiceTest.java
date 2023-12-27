@@ -7,7 +7,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import partydj.backend.rest.entity.SpotifyCredential;
 import partydj.backend.rest.entity.User;
+import partydj.backend.rest.entity.response.SpotifyCredentialResponse;
+import partydj.backend.rest.entity.response.SpotifyLoginUriResponse;
 import partydj.backend.rest.helper.DataGenerator;
+import partydj.backend.rest.mapper.SpotifyCredentialMapper;
 import partydj.backend.rest.repository.SpotifyCredentialRepository;
 import partydj.backend.rest.validation.SpotifyCredentialValidator;
 
@@ -32,13 +35,26 @@ public class SpotifyCredentialServiceTest {
     @Mock
     private SpotifyService spotifyService;
 
+    @Mock
+    private SpotifyCredentialMapper spotifyCredentialMapper;
+
     @InjectMocks
     private SpotifyCredentialService spotifyCredentialService;
 
+    final private User user;
+    final private SpotifyCredential spotifyCredential;
+    final private SpotifyCredentialResponse spotifyCredentialResponse;
+
+    SpotifyCredentialServiceTest() {
+        user = DataGenerator.generateUser();
+        spotifyCredential = DataGenerator.generateSpotifyCredential(user);
+        spotifyCredentialResponse = DataGenerator.generateSpotifyCredentialResponse(spotifyCredential);
+
+        user.setSpotifyCredential(spotifyCredential);
+    }
+
     @Test
     void shouldSaveSpotifyCredential() {
-        final User user = DataGenerator.generateUser();
-        final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
         when(spotifyCredentialRepository.save(any())).thenReturn(spotifyCredential);
 
         final SpotifyCredential savedCredential = spotifyCredentialService.save(spotifyCredential);
@@ -48,8 +64,6 @@ public class SpotifyCredentialServiceTest {
 
     @Test
     void givenSpotifyCredential_whenFindByOwner_thenSuccess() {
-        final User user = DataGenerator.generateUser();
-        final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
         when(spotifyCredentialRepository.findByOwner(any())).thenReturn(spotifyCredential);
 
         final SpotifyCredential foundCredential = spotifyCredentialService.findByOwner(user);
@@ -60,8 +74,6 @@ public class SpotifyCredentialServiceTest {
     @Test
     void givenSpotifyCredential_whenFindByState_thenSuccess() {
         final UUID state = UUID.randomUUID();
-        final User user = DataGenerator.generateUser();
-        final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
         when(spotifyCredentialRepository.findByState(any())).thenReturn(spotifyCredential);
 
         final SpotifyCredential foundCredential = spotifyCredentialService.findByState(state);
@@ -71,9 +83,6 @@ public class SpotifyCredentialServiceTest {
 
     @Test
     void givenSpotifyCredential_whenDelete_thenSuccess() {
-        final User user = DataGenerator.generateUser();
-        final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
-
         final SpotifyCredential deletedCredential = spotifyCredentialService.delete(spotifyCredential);
 
         assertThat(deletedCredential).isSameAs(spotifyCredential);
@@ -81,75 +90,71 @@ public class SpotifyCredentialServiceTest {
 
     @Test
     void givenUserWithoutSpotify_whenRequestsLoginUri_thenSuccess() {
-        final User user = DataGenerator.generateUser();
         final URI loginUri = URI.create("https://login.uri");
         when(spotifyService.generateLoginUri(any())).thenReturn(loginUri);
 
-        final String receivedLoginUri = spotifyCredentialService.getLoginUri(user);
+        final SpotifyLoginUriResponse response = spotifyCredentialService.getLoginUri(user);
 
-        assertThat(receivedLoginUri).isSameAs(loginUri.toString());
+        assertThat(response.getUri()).isSameAs(loginUri.toString());
     }
 
     @Test
     void givenUserWithoutSpotify_whenRequestsLoginUriMultipleTimes_thenSuccess() {
-        final User user = DataGenerator.generateUser();
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredentialWithOnlyState(user);
         final URI loginUri = URI.create("https://login.uri");
         when(spotifyCredentialRepository.findByOwner(any())).thenReturn(spotifyCredential);
         when(spotifyService.generateLoginUri(any())).thenReturn(loginUri);
 
-        final String receivedLoginUri = spotifyCredentialService.getLoginUri(user);
+        final SpotifyLoginUriResponse response = spotifyCredentialService.getLoginUri(user);
 
-        assertThat(receivedLoginUri).isSameAs(loginUri.toString());
+        assertThat(response.getUri()).isSameAs(loginUri.toString());
     }
 
     @Test
     void givenUserLoggedInWithSpotify_whenLogout_thenSuccess() {
-        final User user = DataGenerator.generateUser();
-        final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
-        user.setSpotifyCredential(spotifyCredential);
         when(spotifyCredentialRepository.findByOwner(any())).thenReturn(spotifyCredential);
+        when(spotifyCredentialMapper.mapCredentialToCredentialResponse(any())).thenReturn(spotifyCredentialResponse);
 
-        spotifyCredentialService.logout(user);
+        final SpotifyCredentialResponse response = spotifyCredentialService.logout(user);
 
+        assertThat(response).isSameAs(spotifyCredentialResponse);
         assertThat(user.getSpotifyCredential()).isNull();
     }
 
     @Test
     void givenUserLoggedInWithSpotify_whenGetToken_thenSuccess() {
-        final User user = DataGenerator.generateUser();
-        final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
         when(spotifyCredentialRepository.findByOwner(any())).thenReturn(spotifyCredential);
+        when(spotifyCredentialMapper.mapCredentialToCredentialResponse(any())).thenReturn(spotifyCredentialResponse);
 
-        final SpotifyCredential foundSpotifyCredential = spotifyCredentialService.getToken(user);
 
-        assertThat(foundSpotifyCredential).isSameAs(spotifyCredential);
+        final SpotifyCredentialResponse response = spotifyCredentialService.getToken(user);
+
+        assertThat(response.getToken()).isSameAs(spotifyCredential.getToken());
     }
 
     @Test
     void givenSpotifyResponse_whenProcessCallback_thenSuccess() {
         final String code = "code";
         final UUID state = UUID.randomUUID();
-        final User user = DataGenerator.generateUser();
-        final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
         when(spotifyCredentialRepository.findByState(any())).thenReturn(spotifyCredential);
         when(spotifyService.processCallback(any(), any())).thenReturn(spotifyCredential);
+        when(spotifyCredentialMapper.mapCredentialToCredentialResponse(any())).thenReturn(spotifyCredentialResponse);
 
-        final SpotifyCredential processedCredential = spotifyCredentialService.processCallback(code, state);
+        final SpotifyCredentialResponse response = spotifyCredentialService.processCallback(code, state);
 
-        assertThat(processedCredential).isSameAs(spotifyCredential);
+        assertThat(response.getToken()).isSameAs(spotifyCredential.getToken());
     }
 
     @Test
     void givenUserWithSpotify_whenRefreshToken_thenSuccess() {
-        final User user = DataGenerator.generateUser();
-        final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
         final SpotifyCredential refreshedCredential = DataGenerator.generateSpotifyCredential(user, "refreshed");
+        spotifyCredentialResponse.setToken(refreshedCredential.getToken());
         when(spotifyCredentialRepository.findByOwner(any())).thenReturn(spotifyCredential);
         when(spotifyService.refreshToken(any())).thenReturn(refreshedCredential);
+        when(spotifyCredentialMapper.mapCredentialToCredentialResponse(any())).thenReturn(spotifyCredentialResponse);
 
-        final SpotifyCredential refreshedToken = spotifyCredentialService.refreshToken(user);
+        final SpotifyCredentialResponse response = spotifyCredentialService.refreshToken(user);
 
-        assertThat(refreshedToken).isSameAs(refreshedCredential);
+        assertThat(response.getToken()).isSameAs(refreshedCredential.getToken());
     }
 }

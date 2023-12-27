@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.entity.SpotifyCredential;
 import partydj.backend.rest.entity.User;
+import partydj.backend.rest.entity.response.SpotifyCredentialResponse;
+import partydj.backend.rest.entity.response.SpotifyLoginUriResponse;
+import partydj.backend.rest.mapper.SpotifyCredentialMapper;
 import partydj.backend.rest.repository.SpotifyCredentialRepository;
 import partydj.backend.rest.validation.SpotifyCredentialValidator;
 
@@ -23,6 +26,9 @@ public class SpotifyCredentialService {
 
     @Autowired
     private SpotifyService spotifyService;
+
+    @Autowired
+    private SpotifyCredentialMapper spotifyCredentialMapper;
 
     // Repository handlers
 
@@ -58,7 +64,7 @@ public class SpotifyCredentialService {
 
     // Controller handlers
 
-    public String getLoginUri(final User loggedInUser) {
+    public SpotifyLoginUriResponse getLoginUri(final User loggedInUser) {
         SpotifyCredential spotifyCredential = findByOwnerWithoutExceptionThrowing(loggedInUser);
 
         validator.verifyNotLoggedIn(spotifyCredential);
@@ -78,32 +84,35 @@ public class SpotifyCredentialService {
         loggedInUser.setSpotifyCredential(spotifyCredential);
         userService.save(loggedInUser);
 
-        return spotifyService.generateLoginUri(state).toString();
+        return new SpotifyLoginUriResponse(spotifyService.generateLoginUri(state).toString());
     }
 
-    public SpotifyCredential processCallback(final String code, final UUID state) {
+    public SpotifyCredentialResponse processCallback(final String code, final UUID state) {
         final SpotifyCredential spotifyCredential = findByState(state);
 
-        return spotifyService.processCallback(spotifyCredential, code);
+        return spotifyCredentialMapper.mapCredentialToCredentialResponse(
+                spotifyService.processCallback(spotifyCredential, code));
     }
 
-    public SpotifyCredential logout(final User loggedInUser) {
+    public SpotifyCredentialResponse logout(final User loggedInUser) {
         final SpotifyCredential spotifyCredential = findByOwner(loggedInUser);
 
         loggedInUser.setSpotifyCredential(null);
         userService.save(loggedInUser);
         delete(spotifyCredential);
 
-        return spotifyCredential;
+        return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }
 
-    public SpotifyCredential getToken(final User loggedInUser) {
-        return findByOwner(loggedInUser);
+    public SpotifyCredentialResponse getToken(final User loggedInUser) {
+        return spotifyCredentialMapper.mapCredentialToCredentialResponse(
+                findByOwner(loggedInUser));
     }
 
-    public SpotifyCredential refreshToken(final User loggedInUser) {
+    public SpotifyCredentialResponse refreshToken(final User loggedInUser) {
         final SpotifyCredential spotifyCredential = findByOwner(loggedInUser);
 
-        return spotifyService.refreshToken(spotifyCredential);
+        return spotifyCredentialMapper.mapCredentialToCredentialResponse(
+                spotifyService.refreshToken(spotifyCredential));
     }
 }
