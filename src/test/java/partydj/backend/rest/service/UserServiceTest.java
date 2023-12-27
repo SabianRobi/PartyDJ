@@ -44,8 +44,8 @@ public class UserServiceTest {
 
     @Test
     void givenNewUser_whenRegister_thenSuccess() {
-        final UserRequest userRequest = DataGenerator.generateUserRequest();
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
+        final UserRequest userRequest = DataGenerator.generateUserRequest(user);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         final User registeredUser = userService.register(userRequest);
@@ -56,7 +56,7 @@ public class UserServiceTest {
 
     @Test
     void givenUser_whenSave_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         when(userRepository.save(any())).thenReturn(user);
 
         final User savedUser = userService.save(user);
@@ -66,7 +66,7 @@ public class UserServiceTest {
 
     @Test
     void givenUser_whenFindByUsername_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         when(userRepository.findByUsername(any())).thenReturn(user);
 
         final User foundUser = userService.findByUsername(user.getUsername());
@@ -76,8 +76,8 @@ public class UserServiceTest {
 
     @Test
     void givenUsers_whenSaveAll_thenSuccess() {
-        final User user1 = DataGenerator.generateUserWithId("1");
-        final User user2 = DataGenerator.generateUserWithId("2");
+        final User user1 = DataGenerator.generateUser("1");
+        final User user2 = DataGenerator.generateUser("2");
         final HashSet<User> users = new HashSet<>(Set.of(user1, user2));
         when(userRepository.save(any())).thenReturn(user1).thenReturn(user2);
 
@@ -88,8 +88,8 @@ public class UserServiceTest {
 
     @Test
     void givenUserAndUserRequestButUsernameAlreadyUsed_whenTryToSave_thenTrowsNotUniqueException() {
-        final User user = DataGenerator.generateUserWithId();
-        final UserRequest userRequest = DataGenerator.generateUserRequest();
+        final User user = DataGenerator.generateUser();
+        final UserRequest userRequest = DataGenerator.generateUserRequest(user);
         final String message = "... Duplicate entry '" + userRequest.getUsername() + "' for key ...";
         when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
 
@@ -98,7 +98,7 @@ public class UserServiceTest {
 
     @Test
     void givenUserButUsernameAlreadyUsed_whenTryToSave_thenTrowsNotUniqueException() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final String message = "... Duplicate entry '" + user.getUsername() + "' for key ...";
         when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
 
@@ -107,8 +107,8 @@ public class UserServiceTest {
 
     @Test
     void givenUserAndUserRequestButEmailAlreadyUsed_whenTryToSave_thenTrowsNotUniqueException() {
-        final User user = DataGenerator.generateUserWithId();
-        final UserRequest userRequest = DataGenerator.generateUserRequest();
+        final User user = DataGenerator.generateUser();
+        final UserRequest userRequest = DataGenerator.generateUserRequest(user);
         final String message = "... Duplicate entry '" + userRequest.getEmail() + "' for key ...";
         when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
 
@@ -117,7 +117,7 @@ public class UserServiceTest {
 
     @Test
     void givenUserButEmailAlreadyUsed_whenTryToSave_thenTrowsNotUniqueException() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final String message = "... Duplicate entry '" + user.getEmail() + "' for key ...";
         when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
 
@@ -126,7 +126,7 @@ public class UserServiceTest {
 
     @Test
     void givenUser_whenTryToSave_thenTrowsIllegalStateException() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException("Unknown error."));
 
         assertThrows(IllegalStateException.class, () -> userService.tryToSave(user, null));
@@ -134,7 +134,7 @@ public class UserServiceTest {
 
     @Test
     void givenUserNotInParty_whenDelete_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
 
         final User deletedUser = userService.delete(user, user.getUsername());
 
@@ -143,7 +143,7 @@ public class UserServiceTest {
 
     @Test
     void givenUserInPartyAsParticipant_whenDelete_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final Artist artist = DataGenerator.generateArtist();
         final TrackInQueue track = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));
@@ -165,22 +165,28 @@ public class UserServiceTest {
 
     @Test
     void givenUserInPartyAsCreator_whenDelete_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final Party party = DataGenerator.generateParty("", Set.of(user));
         user.setParty(party);
         user.setPartyRole(PartyRole.CREATOR);
-        when(partyService.deleteByName(any(), any())).thenReturn(party);
+        when(partyService.deleteByName(any(), any())).thenAnswer(invocation -> {
+            user.setParty(null);
+            user.setPartyRole(null);
+            return null;
+        });
 
         final User deletedUser = userService.delete(user, user.getUsername());
 
         assertThat(deletedUser).isSameAs(user);
+        assertThat(user.getParty()).isNull();
+        assertThat(user.getPartyRole()).isNull();
     }
 
     @Test
     void givenUser_whenUpdate_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final String toBeUpdatedUsername = user.getUsername();
-        final UserRequest userRequest = DataGenerator.generateUserRequest();
+        final UserRequest userRequest = DataGenerator.generateUserRequest(user);
         userRequest.setUsername("otherUsername");
         when(passwordEncoder.encode(any())).thenReturn(user.getPassword());
         when(userRepository.save(any())).thenReturn(user);

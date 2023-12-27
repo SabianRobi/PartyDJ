@@ -51,7 +51,7 @@ public class ArtistServiceTest {
 
     @Test
     void givenArtistsWithTrack_whenFindAllByTracksContainingTrack_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final Artist artist1 = DataGenerator.generateArtist("1");
         final Artist artist2 = DataGenerator.generateArtist("2");

@@ -13,12 +13,14 @@ import partydj.backend.rest.entity.error.NotUniqueException;
 import partydj.backend.rest.entity.request.AddTrackRequest;
 import partydj.backend.rest.entity.request.PartyRequest;
 import partydj.backend.rest.entity.request.SetSpotifyDeviceIdRequest;
-import partydj.backend.rest.entity.response.TrackSearchResultResponse;
+import partydj.backend.rest.entity.response.*;
+import partydj.backend.rest.mapper.PartyMapper;
 import partydj.backend.rest.mapper.TrackMapper;
 import partydj.backend.rest.repository.PartyRepository;
 import partydj.backend.rest.validation.PartyValidator;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class PartyService {
@@ -48,6 +50,9 @@ public class PartyService {
     @Autowired
     private ArtistService artistService;
 
+    @Autowired
+    private PartyMapper partyMapper;
+
     // Repository handlers
 
     public Party register(final PartyRequest savePartyRequest, final User loggedInUser) {
@@ -69,7 +74,7 @@ public class PartyService {
         return tryToSave(party, null);
     }
 
-    public Party deleteByName(final User loggedInUser, final String partyName) {
+    public PartyResponse deleteByName(final User loggedInUser, final String partyName) {
         final Party party = findByName(partyName);
 
         validator.validateOnDelete(loggedInUser, party);
@@ -93,7 +98,7 @@ public class PartyService {
 
         repository.delete(party);
 
-        return party;
+        return partyMapper.mapPartyToPartyResponse(party);
     }
 
     public Party findByName(final String name) {
@@ -123,7 +128,7 @@ public class PartyService {
     // Controller handlers
 
     @Transactional
-    public Party create(final User loggedInUser, final PartyRequest savePartyRequest) {
+    public PartyResponse create(final User loggedInUser, final PartyRequest savePartyRequest) {
         validator.validateOnCreate(loggedInUser);
 
         final Party party = register(savePartyRequest, loggedInUser);
@@ -132,16 +137,19 @@ public class PartyService {
         loggedInUser.setPartyRole(PartyRole.CREATOR);
         userService.save(loggedInUser);
 
-        return party;
+        return partyMapper.mapPartyToPartyResponse(party);
     }
 
-    public Party load(final User loggedInUser, final String partyName) {
+    public PartyResponse load(final User loggedInUser, final String partyName) {
         validator.validateOnLoad(loggedInUser, partyName);
 
-        return findByName(partyName);
+        final Party party = findByName(partyName);
+
+        return partyMapper.mapPartyToPartyResponse(party);
+
     }
 
-    public Party join(final User loggedInUser, final PartyRequest joinRequest) {
+    public PartyResponse join(final User loggedInUser, final PartyRequest joinRequest) {
         final Party party = findByName(joinRequest.getName());
 
         validator.validateOnJoin(loggedInUser, joinRequest, party);
@@ -152,10 +160,10 @@ public class PartyService {
         loggedInUser.setPartyRole(PartyRole.PARTICIPANT);
         userService.save(loggedInUser);
 
-        return party;
+        return partyMapper.mapPartyToPartyResponse(party);
     }
 
-    public Party leave(final User loggedInUser, final String partyName) {
+    public PartyResponse leave(final User loggedInUser, final String partyName) {
         final Party party = findByName(partyName);
 
         validator.validateOnLeave(party, loggedInUser);
@@ -166,7 +174,7 @@ public class PartyService {
         loggedInUser.setPartyRole(null);
         userService.save(loggedInUser);
 
-        return party;
+        return partyMapper.mapPartyToPartyResponse(party);
     }
 
     public Collection<TrackSearchResultResponse> search(final User loggedInUser, final String partyName,
@@ -184,7 +192,7 @@ public class PartyService {
         return results;
     }
 
-    public TrackInQueue addTrack(final User loggedInUser, final AddTrackRequest addTrackRequest, final String partyName) {
+    public TrackInQueueResponse addTrack(final User loggedInUser, final AddTrackRequest addTrackRequest, final String partyName) {
         final Party party = findByName(partyName);
 
         validator.validateOnAddTrack(loggedInUser, addTrackRequest, party);
@@ -196,36 +204,39 @@ public class PartyService {
         loggedInUser.addAddedTrack(track);
         userService.save(loggedInUser);
 
-        return track;
+        return trackMapper.mapTrackToTrackInQueueResponse(track);
     }
 
-    public Set<TrackInQueue> getTracks(final User loggedInUser, final String partyName) {
+    public Set<TrackInQueueResponse> getTracks(final User loggedInUser, final String partyName) {
         final Party party = findByName(partyName);
 
         validator.validateOnGetTracks(party, loggedInUser);
 
-        return party.getTracksInQueue();
+        return party.getTracksInQueue().stream().map(track -> trackMapper.mapTrackToTrackInQueueResponse(track))
+                .collect(Collectors.toSet());
     }
 
-    public Set<PreviousTrack> getPreviousTracks(final User loggedInUser, final String partyName) {
+    public Set<PreviousTrackResponse> getPreviousTracks(final User loggedInUser, final String partyName) {
         final Party party = findByName(partyName);
 
         validator.validateOnGetTracks(party, loggedInUser);
 
-        return party.getPreviousTracks();
+        return party.getPreviousTracks().stream().map(track -> trackMapper.mapPreviousTrackToPreviousTrackResponse(track))
+                .collect(Collectors.toSet());
     }
 
-    public Party setSpotifyDeviceId(final User loggedInUser, final SetSpotifyDeviceIdRequest request,
-                                    final String partyName) {
+    public SpotifyDeviceIdResponse setSpotifyDeviceId(final User loggedInUser, final SetSpotifyDeviceIdRequest request,
+                                                      final String partyName) {
         final Party party = findByName(partyName);
 
         validator.validateOnSetSpotifyDeviceId(loggedInUser, party);
 
         party.setSpotifyDeviceId(request.getDeviceId());
-        return save(party);
+
+        return partyMapper.mapPartyToSpotifyDeviceId(save(party));
     }
 
-    public TrackInQueue removeTrackFromQueue(final User loggedInUser, final String partyName, final int trackId) {
+    public TrackInQueueResponse removeTrackFromQueue(final User loggedInUser, final String partyName, final int trackId) {
         final Party party = findByName(partyName);
         final TrackInQueue track = trackService.findById(trackId);
 
@@ -235,10 +246,10 @@ public class PartyService {
         save(party);
         trackService.delete(track);
 
-        return track;
+        return trackMapper.mapTrackToTrackInQueueResponse(track);
     }
 
-    public TrackInQueue playNextTrack(final User loggedInUser, final String partyName) {
+    public TrackInQueueResponse playNextTrack(final User loggedInUser, final String partyName) {
         final Party party = findByName(partyName);
         final TrackInQueue nowPlayingTrack = trackService.getIfExistsNowPlaying(partyName); // can be null
         final TrackInQueue nextTrack = trackService.getNextTrack(partyName);
@@ -264,6 +275,6 @@ public class PartyService {
         }
 
         nextTrack.setPlaying(true);
-        return (TrackInQueue) trackService.save(nextTrack);
+        return trackMapper.mapTrackToTrackInQueueResponse((TrackInQueue) trackService.save(nextTrack));
     }
 }

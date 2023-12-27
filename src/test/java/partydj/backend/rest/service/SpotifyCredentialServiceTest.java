@@ -37,7 +37,7 @@ public class SpotifyCredentialServiceTest {
 
     @Test
     void shouldSaveSpotifyCredential() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
         when(spotifyCredentialRepository.save(any())).thenReturn(spotifyCredential);
 
@@ -48,7 +48,7 @@ public class SpotifyCredentialServiceTest {
 
     @Test
     void givenSpotifyCredential_whenFindByOwner_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
         when(spotifyCredentialRepository.findByOwner(any())).thenReturn(spotifyCredential);
 
@@ -60,7 +60,7 @@ public class SpotifyCredentialServiceTest {
     @Test
     void givenSpotifyCredential_whenFindByState_thenSuccess() {
         final UUID state = UUID.randomUUID();
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
         when(spotifyCredentialRepository.findByState(any())).thenReturn(spotifyCredential);
 
@@ -71,7 +71,7 @@ public class SpotifyCredentialServiceTest {
 
     @Test
     void givenSpotifyCredential_whenDelete_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
 
         final SpotifyCredential deletedCredential = spotifyCredentialService.delete(spotifyCredential);
@@ -81,7 +81,7 @@ public class SpotifyCredentialServiceTest {
 
     @Test
     void givenUserWithoutSpotify_whenRequestsLoginUri_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final URI loginUri = URI.create("https://login.uri");
         when(spotifyService.generateLoginUri(any())).thenReturn(loginUri);
 
@@ -92,7 +92,7 @@ public class SpotifyCredentialServiceTest {
 
     @Test
     void givenUserWithoutSpotify_whenRequestsLoginUriMultipleTimes_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredentialWithOnlyState(user);
         final URI loginUri = URI.create("https://login.uri");
         when(spotifyCredentialRepository.findByOwner(any())).thenReturn(spotifyCredential);
@@ -105,7 +105,7 @@ public class SpotifyCredentialServiceTest {
 
     @Test
     void givenUserLoggedInWithSpotify_whenLogout_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
         user.setSpotifyCredential(spotifyCredential);
         when(spotifyCredentialRepository.findByOwner(any())).thenReturn(spotifyCredential);
@@ -117,7 +117,7 @@ public class SpotifyCredentialServiceTest {
 
     @Test
     void givenUserLoggedInWithSpotify_whenGetToken_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
         when(spotifyCredentialRepository.findByOwner(any())).thenReturn(spotifyCredential);
 
@@ -130,7 +130,7 @@ public class SpotifyCredentialServiceTest {
     void givenSpotifyResponse_whenProcessCallback_thenSuccess() {
         final String code = "code";
         final UUID state = UUID.randomUUID();
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
         when(spotifyCredentialRepository.findByState(any())).thenReturn(spotifyCredential);
         when(spotifyService.processCallback(any(), any())).thenReturn(spotifyCredential);
@@ -142,7 +142,7 @@ public class SpotifyCredentialServiceTest {
 
     @Test
     void givenUserWithSpotify_whenRefreshToken_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final SpotifyCredential spotifyCredential = DataGenerator.generateSpotifyCredential(user);
         final SpotifyCredential refreshedCredential = DataGenerator.generateSpotifyCredential(user, "refreshed");
         when(spotifyCredentialRepository.findByOwner(any())).thenReturn(spotifyCredential);

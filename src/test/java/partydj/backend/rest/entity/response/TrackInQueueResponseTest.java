@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ResourceUtils;
+import partydj.backend.rest.entity.Artist;
+import partydj.backend.rest.entity.User;
 import partydj.backend.rest.entity.enums.PlatformType;
 import partydj.backend.rest.helper.DataGenerator;
 
@@ -19,8 +21,10 @@ public class TrackInQueueResponseTest {
     private final String path;
 
     private TrackInQueueResponseTest() {
-        final ArtistResponse artistResponse = DataGenerator.generateArtistResponse();
-        final UserInPartyTrackInQueueResponse userResponse = DataGenerator.generateUserInPartyTrackInQueueResponse();
+        final User user = DataGenerator.generateUser();
+        final Artist artist = DataGenerator.generateArtist();
+        final ArtistResponse artistResponse = DataGenerator.generateArtistResponse(artist);
+        final UserInPartyTrackInQueueResponse userResponse = DataGenerator.generateUserInPartyTrackInQueueResponse(user);
 
         trackInQueueResponse = TrackInQueueResponse.builder()
                 .id(1)

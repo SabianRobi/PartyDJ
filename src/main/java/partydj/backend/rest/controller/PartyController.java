@@ -10,16 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import partydj.backend.rest.entity.Party;
-import partydj.backend.rest.entity.PreviousTrack;
-import partydj.backend.rest.entity.TrackInQueue;
+import partydj.backend.rest.editor.PlatformTypeEditor;
 import partydj.backend.rest.entity.User;
 import partydj.backend.rest.entity.enums.PlatformType;
 import partydj.backend.rest.entity.request.AddTrackRequest;
 import partydj.backend.rest.entity.request.PartyRequest;
 import partydj.backend.rest.entity.request.SetSpotifyDeviceIdRequest;
 import partydj.backend.rest.entity.response.*;
-import partydj.backend.rest.editor.PlatformTypeEditor;
 import partydj.backend.rest.mapper.PartyMapper;
 import partydj.backend.rest.mapper.TrackMapper;
 import partydj.backend.rest.service.PartyService;
@@ -28,13 +25,13 @@ import partydj.backend.rest.validation.constraint.Name;
 
 import java.util.Collection;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static partydj.backend.rest.config.PartyConfig.DEFAULT_LIMIT;
 
 @RestController
 @RequestMapping(value = "/api/v1/party", produces = "application/json")
 public class PartyController {
+
     @Autowired
     private PartyService partyService;
 
@@ -53,9 +50,7 @@ public class PartyController {
     public PartyResponse save(@Valid final PartyRequest savePartyRequest, final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final Party party = partyService.create(loggedInUser, savePartyRequest);
-
-        return partyMapper.mapPartyToPartyResponse(party);
+        return partyService.create(loggedInUser, savePartyRequest);
     }
 
     // Get
@@ -63,9 +58,7 @@ public class PartyController {
     public PartyResponse get(@PathVariable @Name final String partyName, final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final Party party = partyService.load(loggedInUser, partyName);
-
-        return partyMapper.mapPartyToPartyResponse(party);
+        return partyService.load(loggedInUser, partyName);
     }
 
     // Delete
@@ -74,9 +67,7 @@ public class PartyController {
     public PartyResponse delete(@PathVariable @Name final String partyName, final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final Party deletedParty = partyService.deleteByName(loggedInUser, partyName);
-
-        return partyMapper.mapPartyToPartyResponse(deletedParty);
+        return partyService.deleteByName(loggedInUser, partyName);
     }
 
     // Join
@@ -84,9 +75,7 @@ public class PartyController {
     public PartyResponse join(@Valid final PartyRequest joinRequest, final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final Party joinedParty = partyService.join(loggedInUser, joinRequest);
-
-        return partyMapper.mapPartyToPartyResponse(joinedParty);
+        return partyService.join(loggedInUser, joinRequest);
     }
 
     // Leave
@@ -94,9 +83,7 @@ public class PartyController {
     public PartyResponse leave(@PathVariable @Name final String partyName, final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final Party leftParty = partyService.leave(loggedInUser, partyName);
-
-        return partyMapper.mapPartyToPartyResponse(leftParty);
+        return partyService.leave(loggedInUser, partyName);
     }
 
     // Search
@@ -120,9 +107,7 @@ public class PartyController {
                                          final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final TrackInQueue addedTrack = partyService.addTrack(loggedInUser, addTrackRequest, partyName);
-
-        return trackMapper.mapTrackToTrackInQueueResponse(addedTrack);
+        return partyService.addTrack(loggedInUser, addTrackRequest, partyName);
     }
 
     // Get tracks in queue
@@ -131,10 +116,7 @@ public class PartyController {
                                                final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final Set<TrackInQueue> tracks = partyService.getTracks(loggedInUser, partyName);
-
-        return tracks.stream().map(track -> trackMapper.mapTrackToTrackInQueueResponse(track))
-                .collect(Collectors.toSet());
+        return partyService.getTracks(loggedInUser, partyName);
     }
 
     // Get previous tracks
@@ -143,10 +125,7 @@ public class PartyController {
                                                         final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final Set<PreviousTrack> tracks = partyService.getPreviousTracks(loggedInUser, partyName);
-
-        return tracks.stream().map(track -> trackMapper.mapPreviousTrackToPreviousTrackResponse(track))
-                .collect(Collectors.toSet());
+        return partyService.getPreviousTracks(loggedInUser, partyName);
     }
 
     // Set Spotify device id
@@ -156,9 +135,7 @@ public class PartyController {
                                                       final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final Party updatedParty = partyService.setSpotifyDeviceId(loggedInUser, request, partyName);
-
-        return partyMapper.mapPartyToSpotifyDeviceId(updatedParty);
+        return partyService.setSpotifyDeviceId(loggedInUser, request, partyName);
     }
 
     // Remove track from queue
@@ -168,9 +145,7 @@ public class PartyController {
                                                      final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final TrackInQueue deletedTrack = partyService.removeTrackFromQueue(loggedInUser, partyName, trackId);
-
-        return trackMapper.mapTrackToTrackInQueueResponse(deletedTrack);
+        return partyService.removeTrackFromQueue(loggedInUser, partyName, trackId);
     }
 
     // Skip track, play next
@@ -179,9 +154,7 @@ public class PartyController {
                                               final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final TrackInQueue nextTrack = partyService.playNextTrack(loggedInUser, partyName);
-
-        return trackMapper.mapTrackToTrackInQueueResponse(nextTrack);
+        return partyService.playNextTrack(loggedInUser, partyName);
     }
 
     @InitBinder

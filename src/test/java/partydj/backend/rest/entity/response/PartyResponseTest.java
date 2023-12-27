@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ResourceUtils;
+import partydj.backend.rest.entity.User;
+import partydj.backend.rest.entity.enums.PartyRole;
 import partydj.backend.rest.helper.DataGenerator;
 
 import java.io.File;
@@ -19,7 +21,9 @@ public class PartyResponseTest {
     private final String path;
 
     private PartyResponseTest() {
-        UserInPartyResponse userInPartyResponse = DataGenerator.generateUserInPartyResponse();
+        final User user = DataGenerator.generateUser();
+        user.setPartyRole(PartyRole.PARTICIPANT);
+        UserInPartyResponse userInPartyResponse = DataGenerator.generateUserInPartyResponse(user);
         partyResponse = PartyResponse.builder()
                 .id(1)
                 .name("testParty")

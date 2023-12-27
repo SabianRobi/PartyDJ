@@ -15,8 +15,9 @@ import partydj.backend.rest.entity.error.NotUniqueException;
 import partydj.backend.rest.entity.request.AddTrackRequest;
 import partydj.backend.rest.entity.request.PartyRequest;
 import partydj.backend.rest.entity.request.SetSpotifyDeviceIdRequest;
-import partydj.backend.rest.entity.response.TrackSearchResultResponse;
+import partydj.backend.rest.entity.response.*;
 import partydj.backend.rest.helper.DataGenerator;
+import partydj.backend.rest.mapper.PartyMapper;
 import partydj.backend.rest.mapper.TrackMapper;
 import partydj.backend.rest.repository.PartyRepository;
 import partydj.backend.rest.validation.PartyValidator;
@@ -57,14 +58,48 @@ public class PartyServiceTest {
     @Mock
     private ArtistService artistService;
 
+    @Mock
+    private PartyMapper partyMapper;
+
     @InjectMocks
     private PartyService partyService;
 
+    final private User user;
+    final private Artist artist;
+    final private Party party;
+    final private PreviousTrack previousTrack;
+    final private TrackInQueue trackInQueue;
+    final private ArtistResponse artistResponse;
+    final private UserInPartyTrackInQueueResponse userInPartyTrackInQueueResponse;
+    final private UserInPartyResponse userInPartyResponse;
+    final private TrackInQueueResponse trackInQueueResponse;
+    private PartyResponse partyResponse;
+
+    private PartyServiceTest() {
+        user = DataGenerator.generateUser("");
+        artist = DataGenerator.generateArtist();
+        party = DataGenerator.generateParty("", Set.of(user));
+        previousTrack = DataGenerator.generatePreviousTrack("", party, user, Set.of(artist));
+        trackInQueue = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));
+        Set<Track> tracks = new HashSet<>(Set.of(trackInQueue));
+
+        user.setParty(party);
+        user.setPartyRole(PartyRole.CREATOR);
+        user.addAddedTrack(trackInQueue);
+        party.addTrackToPreviousTracks(previousTrack);
+        party.addTrackToQueue(trackInQueue);
+        artist.setTracks(tracks);
+
+        artistResponse = DataGenerator.generateArtistResponse(artist);
+        userInPartyTrackInQueueResponse = DataGenerator.generateUserInPartyTrackInQueueResponse(user);
+        userInPartyResponse = DataGenerator.generateUserInPartyResponse(user);
+        trackInQueueResponse = DataGenerator.generateTrackInQueueResponse(trackInQueue, Set.of(artistResponse), userInPartyTrackInQueueResponse);
+        partyResponse = DataGenerator.generatePartyResponse(party, Set.of(trackInQueueResponse), Set.of(userInPartyResponse));
+    }
+
     @Test
     void shouldRegister() {
-        final PartyRequest partyRequest = DataGenerator.generatePartyRequest();
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
+        final PartyRequest partyRequest = DataGenerator.generatePartyRequest(party);
         when(partyRepository.save(any())).thenReturn(party);
 
         final Party registeredParty = partyService.register(partyRequest, user);
@@ -75,8 +110,6 @@ public class PartyServiceTest {
 
     @Test
     void givenParty_whenSave_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
         when(partyRepository.save(any())).thenReturn(party);
 
         final Party savedParty = partyService.save(party);
@@ -86,44 +119,30 @@ public class PartyServiceTest {
 
     @Test
     void givenParty_whenDeleteByName_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
-        final Artist artist = DataGenerator.generateArtist();
-        final TrackInQueue track = DataGenerator.generateTrackInQueueWithId("", party, user, Set.of(artist));
-        final PreviousTrack previousTrack = DataGenerator.generatePreviousTrack("", party, user, Set.of(artist));
-        final Set<Track> tracks = new HashSet<>(Set.of(track));
-        user.setParty(party);
-        user.setPartyRole(PartyRole.CREATOR);
-        user.addAddedTrack(track);
-        party.addTrackToQueue(track);
-        party.addTrackToPreviousTracks(previousTrack);
-        artist.setTracks(tracks);
-
         when(partyRepository.findByName(any())).thenReturn(party);
-        when(userService.saveAll(any())).thenReturn(Set.of(user));
+        when(partyMapper.mapPartyToPartyResponse(any())).thenReturn(partyResponse);
+
         doAnswer(invocation -> {
             // DB would handle this
-            party.removeTrackFromQueue(track);
+            party.removeTrackFromQueue(trackInQueue);
             party.removePreviousTrack(previousTrack);
-            user.removeAddedTrack(track);
+            user.removeAddedTrack(trackInQueue);
             return null;
         }).when(trackService).delete(any(Track.class));
 
-        final Party deletedParty = partyService.deleteByName(user, party.getName());
+        final PartyResponse response = partyService.deleteByName(user, party.getName());
 
-        assertThat(deletedParty).isSameAs(party);
+        assertThat(response).isSameAs(partyResponse);
         assertThat(user.getParty()).isNull();
         assertThat(user.getPartyRole()).isNull();
+        assertThat(user.getAddedTracks()).isEmpty();
         assertThat(party.getTracksInQueue()).isEmpty();
         assertThat(party.getPreviousTracks()).isEmpty();
-        assertThat(user.getAddedTracks()).isEmpty();
         assertThat(artist.getTracks()).isEmpty();
     }
 
     @Test
     void givenParty_whenFindByName_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
         when(partyRepository.findByName(any())).thenReturn(party);
 
         final Party foundParty = partyService.findByName(party.getName());
@@ -140,9 +159,7 @@ public class PartyServiceTest {
 
     @Test
     void givenPartyWithNameAlreadyUsed_whenTryToRegister_thenThrowsNotUniqueException() {
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
-        final PartyRequest partyRequest = DataGenerator.generatePartyRequest();
+        final PartyRequest partyRequest = DataGenerator.generatePartyRequest(party);
         final String message = "... Duplicate entry '" + partyRequest.getName() + "' for key ...";
         when(partyRepository.save(any())).thenThrow(new DataIntegrityViolationException(message));
 
@@ -151,8 +168,6 @@ public class PartyServiceTest {
 
     @Test
     void givenPartyWithNameAlreadyUsed_whenTryToSave_thenThrowsNotUniqueException() {
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
         final String message = "... Duplicate entry '" + party.getName() + "' for key ...";
         when(partyRepository.save(any())).thenThrow(new DataIntegrityViolationException(message));
 
@@ -161,8 +176,6 @@ public class PartyServiceTest {
 
     @Test
     void givenPartyWithNameAlreadyUsed_whenTryToSave_thenThrowsException() {
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
         when(partyRepository.save(any())).thenThrow(new DataIntegrityViolationException("Unknown error."));
 
         assertThrows(IllegalStateException.class, () -> partyService.tryToSave(party, null));
@@ -170,72 +183,71 @@ public class PartyServiceTest {
 
     @Test
     void shouldCreateParty() {
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
-        final PartyRequest partyRequest = DataGenerator.generatePartyRequest();
+        final PartyRequest partyRequest = DataGenerator.generatePartyRequest(party);
         when(partyRepository.save(any())).thenReturn(party);
+        when(partyMapper.mapPartyToPartyResponse(any())).thenReturn(partyResponse);
 
-        final Party createdParty = partyService.create(user, partyRequest);
+        final PartyResponse response = partyService.create(user, partyRequest);
 
-        assertThat(createdParty.getParticipants()).contains(user);
-        assertThat(user.getParty()).isSameAs(createdParty);
+        assertThat(response).isSameAs(partyResponse);
+        assertThat(user.getParty()).isSameAs(party);
         assertThat(user.getPartyRole()).isSameAs(PartyRole.CREATOR);
+        assertThat(party.getParticipants()).containsOnly(user);
     }
 
     @Test
     void shouldLoadParty() {
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
         when(partyRepository.findByName(any())).thenReturn(party);
+        when(partyMapper.mapPartyToPartyResponse(any())).thenReturn(partyResponse);
 
-        final Party foundParty = partyService.load(user, party.getName());
+        final PartyResponse response = partyService.load(user, party.getName());
 
-        assertThat(foundParty).isSameAs(party);
+        assertThat(response).isSameAs(partyResponse);
     }
 
     @Test
     void givenPartyAndUser_whenJoinParty_thenSuccess() {
-        final User user1 = DataGenerator.generateUser("1");
         final User user2 = DataGenerator.generateUser("2");
-        final Party party = DataGenerator.generateParty("", Set.of(user1));
-        final PartyRequest partyRequest = DataGenerator.generatePartyRequest();
+        final PartyRequest partyRequest = DataGenerator.generatePartyRequest(party);
+        final UserInPartyResponse userInPartyResponse2 = DataGenerator.generateUserInPartyResponse(user2);
+        partyResponse = DataGenerator.generatePartyResponse(party, Set.of(trackInQueueResponse), Set.of(userInPartyResponse, userInPartyResponse2));
         when(partyRepository.findByName(any())).thenReturn(party);
+        when(partyMapper.mapPartyToPartyResponse(any())).thenReturn(partyResponse);
 
-        final Party joinedParty = partyService.join(user2, partyRequest);
+        final PartyResponse response = partyService.join(user2, partyRequest);
 
-        assertThat(joinedParty).isSameAs(party);
+        assertThat(response).isSameAs(partyResponse);
         assertThat(user2.getParty()).isSameAs(party);
         assertThat(user2.getPartyRole()).isEqualTo(PartyRole.PARTICIPANT);
-        assertThat(joinedParty.getParticipants()).hasSize(2);
+        assertThat(response.getParticipants()).containsOnly(userInPartyResponse, userInPartyResponse2);
     }
 
     @Test
     void givenParty_whenLeave_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
-        user.setPartyRole(PartyRole.PARTICIPANT);
-        final Party party = DataGenerator.generateParty("", Set.of(user));
-        user.setParty(party);
+        final User user2 = DataGenerator.generateUser("2");
+        user2.setParty(party);
+        user2.setPartyRole(PartyRole.PARTICIPANT);
+        party.addUser(user2);
         when(partyRepository.findByName(any())).thenReturn(party);
+        when(partyMapper.mapPartyToPartyResponse(any())).thenReturn(partyResponse);
 
-        final Party leftParty = partyService.leave(user, party.getName());
+        final PartyResponse response = partyService.leave(user2, party.getName());
 
-        assertThat(leftParty).isSameAs(party);
-        assertThat(user.getPartyRole()).isNull();
-        assertThat(user.getParty()).isNull();
-        assertThat(party.getParticipants()).doesNotContain(user);
+        assertThat(response).isSameAs(partyResponse);
+        assertThat(user2.getPartyRole()).isNull();
+        assertThat(user2.getParty()).isNull();
+        assertThat(party.getParticipants()).doesNotContain(user2);
     }
 
     @Test
     void givenSearchQuery_whenSearch_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
         final String query = "query";
         final int offset = 0;
         final int limit = 1;
         final HashSet<PlatformType> platforms = new HashSet<>(Set.of(PlatformType.SPOTIFY));
-        final Artist artist = DataGenerator.generateArtist();
         final HashSet<TrackSearchResultResponse> response = new HashSet<>();
-        final TrackSearchResultResponse trackResponse = DataGenerator.generateTrackSearchResultResponse(Set.of(artist));
+        final TrackSearchResultResponse trackResponse =
+                DataGenerator.generateTrackSearchResultResponse(Set.of(artist), trackInQueue);
         response.add(trackResponse);
         when(partyRepository.findByName(any())).thenReturn(party);
         when(spotifyService.search(any(User.class), any(String.class), any(Integer.class), any(Integer.class)))
@@ -244,110 +256,103 @@ public class PartyServiceTest {
         final Collection<TrackSearchResultResponse> result =
                 partyService.search(user, party.getName(), query, offset, limit, platforms);
 
-        assertThat(result).contains(trackResponse);
+        assertThat(result).containsOnly(trackResponse);
     }
 
     @Test
     void givenParty_whenAddTrack_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
-        final AddTrackRequest trackRequest = DataGenerator.generateAddTrackRequest();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
-        final Artist artist = DataGenerator.generateArtist();
-        final TrackInQueue track = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));
+        final TrackInQueue trackInQueue2 = DataGenerator.generateTrackInQueue("2", party, user, Set.of(artist));
+        final AddTrackRequest trackRequest = DataGenerator.generateAddTrackRequest(trackInQueue2);
         when(partyRepository.findByName(any())).thenReturn(party);
-        when(spotifyService.fetchAndSafeTrackInfo(any(), any(), any())).thenReturn(track);
+        when(spotifyService.fetchAndSafeTrackInfo(any(), any(), any())).thenReturn(trackInQueue2);
+        when(trackMapper.mapTrackToTrackInQueueResponse(any())).thenReturn(trackInQueueResponse);
 
-        final TrackInQueue addedTrack = partyService.addTrack(user, trackRequest, party.getName());
+        final TrackInQueueResponse response = partyService.addTrack(user, trackRequest, party.getName());
 
-        assertThat(addedTrack).isIn(party.getTracksInQueue());
-        assertThat(addedTrack).isIn(user.getAddedTracks());
+        assertThat(response).isSameAs(trackInQueueResponse);
+        assertThat(party.getTracksInQueue()).contains(trackInQueue2);
+        assertThat(user.getAddedTracks()).contains(trackInQueue2);
     }
 
     @Test
     void givenTracksInQueue_whenGetTracks_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
-        final Artist artist = DataGenerator.generateArtist();
-        final TrackInQueue track = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));
-        party.setTracksInQueue(Set.of(track));
         when(partyRepository.findByName(any())).thenReturn(party);
+        when(trackMapper.mapTrackToTrackInQueueResponse(any())).thenReturn(trackInQueueResponse);
 
-        final Set<TrackInQueue> foundTracks = partyService.getTracks(user, party.getName());
+        final Set<TrackInQueueResponse> response = partyService.getTracks(user, party.getName());
 
-        assertThat(foundTracks).contains(track);
+        assertThat(response).containsOnly(trackInQueueResponse);
     }
 
     @Test
     void givenPreviousTracks_whenGetPreviousTracks_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
-        final Artist artist = DataGenerator.generateArtist();
-        final PreviousTrack track = DataGenerator.generatePreviousTrack("", party, user, Set.of(artist));
-        party.setPreviousTracks(Set.of(track));
+        final PreviousTrackResponse previousTrackResponse =
+                DataGenerator.generatePreviousTrackResponse(previousTrack, Set.of(artistResponse), userInPartyTrackInQueueResponse);
         when(partyRepository.findByName(any())).thenReturn(party);
+        when(trackMapper.mapPreviousTrackToPreviousTrackResponse(any())).thenReturn(previousTrackResponse);
 
-        final Set<PreviousTrack> foundTracks = partyService.getPreviousTracks(user, party.getName());
+        final Set<PreviousTrackResponse> response = partyService.getPreviousTracks(user, party.getName());
 
-        assertThat(foundTracks).contains(track);
+        assertThat(response).containsOnly(previousTrackResponse);
     }
 
     @Test
     void givenParty_whenSetSpotifyDeviceId_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
-        final SetSpotifyDeviceIdRequest spotifyRequest = DataGenerator.generateSpotifyRequest();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
+        final SetSpotifyDeviceIdRequest spotifyRequest = DataGenerator.generateSpotifyRequest(party);
+        final SpotifyDeviceIdResponse spotifyDeviceIdResponse = DataGenerator.generateSpotifyDeviceIdResponse(party);
         when(partyRepository.findByName(any())).thenReturn(party);
         when(partyRepository.save(any())).thenReturn(party);
+        when(partyMapper.mapPartyToSpotifyDeviceId(any())).thenReturn(spotifyDeviceIdResponse);
 
-        final Party updatedParty = partyService.setSpotifyDeviceId(user, spotifyRequest, party.getName());
+        final SpotifyDeviceIdResponse response = partyService.setSpotifyDeviceId(user, spotifyRequest, party.getName());
 
-        assertThat(updatedParty).isSameAs(party);
-        assertThat(updatedParty.getSpotifyDeviceId()).isEqualTo(spotifyRequest.getDeviceId());
+        assertThat(response.getDeviceId()).isEqualTo(party.getSpotifyDeviceId());
     }
 
     @Test
     void givenTrackInQueue_whenRemoveTrackFromQueue_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
-        final Artist artist = DataGenerator.generateArtist();
-        final TrackInQueue track = DataGenerator.generateTrackInQueueWithId("", party, user, Set.of(artist));
-        final HashSet<TrackInQueue> tracks = new HashSet<>(Set.of(track));
-        party.setTracksInQueue(tracks);
-        user.setAddedTracks(tracks);
         when(partyRepository.findByName(any())).thenReturn(party);
-        when(trackService.findById(anyInt())).thenReturn(track);
+        when(trackService.findById(anyInt())).thenReturn(trackInQueue);
+        when(trackMapper.mapTrackToTrackInQueueResponse(any())).thenReturn(trackInQueueResponse);
+        doAnswer(invocation -> {
+            // trackService.delete() method would handle this
+            user.removeAddedTrack(trackInQueue);
+            return null;
+        }).when(trackService).delete(any(Track.class));
 
-        partyService.removeTrackFromQueue(user, party.getName(), track.getId());
+        final TrackInQueueResponse response = partyService.removeTrackFromQueue(user, party.getName(), trackInQueue.getId());
 
+        assertThat(response).isSameAs(trackInQueueResponse);
         assertThat(party.getTracksInQueue()).isEmpty();
         assertThat(user.getAddedTracks()).isEmpty();
     }
 
     @Test
     void givenNowPlayingTrackAndNextTrack_whenPlayNextTrack_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
-        final Party party = DataGenerator.generateParty("", Set.of(user));
-        final Artist artist = DataGenerator.generateArtist();
-        final TrackInQueue nowPlayingTrack = DataGenerator.generateTrackInQueueWithId("now", party, user, Set.of(artist));
+        final TrackInQueue nowPlayingTrack = DataGenerator.generateTrackInQueue("now", party, user, Set.of(artist));
         nowPlayingTrack.setPlaying(true);
-        final TrackInQueue nextTrack = DataGenerator.generateTrackInQueueWithId("next", party, user, Set.of(artist));
+        final TrackInQueue nextTrack = DataGenerator.generateTrackInQueue("next", party, user, Set.of(artist));
         nextTrack.setScore(10);
+        final TrackInQueueResponse nextTrackResponse =
+                DataGenerator.generateTrackInQueueResponse(nowPlayingTrack, Set.of(artistResponse), userInPartyTrackInQueueResponse);
         final HashSet<TrackInQueue> tracks = new HashSet<>(Set.of(nowPlayingTrack, nextTrack));
         party.setTracksInQueue(tracks);
+        party.setPreviousTracks(new HashSet<>());
         user.setAddedTracks(tracks);
-        final PreviousTrack prevTrack = DataGenerator.generatePreviousTrack("", party, user, Set.of(artist));
 
         when(partyRepository.findByName(any())).thenReturn(party);
         when(trackService.getIfExistsNowPlaying(any())).thenReturn(nowPlayingTrack);
         when(trackService.getNextTrack(any())).thenReturn(nextTrack);
-        when(trackMapper.mapTrackInQueueToPreviousTrack(any())).thenReturn(prevTrack);
+        when(trackMapper.mapTrackInQueueToPreviousTrack(any())).thenReturn(previousTrack);
         when(trackService.save(any())).thenReturn(nextTrack);
+        when(trackMapper.mapTrackToTrackInQueueResponse(any())).thenReturn(nextTrackResponse);
 
-        partyService.playNextTrack(user, party.getName());
+        final TrackInQueueResponse response = partyService.playNextTrack(user, party.getName());
 
-        assertThat(party.getPreviousTracks()).contains(prevTrack);
-        assertThat(party.getTracksInQueue()).hasSize(1).contains(nextTrack);
-        assertThat(user.getAddedTracks()).hasSize(1).doesNotContain(nowPlayingTrack);
+        assertThat(response).isSameAs(nextTrackResponse);
+        assertThat(party.getPreviousTracks()).containsOnly(previousTrack);
+        assertThat(party.getTracksInQueue()).containsOnly(nextTrack);
+        assertThat(user.getAddedTracks()).containsOnly(nextTrack);
         assertThat(nextTrack.isPlaying()).isTrue();
     }
 }

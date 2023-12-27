@@ -43,7 +43,7 @@ public class TrackServiceTest {
 
     @Test
     void shouldSaveTrackInQueue() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final Artist artist = DataGenerator.generateArtist();
         final TrackInQueue track = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));
@@ -56,7 +56,7 @@ public class TrackServiceTest {
 
     @Test
     void shouldSavePreviousQueue() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final Artist artist = DataGenerator.generateArtist();
         final PreviousTrack track = DataGenerator.generatePreviousTrack("", party, user, Set.of(artist));
@@ -69,7 +69,7 @@ public class TrackServiceTest {
 
     @Test
     void shouldDeleteTrackInQueue() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final Artist artist = DataGenerator.generateArtist();
         final TrackInQueue track = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));
@@ -88,7 +88,7 @@ public class TrackServiceTest {
 
     @Test
     void shouldDeletePreviousTrack() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final Artist artist = DataGenerator.generateArtist();
         final PreviousTrack track = DataGenerator.generatePreviousTrack("", party, user, Set.of(artist));
@@ -105,10 +105,10 @@ public class TrackServiceTest {
 
     @Test
     void givenTrack_whenFindById_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final Artist artist = DataGenerator.generateArtist();
-        final TrackInQueue track = DataGenerator.generateTrackInQueueWithId("", party, user, Set.of(artist));
+        final TrackInQueue track = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));
         when(trackInQueueRepository.findById(anyInt())).thenReturn(track);
 
         final TrackInQueue foundTrack = trackService.findById(track.getId());
@@ -118,7 +118,7 @@ public class TrackServiceTest {
 
     @Test
     void givenPopulatedQueue_whenGetNext_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final Artist artist = DataGenerator.generateArtist();
         final TrackInQueue track = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));
@@ -131,7 +131,7 @@ public class TrackServiceTest {
 
     @Test
     void givenPopulatedQueue_whenGetNowPlaying_thenSuccess() {
-        final User user = DataGenerator.generateUserWithId();
+        final User user = DataGenerator.generateUser();
         final Party party = DataGenerator.generateParty("", Set.of(user));
         final Artist artist = DataGenerator.generateArtist();
         final TrackInQueue track = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));

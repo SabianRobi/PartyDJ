@@ -5,6 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ResourceUtils;
+import partydj.backend.rest.entity.Artist;
+import partydj.backend.rest.entity.User;
 import partydj.backend.rest.entity.enums.PlatformType;
 import partydj.backend.rest.helper.DataGenerator;
 
@@ -21,8 +23,10 @@ public class PreviousTrackResponseTest {
     private final String path;
 
     private PreviousTrackResponseTest() {
-        final ArtistResponse artistResponse = DataGenerator.generateArtistResponse();
-        final UserInPartyTrackInQueueResponse userResponse = DataGenerator.generateUserInPartyTrackInQueueResponse();
+        final User user = DataGenerator.generateUser();
+        final Artist artist = DataGenerator.generateArtist();
+        final ArtistResponse artistResponse = DataGenerator.generateArtistResponse(artist);
+        final UserInPartyTrackInQueueResponse userResponse = DataGenerator.generateUserInPartyTrackInQueueResponse(user);
 
         previousTrackResponse = PreviousTrackResponse.builder()
                 .title("title")
