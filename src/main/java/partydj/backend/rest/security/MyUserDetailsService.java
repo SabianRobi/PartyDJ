@@ -1,6 +1,7 @@
 package partydj.backend.rest.security;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,6 +16,7 @@ public class MyUserDetailsService implements UserDetailsService {
     private UserService userService;
 
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
         User user;
         try {
