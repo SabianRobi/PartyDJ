@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import partydj.backend.rest.entity.User;
 import partydj.backend.rest.entity.enums.PartyRole;
 import partydj.backend.rest.entity.enums.UserType;
@@ -13,7 +14,8 @@ import partydj.backend.rest.entity.request.UserRequest;
 import partydj.backend.rest.entity.response.UserResponse;
 import partydj.backend.rest.mapper.UserMapper;
 import partydj.backend.rest.repository.UserRepository;
-import partydj.backend.rest.validation.UserValidator;
+import partydj.backend.rest.validation.constraint.Exists;
+import partydj.backend.rest.validation.constraint.SameUser;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -21,6 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Validated
 public class UserService {
 
     @Autowired
@@ -33,9 +36,6 @@ public class UserService {
     private PartyService partyService;
 
     @Autowired
-    private UserValidator validator;
-
-    @Autowired
     private UserMapper userMapper;
 
     // Repository handlers
@@ -43,12 +43,9 @@ public class UserService {
         return tryToSave(user, null);
     }
 
+    @Exists(type = "User")
     public User findByUsername(final String username) {
-        final User user = userRepository.findByUsername(username);
-
-        validator.verifyNotNull(user);
-
-        return user;
+        return userRepository.findByUsername(username);
     }
 
     public Set<User> saveAll(final Set<User> users) {
@@ -91,9 +88,8 @@ public class UserService {
     }
 
     @Transactional
+    @SameUser
     public UserResponse delete(final User loggedInUser, final String toBeDeletedUsername) {
-        validator.verifySameUser(loggedInUser, toBeDeletedUsername);
-
         if (loggedInUser.getPartyRole() != null) {
             if (loggedInUser.getPartyRole() == PartyRole.CREATOR) {
                 partyService.deleteByName(loggedInUser, loggedInUser.getParty().getName());
@@ -111,9 +107,8 @@ public class UserService {
         return userMapper.mapUserToUserResponse(loggedInUser);
     }
 
+    @SameUser
     public UserResponse update(final User loggedInUser, final String givenUsername, final UserRequest newData) {
-        validator.verifySameUser(loggedInUser, givenUsername);
-
         loggedInUser.setEmail(newData.getEmail().trim());
         loggedInUser.setUsername(newData.getUsername().trim());
         loggedInUser.setPassword(passwordEncoder.encode(newData.getPassword()));

@@ -15,7 +15,6 @@ import partydj.backend.rest.entity.response.UserResponse;
 import partydj.backend.rest.helper.DataGenerator;
 import partydj.backend.rest.mapper.UserMapper;
 import partydj.backend.rest.repository.UserRepository;
-import partydj.backend.rest.validation.UserValidator;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -36,9 +35,6 @@ public class UserServiceTest {
 
     @Mock
     private PartyService partyService;
-
-    @Mock
-    private UserValidator validator;
 
     @Mock
     private UserMapper userMapper;
