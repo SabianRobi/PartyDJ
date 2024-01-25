@@ -57,6 +57,8 @@ Auth required for every endpoint
 | [X]  | GetToken     | GET    | /platforms/spotify/token    | Returns the user's Spotify token                        |
 | [X]  | RefreshToken | PATCH  | /platforms/spotify/token    | Makes the backend refresh the user's Spotify token      |
 
+* Create liveness endpoint
+* Split user password update into its own endpoint
 * Separate model, service, web layer into separate projects
     * Service repository methods should be private
 * Add tests

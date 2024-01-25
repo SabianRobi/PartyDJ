@@ -14,13 +14,9 @@ public class ExistsValidator implements ConstraintValidator<Exists, Object> {
 
     @Override
     public boolean isValid(final Object value, final ConstraintValidatorContext context) {
-        System.err.println("Null check running");
         if (value == null) {
-            System.err.println("Result: null");
             throw new EntityNotFoundException(type + " does not exists.");
         }
-        System.err.println("Result: not null, value: " + value);
-
         return true;
     }
 }
