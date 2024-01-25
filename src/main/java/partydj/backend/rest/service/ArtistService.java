@@ -35,6 +35,11 @@ public class ArtistService {
     }
 
     public HashSet<Artist> saveAll(final Set<Artist> artists) {
-        return (HashSet<Artist>) repository.saveAll(artists);
+        final Iterable<Artist> savedArtists = repository.saveAll(artists);
+        HashSet<Artist> setOfSavedArtists = new HashSet<>();
+
+        savedArtists.forEach(setOfSavedArtists::add);
+
+        return setOfSavedArtists;
     }
 }

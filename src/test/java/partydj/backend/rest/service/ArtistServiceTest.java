@@ -85,6 +85,8 @@ public class ArtistServiceTest {
 
         final HashSet<Artist> foundArtists = artistService.saveAll(artists);
 
-        assertThat(foundArtists).isSameAs(artists);
+        assertThat(foundArtists.contains(artist1)).isTrue();
+        assertThat(foundArtists.contains(artist2)).isTrue();
+        assertThat(foundArtists.size() == 2).isTrue();
     }
 }
