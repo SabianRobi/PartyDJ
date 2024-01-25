@@ -2,6 +2,7 @@ package partydj.backend.rest.service;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,10 @@ public class UserService {
 
     @Autowired
     private PartyService partyService;
+
+    @Lazy
+    @Autowired
+    private SpotifyCredentialService spotifyCredentialService;
 
     @Autowired
     private UserMapper userMapper;
@@ -101,6 +106,10 @@ public class UserService {
                 loggedInUser.getParty().removeUser(loggedInUser);
                 partyService.save(loggedInUser.getParty());
             }
+        }
+
+        if (loggedInUser.getSpotifyCredential() != null) {
+            spotifyCredentialService.delete(loggedInUser.getSpotifyCredential());
         }
 
         userRepository.delete(loggedInUser);
