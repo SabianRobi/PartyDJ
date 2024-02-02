@@ -29,6 +29,7 @@ import java.util.Set;
 import static partydj.backend.rest.config.PartyConfig.DEFAULT_LIMIT;
 
 @RestController
+@CrossOrigin
 @RequestMapping(value = "/api/v1/party", produces = "application/json")
 public class PartyController {
 
@@ -45,9 +46,9 @@ public class PartyController {
     private TrackMapper trackMapper;
 
     // Create
-    @PostMapping(consumes = "application/x-www-form-urlencoded")
+    @PostMapping(consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public PartyResponse save(@Valid final PartyRequest savePartyRequest, final Authentication auth) {
+    public PartyResponse save(@Valid @RequestBody final PartyRequest savePartyRequest, final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
         return partyService.create(loggedInUser, savePartyRequest);
@@ -71,8 +72,8 @@ public class PartyController {
     }
 
     // Join
-    @PostMapping(value = "/*/join", consumes = "application/x-www-form-urlencoded")
-    public PartyResponse join(@Valid final PartyRequest joinRequest, final Authentication auth) {
+    @PostMapping(value = "/*/join", consumes = "application/json")
+    public PartyResponse join(@Valid @RequestBody final PartyRequest joinRequest, final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
         return partyService.join(loggedInUser, joinRequest);
@@ -100,9 +101,9 @@ public class PartyController {
     }
 
     // Add track to queue
-    @PostMapping(value = "/{partyName}/tracks", consumes = "application/x-www-form-urlencoded")
+    @PostMapping(value = "/{partyName}/tracks", consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public TrackInQueueResponse addTrack(@Valid final AddTrackRequest addTrackRequest,
+    public TrackInQueueResponse addTrack(@Valid @RequestBody final AddTrackRequest addTrackRequest,
                                          @PathVariable @Name final String partyName,
                                          final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
@@ -129,8 +130,8 @@ public class PartyController {
     }
 
     // Set Spotify device id
-    @PostMapping(value = "/{partyName}/spotifyDeviceId", consumes = "application/x-www-form-urlencoded")
-    public SpotifyDeviceIdResponse setSpotifyDeviceId(@Valid final SetSpotifyDeviceIdRequest request,
+    @PostMapping(value = "/{partyName}/spotifyDeviceId", consumes = "application/json")
+    public SpotifyDeviceIdResponse setSpotifyDeviceId(@Valid @RequestBody final SetSpotifyDeviceIdRequest request,
                                                       @PathVariable @Name final String partyName,
                                                       final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());

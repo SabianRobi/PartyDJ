@@ -14,6 +14,7 @@ import partydj.backend.rest.service.SpotifyCredentialService;
 import partydj.backend.rest.service.UserService;
 
 @RestController
+@CrossOrigin
 @RequestMapping(value = "/api/v1/platforms/spotify", produces = "application/json")
 public class SpotifyCredentialController {
 

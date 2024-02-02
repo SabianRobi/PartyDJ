@@ -1,15 +1,15 @@
 package partydj.backend.rest.config;
 
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -44,27 +44,29 @@ public class SecurityConfig {
                                 AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/platforms/spotify/callback/**")
                         ).permitAll()
                         .requestMatchers(
-                                AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/protected"),
                                 new AntPathRequestMatcher("/api/v1/user/**"),
                                 new AntPathRequestMatcher("/api/v1/party/**"),
                                 new AntPathRequestMatcher("/api/v1/platforms/**")
                         ).hasRole("NORMAL")
                         .anyRequest().authenticated()
                 )
-                .formLogin(
-                        (form) -> form
-                                .loginPage("/login")
-                                .defaultSuccessUrl("/protected")
-                                .permitAll()
+                .formLogin(form -> form
+                        .loginProcessingUrl("/api/v1/login/process")
+                        .successHandler((request, response, authentication) -> response.setStatus(HttpStatus.OK.value()))
+                        .failureHandler((request, response, exception) -> response.setStatus(HttpStatus.UNAUTHORIZED.value()))
+                        .permitAll()
                 )
-                .logout(LogoutConfigurer::permitAll)
-//                .csrf(form -> form
-//                        .ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**"))
-//                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                .logout(logout -> logout
+                        .logoutUrl("/api/v1/logout")
+                        .logoutSuccessHandler((request, response, authentication) -> response.setStatus(HttpServletResponse.SC_OK))
+                        .permitAll()
+                )
+//                .csrf(form -> form.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .headers(head -> head.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(getRestAuthenticationEntryPoint()));
-
+//                .headers(head -> head.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(getRestAuthenticationEntryPoint()))
+//                .httpBasic(Customizer.withDefaults())
+                .cors(Customizer.withDefaults());
         return http.build();
     }
 }

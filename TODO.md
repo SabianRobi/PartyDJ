@@ -74,7 +74,6 @@ Auth required for every endpoint
 * Add option to select playback device id on Spotify
 * Add YouTube support
 * When frontend comes alive
-    * Remove PageController
     * Enable CSRF protection
     * Check: when login fails -> response is 200 and no errors returned (does not log in)
   

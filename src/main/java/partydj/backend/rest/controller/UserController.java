@@ -18,6 +18,7 @@ import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.constraint.Name;
 
 @RestController
+@CrossOrigin
 @RequestMapping(value = "/api/v1/user", produces = "application/json")
 public class UserController {
 
@@ -28,15 +29,15 @@ public class UserController {
     private UserMapper userMapper;
 
     // Register
-    @PostMapping(consumes = "application/x-www-form-urlencoded")
+    @PostMapping(consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse save(@Valid final UserRequest userRequest) {
+    public UserResponse save(@Valid @RequestBody final UserRequest userRequest) {
         return userService.register(userRequest);
     }
 
     // Update
-    @PutMapping(value = "/{givenUsername}", consumes = "application/x-www-form-urlencoded")
-    public UserResponse update(@Valid final UserRequest userRequest,
+    @PutMapping(value = "/{givenUsername}", consumes = "application/json")
+    public UserResponse update(@Valid @RequestBody final UserRequest userRequest,
                                @PathVariable("givenUsername") @Name final String toBeUpdatedUsername,
                                final Authentication auth,
                                final UserPrincipal userPrincipal) {
