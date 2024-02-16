@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -17,8 +18,6 @@ import partydj.backend.rest.entity.request.AddTrackRequest;
 import partydj.backend.rest.entity.request.PartyRequest;
 import partydj.backend.rest.entity.request.SetSpotifyDeviceIdRequest;
 import partydj.backend.rest.entity.response.*;
-import partydj.backend.rest.mapper.PartyMapper;
-import partydj.backend.rest.mapper.TrackMapper;
 import partydj.backend.rest.service.PartyService;
 import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.constraint.Name;
@@ -37,13 +36,7 @@ public class PartyController {
     private PartyService partyService;
 
     @Autowired
-    private PartyMapper partyMapper;
-
-    @Autowired
     private UserService userService;
-
-    @Autowired
-    private TrackMapper trackMapper;
 
     // Create
     @PostMapping(consumes = "application/json")
@@ -89,14 +82,14 @@ public class PartyController {
 
     // Search
     @GetMapping("/{partyName}/search")
-    public Collection<TrackSearchResultResponse> search(@RequestParam @NotNull @Min(3) final String query,
-                                                        @RequestParam(defaultValue = "0") @Min(0) final int offset,
-                                                        @RequestParam(defaultValue = DEFAULT_LIMIT + "") @Min(1) final int limit,
-                                                        @RequestParam @NotNull @NotEmpty final Set<@NotNull PlatformType> platforms,
-                                                        @PathVariable @Name final String partyName,
-                                                        final Authentication auth) {
+    public Collection<TrackSearchResultResponse> search(
+            @RequestParam @NotNull @Size(min = 3) final String query,
+            @RequestParam(defaultValue = "0") @Min(0) final int offset,
+            @RequestParam(defaultValue = DEFAULT_LIMIT + "") @Min(1) final int limit,
+            @RequestParam @NotNull @NotEmpty final Set<@NotNull PlatformType> platforms,
+            @PathVariable @Name final String partyName,
+            final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
-
         return partyService.search(loggedInUser, partyName, query, offset, limit, platforms);
     }
 
