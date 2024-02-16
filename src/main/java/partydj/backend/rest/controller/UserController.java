@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.entity.User;
 import partydj.backend.rest.entity.request.UserRequest;
 import partydj.backend.rest.entity.response.UserResponse;
-import partydj.backend.rest.mapper.UserMapper;
 import partydj.backend.rest.security.UserPrincipal;
 import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.constraint.Name;
@@ -24,9 +23,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private UserMapper userMapper;
 
     // Register
     @PostMapping(consumes = "application/json")
@@ -59,7 +55,7 @@ public class UserController {
     public UserResponse get(@PathVariable @Name final String username) {
         final User toGetUser = userService.findByUsername(username);
 
-        return userMapper.mapUserToUserResponse(toGetUser);
+        return userService.getUserInfo(toGetUser);
     }
 
     // Delete

@@ -124,4 +124,8 @@ public class UserService {
 
         return userMapper.mapUserToUserResponse(tryToSave(loggedInUser, newData));
     }
+
+    public UserResponse getUserInfo(final User toGetUser) {
+        return userMapper.mapUserToUserResponse(toGetUser);
+    }
 }
