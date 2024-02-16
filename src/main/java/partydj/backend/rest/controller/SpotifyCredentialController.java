@@ -2,7 +2,6 @@ package partydj.backend.rest.controller;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.validator.constraints.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -12,6 +11,7 @@ import partydj.backend.rest.entity.response.SpotifyCredentialResponse;
 import partydj.backend.rest.entity.response.SpotifyLoginUriResponse;
 import partydj.backend.rest.service.SpotifyCredentialService;
 import partydj.backend.rest.service.UserService;
+import partydj.backend.rest.validation.constraint.UUID;
 
 @RestController
 @CrossOrigin
