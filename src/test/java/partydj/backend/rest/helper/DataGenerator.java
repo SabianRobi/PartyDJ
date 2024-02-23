@@ -4,10 +4,7 @@ import org.springframework.stereotype.Component;
 import partydj.backend.rest.entity.*;
 import partydj.backend.rest.entity.enums.PlatformType;
 import partydj.backend.rest.entity.enums.UserType;
-import partydj.backend.rest.entity.request.AddTrackRequest;
-import partydj.backend.rest.entity.request.PartyRequest;
-import partydj.backend.rest.entity.request.SetSpotifyDeviceIdRequest;
-import partydj.backend.rest.entity.request.UserRequest;
+import partydj.backend.rest.entity.request.*;
 import partydj.backend.rest.entity.response.*;
 
 import java.net.URI;
@@ -134,11 +131,26 @@ public class DataGenerator {
 
     // REQUESTS
 
-    public static UserRequest generateUserRequest(final User user) {
-        return UserRequest.builder()
+    public static SaveUserRequest generateSaveUserRequest(final User user) {
+        return SaveUserRequest.builder()
                 .email(user.getEmail())
                 .username(user.getUsername())
                 .password(user.getPassword())
+                .build();
+    }
+
+    public static UpdateUserDetailsRequest generateUpdateUserDetailsRequest(final User user) {
+        return UpdateUserDetailsRequest.builder()
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .build();
+    }
+
+    public static UpdateUserPasswordRequest generateUpdateUserPasswordRequest(final User user) {
+        return UpdateUserPasswordRequest.builder()
+                .currentPassword(user.getPassword())
+                .password("otherPassword")
+                .confirmPassword("otherPassword")
                 .build();
     }
 

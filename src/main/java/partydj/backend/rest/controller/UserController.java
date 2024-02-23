@@ -10,7 +10,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.entity.User;
-import partydj.backend.rest.entity.request.UserRequest;
+import partydj.backend.rest.entity.request.SaveUserRequest;
+import partydj.backend.rest.entity.request.UpdateUserDetailsRequest;
+import partydj.backend.rest.entity.request.UpdateUserPasswordRequest;
 import partydj.backend.rest.entity.response.UserResponse;
 import partydj.backend.rest.security.UserPrincipal;
 import partydj.backend.rest.service.UserService;
@@ -27,19 +29,38 @@ public class UserController {
     // Register
     @PostMapping(consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse save(@Valid @RequestBody final UserRequest userRequest) {
+    public UserResponse save(@Valid @RequestBody final SaveUserRequest userRequest) {
         return userService.register(userRequest);
     }
 
-    // Update
-    @PutMapping(value = "/{givenUsername}", consumes = "application/json")
-    public UserResponse update(@Valid @RequestBody final UserRequest userRequest,
-                               @PathVariable("givenUsername") @Name final String toBeUpdatedUsername,
-                               final Authentication auth,
-                               final UserPrincipal userPrincipal) {
+    // Update user infos
+    @PatchMapping(value = "/{givenUsername}", consumes = "application/json")
+    public UserResponse updateDetails(@Valid @RequestBody final UpdateUserDetailsRequest userRequest,
+                                      @PathVariable("givenUsername") @Name final String toBeUpdatedUsername,
+                                      final Authentication auth,
+                                      final UserPrincipal userPrincipal) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final UserResponse response = userService.update(loggedInUser, toBeUpdatedUsername, userRequest);
+        final UserResponse response = userService.updateDetails(loggedInUser, toBeUpdatedUsername, userRequest);
+
+        // Update logged in user infos
+        userPrincipal.setUser(loggedInUser);
+        final Authentication newAuth = new UsernamePasswordAuthenticationToken(
+                userPrincipal, auth.getCredentials(), auth.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
+
+        return response;
+    }
+
+    // Update user password
+    @PatchMapping(value = "/{givenUsername}/password", consumes = "application/json")
+    public UserResponse updatePassword(@Valid @RequestBody final UpdateUserPasswordRequest updateUserPasswordRequest,
+                                       @PathVariable("givenUsername") @Name final String toBeUpdatedUsername,
+                                       final Authentication auth,
+                                       final UserPrincipal userPrincipal) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
+
+        final UserResponse response = userService.updatePassword(loggedInUser, toBeUpdatedUsername, updateUserPasswordRequest);
 
         // Update logged in user infos
         userPrincipal.setUser(loggedInUser);

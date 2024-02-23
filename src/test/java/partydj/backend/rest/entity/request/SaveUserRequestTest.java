@@ -10,19 +10,19 @@ import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class UserRequestTest {
-    private final UserRequest userRequest;
+public class SaveUserRequestTest {
+    private final SaveUserRequest userRequest;
     private final ObjectMapper objectMapper;
     private final String path;
 
-    private UserRequestTest() {
-        userRequest = UserRequest.builder()
-                .username("testUser")
+    private SaveUserRequestTest() {
+        userRequest = SaveUserRequest.builder()
                 .email("test@user.co")
+                .username("testUser")
                 .password("testPassword")
                 .build();
         objectMapper = new ObjectMapper();
-        path = "classpath:domain/request/userRequest.json";
+        path = "classpath:domain/request/saveUserRequest.json";
     }
 
     @Test
@@ -39,8 +39,8 @@ public class UserRequestTest {
     @Test
     @SneakyThrows
     void shouldDeserialize() {
-        final UserRequest actual = objectMapper.readValue(
-                ResourceUtils.getFile(path), UserRequest.class);
+        final SaveUserRequest actual = objectMapper.readValue(
+                ResourceUtils.getFile(path), SaveUserRequest.class);
 
         assertThat(actual).isEqualTo(userRequest);
     }

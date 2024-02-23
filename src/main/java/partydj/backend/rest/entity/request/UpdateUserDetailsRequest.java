@@ -11,13 +11,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import partydj.backend.rest.validation.constraint.Name;
 
-import static partydj.backend.rest.config.UserConfig.*;
+import static partydj.backend.rest.config.UserConfig.USERNAME_MAX_LENGTH;
+import static partydj.backend.rest.config.UserConfig.USERNAME_MIN_LENGTH;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRequest {
+public class UpdateUserDetailsRequest {
 
     @NotNull
     @NotBlank
@@ -32,9 +33,4 @@ public class UserRequest {
     @Size(max = USERNAME_MAX_LENGTH, message = "Should be maximum {max} characters long.")
     @Name
     private String username;
-
-    @NotNull
-    @NotBlank
-    @Size(min = PASSWORD_MIN_LENGTH, message = "Should be at least {min} characters long.")
-    private String password;
 }

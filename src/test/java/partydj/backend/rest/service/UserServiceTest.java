@@ -10,9 +10,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import partydj.backend.rest.entity.*;
 import partydj.backend.rest.entity.enums.PartyRole;
 import partydj.backend.rest.entity.error.NotUniqueException;
-import partydj.backend.rest.entity.request.UserRequest;
+import partydj.backend.rest.entity.error.RequiredFieldInvalidException;
+import partydj.backend.rest.entity.request.SaveUserRequest;
+import partydj.backend.rest.entity.request.UpdateUserDetailsRequest;
+import partydj.backend.rest.entity.request.UpdateUserPasswordRequest;
 import partydj.backend.rest.entity.response.UserResponse;
-import partydj.backend.rest.helper.DataGenerator;
 import partydj.backend.rest.mapper.UserMapper;
 import partydj.backend.rest.repository.UserRepository;
 
@@ -22,7 +24,9 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static partydj.backend.rest.helper.DataGenerator.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
@@ -37,6 +41,9 @@ public class UserServiceTest {
     private PartyService partyService;
 
     @Mock
+    private SpotifyCredentialService spotifyCredentialService;
+
+    @Mock
     private UserMapper userMapper;
 
     @InjectMocks
@@ -45,14 +52,14 @@ public class UserServiceTest {
     final private User user;
 
     UserServiceTest() {
-        user = DataGenerator.generateUser();
+        user = generateUser();
     }
 
 
     @Test
     void givenNewUser_whenRegister_thenSuccess() {
-        final UserRequest userRequest = DataGenerator.generateUserRequest(user);
-        final UserResponse userResponse = DataGenerator.generateUserResponse(user);
+        final SaveUserRequest userRequest = generateSaveUserRequest(user);
+        final UserResponse userResponse = generateUserResponse(user);
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(userMapper.mapUserToUserResponse(any())).thenReturn(userResponse);
 
@@ -81,7 +88,7 @@ public class UserServiceTest {
 
     @Test
     void givenUsers_whenSaveAll_thenSuccess() {
-        final User user2 = DataGenerator.generateUser("2");
+        final User user2 = generateUser("2");
         final HashSet<User> users = new HashSet<>(Set.of(user, user2));
         when(userRepository.save(any())).thenReturn(user).thenReturn(user2);
 
@@ -92,7 +99,7 @@ public class UserServiceTest {
 
     @Test
     void givenUserAndUserRequestButUsernameAlreadyUsed_whenTryToSave_thenTrowsNotUniqueException() {
-        final UserRequest userRequest = DataGenerator.generateUserRequest(user);
+        final SaveUserRequest userRequest = generateSaveUserRequest(user);
         final String message = "... Duplicate entry '" + userRequest.getUsername() + "' for key ...";
         when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
 
@@ -104,12 +111,12 @@ public class UserServiceTest {
         final String message = "... Duplicate entry '" + user.getUsername() + "' for key ...";
         when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
 
-        assertThrows(NotUniqueException.class, () -> userService.tryToSave(user, null));
+        assertThrows(NotUniqueException.class, () -> userService.tryToSave(user, (Object) null));
     }
 
     @Test
     void givenUserAndUserRequestButEmailAlreadyUsed_whenTryToSave_thenTrowsNotUniqueException() {
-        final UserRequest userRequest = DataGenerator.generateUserRequest(user);
+        final SaveUserRequest userRequest = generateSaveUserRequest(user);
         final String message = "... Duplicate entry '" + userRequest.getEmail() + "' for key ...";
         when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
 
@@ -121,19 +128,19 @@ public class UserServiceTest {
         final String message = "... Duplicate entry '" + user.getEmail() + "' for key ...";
         when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException(message));
 
-        assertThrows(NotUniqueException.class, () -> userService.tryToSave(user, null));
+        assertThrows(NotUniqueException.class, () -> userService.tryToSave(user, (Object) null));
     }
 
     @Test
     void givenUser_whenTryToSave_thenTrowsIllegalStateException() {
         when(userRepository.save(any(User.class))).thenThrow(new DataIntegrityViolationException("Unknown error."));
 
-        assertThrows(IllegalStateException.class, () -> userService.tryToSave(user, null));
+        assertThrows(IllegalStateException.class, () -> userService.tryToSave(user, (Object) null));
     }
 
     @Test
     void givenUserNotInParty_whenDelete_thenSuccess() {
-        final UserResponse userResponse = DataGenerator.generateUserResponse(user);
+        final UserResponse userResponse = generateUserResponse(user);
         when(userMapper.mapUserToUserResponse(any())).thenReturn(userResponse);
 
         final UserResponse response = userService.delete(user, user.getUsername());
@@ -143,12 +150,12 @@ public class UserServiceTest {
 
     @Test
     void givenUserInPartyAsParticipant_whenDelete_thenSuccess() {
-        final Party party = DataGenerator.generateParty("", Set.of(user));
-        final Artist artist = DataGenerator.generateArtist();
-        final TrackInQueue track = DataGenerator.generateTrackInQueue("", party, user, Set.of(artist));
+        final Party party = generateParty("", Set.of(user));
+        final Artist artist = generateArtist();
+        final TrackInQueue track = generateTrackInQueue("", party, user, Set.of(artist));
         final HashSet<TrackInQueue> tracks = new HashSet<>(Set.of(track));
         final HashSet<Track> tracksForArtist = new HashSet<>(Set.of(track));
-        final UserResponse userResponse = DataGenerator.generateUserResponse(user);
+        final UserResponse userResponse = generateUserResponse(user);
         user.setParty(party);
         user.setPartyRole(PartyRole.PARTICIPANT);
         user.setAddedTracks(tracks);
@@ -167,8 +174,8 @@ public class UserServiceTest {
 
     @Test
     void givenUserInPartyAsCreator_whenDelete_thenSuccess() {
-        final Party party = DataGenerator.generateParty("", Set.of(user));
-        final UserResponse userResponse = DataGenerator.generateUserResponse(user);
+        final Party party = generateParty("", Set.of(user));
+        final UserResponse userResponse = generateUserResponse(user);
         user.setParty(party);
         user.setPartyRole(PartyRole.CREATOR);
         when(userMapper.mapUserToUserResponse(any())).thenReturn(userResponse);
@@ -186,48 +193,83 @@ public class UserServiceTest {
     }
 
     @Test
+    void givenUserWithSpotify_whenDelete_thenDeletesSpotifyAlso() {
+        final Party party = generateParty("", Set.of(user));
+        final SpotifyCredential spotifyCredential = generateSpotifyCredential(user);
+        user.setParty(party);
+        user.setPartyRole(PartyRole.CREATOR);
+        user.setSpotifyCredential(spotifyCredential);
+        when(spotifyCredentialService.delete(any())).then(invocation -> {
+            user.setSpotifyCredential(null);
+            return null;
+        });
+
+        userService.delete(user, user.getUsername());
+
+        assertThat(user.getSpotifyCredential()).isNull();
+    }
+
+    @Test
     void givenUser_whenUpdateUsername_thenSuccess() {
-        final UserResponse userResponse = DataGenerator.generateUserResponse(user);
-        final UserRequest userRequest = DataGenerator.generateUserRequest(user);
+        final UserResponse userResponse = generateUserResponse(user);
+        final UpdateUserDetailsRequest userRequest = generateUpdateUserDetailsRequest(user);
         userRequest.setUsername("otherUsername");
         userResponse.setUsername("otherUsername");
-        when(passwordEncoder.encode(any())).thenReturn(user.getPassword());
         when(userRepository.save(any())).thenReturn(user);
         when(userMapper.mapUserToUserResponse(any())).thenReturn(userResponse);
 
-        final UserResponse response = userService.update(user, user.getUsername(), userRequest);
+        final UserResponse response = userService.updateDetails(user, user.getUsername(), userRequest);
 
         assertThat(response.getUsername()).isSameAs(userRequest.getUsername());
     }
 
     @Test
     void givenUser_whenUpdateEmail_thenSuccess() {
-        final UserResponse userResponse = DataGenerator.generateUserResponse(user);
-        final UserRequest userRequest = DataGenerator.generateUserRequest(user);
+        final UserResponse userResponse = generateUserResponse(user);
+        final UpdateUserDetailsRequest userRequest = generateUpdateUserDetailsRequest(user);
         userRequest.setEmail("other@email.test");
         userResponse.setEmail("other@email.test");
-        when(passwordEncoder.encode(any())).thenReturn(user.getPassword());
         when(userRepository.save(any())).thenReturn(user);
         when(userMapper.mapUserToUserResponse(any())).thenReturn(userResponse);
 
-        final UserResponse response = userService.update(user, user.getUsername(), userRequest);
+        final UserResponse response = userService.updateDetails(user, user.getUsername(), userRequest);
 
         assertThat(response.getEmail()).isSameAs(userRequest.getEmail());
     }
 
     @Test
     void givenUser_whenUpdatePassword_thenSuccess() {
-        final UserResponse userResponse = DataGenerator.generateUserResponse(user);
-        final UserRequest userRequest = DataGenerator.generateUserRequest(user);
-        userRequest.setPassword("otherPassword");
+        final UserResponse userResponse = generateUserResponse(user);
+        final UpdateUserPasswordRequest userRequest = generateUpdateUserPasswordRequest(user);
         when(passwordEncoder.encode(any())).thenReturn(user.getPassword());
+        when(passwordEncoder.matches("password", "password")).thenReturn(true);
         when(userRepository.save(any())).thenReturn(user);
         when(userMapper.mapUserToUserResponse(any())).thenReturn(userResponse);
 
-        final UserResponse response = userService.update(user, user.getUsername(), userRequest);
+        final UserResponse response = userService.updatePassword(user, user.getUsername(), userRequest);
 
         verifyUserAndResponse(response, user);
     }
+
+    @Test
+    void givenUser_whenUpdatePassword_thenIncorrectCurrentPassword() {
+        final UpdateUserPasswordRequest userRequest = generateUpdateUserPasswordRequest(user);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+        assertThrows(RequiredFieldInvalidException.class, () ->
+                userService.updatePassword(user, user.getUsername(), userRequest));
+    }
+
+    @Test
+    void givenUser_whenGetUserInfo_thenSuccess() {
+        final UserResponse userResponse = generateUserResponse(user);
+        when(userMapper.mapUserToUserResponse(any())).thenReturn(userResponse);
+
+        final UserResponse response = userService.getUserInfo(user);
+
+        assertThat(response).isSameAs(userResponse);
+    }
+
 
     private void verifyUserAndResponse(final UserResponse response, final User user) {
         assertThat(response.getId()).isEqualTo(user.getId());

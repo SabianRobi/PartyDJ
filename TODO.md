@@ -57,7 +57,6 @@ Auth required for every endpoint
 | [X]  | GetToken     | GET    | /platforms/spotify/token    | Returns the user's Spotify token                        |
 | [X]  | RefreshToken | PATCH  | /platforms/spotify/token    | Makes the backend refresh the user's Spotify token      |
 
-* Create liveness endpoint
 * Split user password update into its own endpoint
 * Separate model, service, web layer into separate projects
     * Service repository methods should be private
@@ -70,6 +69,9 @@ Auth required for every endpoint
 * Recommend songs when no tracks in queue
 * Make documentation
 * Introduce ModelMapper instead of creating them manually
+* Create liveness endpoint
+* Send normalized error message paths to frontend
+  * (ie. "updateDetails.<cross-parameter>" -> "general"; in updatePassword constraint)
 
 * Add option to select playback device id on Spotify
 * Add YouTube support
