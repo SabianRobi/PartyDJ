@@ -17,14 +17,15 @@ localhost:8080/api/v1/
 
 ### User
 
-| Done | Name     | Method | Path             | Description                                | Auth required? |
-|------|----------|--------|------------------|--------------------------------------------|----------------|
-| [X]  | Register | POST   | /user            | Validates the submitted data & saves to DB | no             |
-| [X]  | Login    | POST   | /login           | Validates the submitted data & updates DB  | no             |
-| [X]  | Logout   | POST   | /logout          | Logs out the user                          | yes            |
-| [X]  | Profile  | GET    | /user/{username} | Returns the user infos                     | yes            |
-| [X]  | Profile  | PUT    | /user/{username} | Updates the user infos                     | yes            |
-| [X]  | Profile  | DELETE | /user/{username} | Deletes the profile                        | yes            |
+| Done | Name     | Method | Path                      | Description                                | Auth required? |
+|------|----------|--------|---------------------------|--------------------------------------------|----------------|
+| [X]  | Register | POST   | /user                     | Validates the submitted data & saves to DB | no             |
+| [X]  | Login    | POST   | /login                    | Validates the submitted data & updates DB  | no             |
+| [X]  | Logout   | POST   | /logout                   | Logs out the user                          | yes            |
+| [X]  | Profile  | GET    | /user/{username}          | Returns the user infos                     | yes            |
+| [X]  | Profile  | PATCH  | /user/{username}          | Updates the user details                   | yes            |
+| [X]  | Profile  | PATCH  | /user/{username}/password | Updates the user password                  | yes            |
+| [X]  | Profile  | DELETE | /user/{username}          | Deletes the profile                        | yes            |
 
 ### Party
 
@@ -57,7 +58,13 @@ Auth required for every endpoint
 | [X]  | GetToken     | GET    | /platforms/spotify/token    | Returns the user's Spotify token                        |
 | [X]  | RefreshToken | PATCH  | /platforms/spotify/token    | Makes the backend refresh the user's Spotify token      |
 
-* Split user password update into its own endpoint
+* When frontend comes alive
+  * Enable CSRF protection
+    * Check: when login fails -> response is 200 and no errors returned (does not log in)
+* Recommend songs when no tracks in queue
+* Add option to select playback device id on Spotify
+* Add YouTube support
+
 * Separate model, service, web layer into separate projects
     * Service repository methods should be private
 * Add tests
@@ -66,16 +73,10 @@ Auth required for every endpoint
     * Services
     * Controllers
 * Add readme (introduction, configuring, running)
-* Recommend songs when no tracks in queue
 * Make documentation
 * Introduce ModelMapper instead of creating them manually
 * Create liveness endpoint
 * Send normalized error message paths to frontend
   * (ie. "updateDetails.<cross-parameter>" -> "general"; in updatePassword constraint)
 
-* Add option to select playback device id on Spotify
-* Add YouTube support
-* When frontend comes alive
-    * Enable CSRF protection
-    * Check: when login fails -> response is 200 and no errors returned (does not log in)
   

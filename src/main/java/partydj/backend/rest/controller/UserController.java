@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.entity.User;
+import partydj.backend.rest.entity.request.DeleteUserRequest;
 import partydj.backend.rest.entity.request.SaveUserRequest;
 import partydj.backend.rest.entity.request.UpdateUserDetailsRequest;
 import partydj.backend.rest.entity.request.UpdateUserPasswordRequest;
@@ -19,7 +20,7 @@ import partydj.backend.rest.service.UserService;
 import partydj.backend.rest.validation.constraint.Name;
 
 @RestController
-@CrossOrigin
+@CrossOrigin("http://localhost:3000/")
 @RequestMapping(value = "/api/v1/user", produces = "application/json")
 public class UserController {
 
@@ -81,12 +82,13 @@ public class UserController {
 
     // Delete
     @DeleteMapping("/{username}")
-    public UserResponse delete(@PathVariable("username") @Name final String toBeDeletedUsername,
+    public UserResponse delete(@Valid @RequestBody final DeleteUserRequest deleteUserRequest,
+                               @PathVariable("username") @Name final String toBeDeletedUsername,
                                final Authentication auth,
                                final HttpServletRequest request) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
-        final UserResponse response = userService.delete(loggedInUser, toBeDeletedUsername);
+        final UserResponse response = userService.delete(loggedInUser, toBeDeletedUsername, deleteUserRequest);
 
         // Log out the user
         try {

@@ -2,5 +2,6 @@
   "id" : 1,
   "email" : "e@ma.il",
   "username" : "username",
+  "partyName" : null,
   "spotifyConnected" : false
 }

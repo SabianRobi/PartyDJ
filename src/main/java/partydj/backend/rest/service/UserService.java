@@ -12,6 +12,7 @@ import partydj.backend.rest.entity.enums.PartyRole;
 import partydj.backend.rest.entity.enums.UserType;
 import partydj.backend.rest.entity.error.NotUniqueException;
 import partydj.backend.rest.entity.error.RequiredFieldInvalidException;
+import partydj.backend.rest.entity.request.DeleteUserRequest;
 import partydj.backend.rest.entity.request.SaveUserRequest;
 import partydj.backend.rest.entity.request.UpdateUserDetailsRequest;
 import partydj.backend.rest.entity.request.UpdateUserPasswordRequest;
@@ -110,7 +111,11 @@ public class UserService {
 
     @Transactional
     @SameUser
-    public UserResponse delete(final User loggedInUser, final String toBeDeletedUsername) {
+    public UserResponse delete(final User loggedInUser, final String toBeDeletedUsername, final DeleteUserRequest deleteUserRequest) {
+        if(!passwordEncoder.matches(deleteUserRequest.getPassword(), loggedInUser.getPassword())) {
+            throw new RequiredFieldInvalidException("Incorrect password.");
+        }
+
         if (loggedInUser.getPartyRole() != null) {
             if (loggedInUser.getPartyRole() == PartyRole.CREATOR) {
                 partyService.deleteByName(loggedInUser, loggedInUser.getParty().getName());

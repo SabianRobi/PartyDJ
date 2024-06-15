@@ -29,4 +29,7 @@ public class UserResponse {
 
     @NotNull
     private boolean isSpotifyConnected;
+
+    @NotNull
+    private String partyName;
 }

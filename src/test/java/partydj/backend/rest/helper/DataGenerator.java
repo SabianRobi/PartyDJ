@@ -193,6 +193,13 @@ public class DataGenerator {
                 .build();
     }
 
+    public static DeleteUserRequest generateDeleteUserRequest(final User user) {
+        return DeleteUserRequest.builder()
+                .confirmChoice(true)
+                .password(user.getPassword())
+                .build();
+    }
+
 
     // RESPONSES
 

@@ -37,4 +37,10 @@ public class SaveUserRequest {
     @NotBlank
     @Size(min = PASSWORD_MIN_LENGTH, message = "Should be at least {min} characters long.")
     private String password;
+
+    // TODO: implement this
+//    @NotNull
+//    @NotBlank
+//    @Size(min = PASSWORD_MIN_LENGTH, message = "Should be at least {min} characters long.")
+//    private String confirmPassword;
 }

@@ -11,6 +11,7 @@ import partydj.backend.rest.entity.*;
 import partydj.backend.rest.entity.enums.PartyRole;
 import partydj.backend.rest.entity.error.NotUniqueException;
 import partydj.backend.rest.entity.error.RequiredFieldInvalidException;
+import partydj.backend.rest.entity.request.DeleteUserRequest;
 import partydj.backend.rest.entity.request.SaveUserRequest;
 import partydj.backend.rest.entity.request.UpdateUserDetailsRequest;
 import partydj.backend.rest.entity.request.UpdateUserPasswordRequest;
@@ -141,13 +142,25 @@ public class UserServiceTest {
     @Test
     void givenUserNotInParty_whenDelete_thenSuccess() {
         final UserResponse userResponse = generateUserResponse(user);
+        final DeleteUserRequest deleteUserRequest = generateDeleteUserRequest(user);
+        when(passwordEncoder.matches(any(), any())).thenReturn(true);
         when(userMapper.mapUserToUserResponse(any())).thenReturn(userResponse);
 
-        final UserResponse response = userService.delete(user, user.getUsername());
+        final UserResponse response = userService.delete(user, user.getUsername(), deleteUserRequest);
 
         verifyUserAndResponse(response, user);
     }
 
+    @Test
+    void givenUserNotInPartyAndWrongPassword_whenDelete_thenThrowsException() {
+        final DeleteUserRequest deleteUserRequest = generateDeleteUserRequest(user);
+        deleteUserRequest.setPassword("someOtherPassword");
+        when(passwordEncoder.matches(any(), any())).thenReturn(false);
+
+        assertThrows(RequiredFieldInvalidException.class, () -> userService.delete(user, user.getUsername(), deleteUserRequest));
+    }
+
+    // TODO
     @Test
     void givenUserInPartyAsParticipant_whenDelete_thenSuccess() {
         final Party party = generateParty("", Set.of(user));
@@ -156,15 +169,17 @@ public class UserServiceTest {
         final HashSet<TrackInQueue> tracks = new HashSet<>(Set.of(track));
         final HashSet<Track> tracksForArtist = new HashSet<>(Set.of(track));
         final UserResponse userResponse = generateUserResponse(user);
+        final DeleteUserRequest deleteUserRequest = generateDeleteUserRequest(user);
         user.setParty(party);
         user.setPartyRole(PartyRole.PARTICIPANT);
         user.setAddedTracks(tracks);
         party.setTracksInQueue(tracks);
         artist.setTracks(tracksForArtist);
 
+        when(passwordEncoder.matches(any(), any())).thenReturn(true);
         when(userMapper.mapUserToUserResponse(any())).thenReturn(userResponse);
 
-        final UserResponse response = userService.delete(user, user.getUsername());
+        final UserResponse response = userService.delete(user, user.getUsername(), deleteUserRequest);
 
         verifyUserAndResponse(response, user);
         assertThat(user.getAddedTracks()).isEmpty();
@@ -172,12 +187,15 @@ public class UserServiceTest {
         assertThat(artist.getTracks()).isEmpty();
     }
 
+    // TODO
     @Test
     void givenUserInPartyAsCreator_whenDelete_thenSuccess() {
         final Party party = generateParty("", Set.of(user));
         final UserResponse userResponse = generateUserResponse(user);
+        final DeleteUserRequest deleteUserRequest = generateDeleteUserRequest(user);
         user.setParty(party);
         user.setPartyRole(PartyRole.CREATOR);
+        when(passwordEncoder.matches(any(), any())).thenReturn(true);
         when(userMapper.mapUserToUserResponse(any())).thenReturn(userResponse);
         when(partyService.deleteByName(any(), any())).thenAnswer(invocation -> {
             user.setParty(null);
@@ -185,26 +203,29 @@ public class UserServiceTest {
             return null;
         });
 
-        final UserResponse response = userService.delete(user, user.getUsername());
+        final UserResponse response = userService.delete(user, user.getUsername(), deleteUserRequest);
 
         verifyUserAndResponse(response, user);
         assertThat(user.getParty()).isNull();
         assertThat(user.getPartyRole()).isNull();
     }
 
+    // TODO
     @Test
     void givenUserWithSpotify_whenDelete_thenDeletesSpotifyAlso() {
         final Party party = generateParty("", Set.of(user));
         final SpotifyCredential spotifyCredential = generateSpotifyCredential(user);
+        final DeleteUserRequest deleteUserRequest = generateDeleteUserRequest(user);
         user.setParty(party);
         user.setPartyRole(PartyRole.CREATOR);
         user.setSpotifyCredential(spotifyCredential);
+        when(passwordEncoder.matches(any(), any())).thenReturn(true);
         when(spotifyCredentialService.delete(any())).then(invocation -> {
             user.setSpotifyCredential(null);
             return null;
         });
 
-        userService.delete(user, user.getUsername());
+        userService.delete(user, user.getUsername(), deleteUserRequest);
 
         assertThat(user.getSpotifyCredential()).isNull();
     }

@@ -7,7 +7,6 @@ import partydj.backend.rest.validation.constraint.NewPasswordsMatch;
 
 public class NewPasswordsMatchValidator implements ConstraintValidator<NewPasswordsMatch, UpdateUserPasswordRequest> {
 
-
     @Override
     public boolean isValid(final UpdateUserPasswordRequest request, final ConstraintValidatorContext context) {
         if (request == null
