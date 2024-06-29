@@ -8,7 +8,6 @@ import partydj.backend.rest.entity.response.PreviousTrackResponse;
 import partydj.backend.rest.entity.response.TrackInQueueResponse;
 import partydj.backend.rest.entity.response.TrackSearchResultResponse;
 import partydj.backend.rest.service.ArtistService;
-import se.michaelthelin.spotify.model_objects.specification.ArtistSimplified;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -57,7 +56,8 @@ public class TrackMapper {
             final se.michaelthelin.spotify.model_objects.specification.Track track) {
         return TrackSearchResultResponse.builder()
                 .title(track.getName())
-                .artists(Arrays.stream(track.getArtists()).map(ArtistSimplified::getName).collect(Collectors.toSet()))
+                .artists(Arrays.stream(track.getArtists()).map(artistSimplified ->
+                        artistMapper.mapSimplifiedArtistToArtistResponse(artistSimplified)).collect(Collectors.toSet()))
                 .coverUri(track.getAlbum().getImages()[1].getUrl())
                 .length(track.getDurationMs())
                 .platformType(PlatformType.SPOTIFY)

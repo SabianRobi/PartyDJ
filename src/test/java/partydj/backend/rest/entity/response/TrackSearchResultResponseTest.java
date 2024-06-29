@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ResourceUtils;
+import partydj.backend.rest.entity.Artist;
 import partydj.backend.rest.entity.enums.PlatformType;
+import partydj.backend.rest.helper.DataGenerator;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -18,13 +20,15 @@ public class TrackSearchResultResponseTest {
     private final String path;
 
     private TrackSearchResultResponseTest() {
-        final HashSet<String> artists = new HashSet<>();
-        artists.add("artist");
+        final Artist artist = DataGenerator.generateArtist();
+        final ArtistResponse artistResponse = DataGenerator.generateArtistResponse(artist);
+        final HashSet<ArtistResponse> artistResponses = new HashSet<>();
+        artistResponses.add(artistResponse);
 
         trackSearchResultResponse = TrackSearchResultResponse.builder()
                 .uri("spotify:track:something")
                 .title("title")
-                .artists(artists)
+                .artists(artistResponses)
                 .coverUri("https://cover.uri")
                 .length(420)
                 .platformType(PlatformType.SPOTIFY)

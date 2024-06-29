@@ -29,7 +29,7 @@ public class TrackSearchResultResponse {
     @EqualsAndHashCode.Exclude
     @NotNull
     @NotEmpty
-    private Set<@NotNull @NotBlank String> artists;
+    private Set<@NotNull @NotBlank ArtistResponse> artists;
 
     @NotNull
     @NotBlank

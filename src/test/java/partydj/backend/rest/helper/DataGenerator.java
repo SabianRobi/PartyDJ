@@ -166,7 +166,7 @@ public class DataGenerator {
         return TrackSearchResultResponse.builder()
                 .uri(track.getUri())
                 .title(track.getTitle())
-                .artists(artists.stream().map(Artist::getName).collect(Collectors.toSet()))
+                .artists(artists.stream().map(DataGenerator::generateArtistResponse).collect(Collectors.toSet()))
                 .coverUri(track.getCoverUri())
                 .length(track.getLength())
                 .platformType(track.getPlatformType())
