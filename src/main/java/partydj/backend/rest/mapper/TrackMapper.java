@@ -1,5 +1,6 @@
 package partydj.backend.rest.mapper;
 
+import com.google.api.services.youtube.model.SearchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import partydj.backend.rest.entity.*;
@@ -11,6 +12,7 @@ import partydj.backend.rest.service.ArtistService;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -62,6 +64,17 @@ public class TrackMapper {
                 .length(track.getDurationMs())
                 .platformType(PlatformType.SPOTIFY)
                 .uri(track.getUri())
+                .build();
+    }
+
+    public TrackSearchResultResponse mapYouTubeVideoToTrackSearchResultResponse(final SearchResult video) {
+        return TrackSearchResultResponse.builder()
+                .title(video.getSnippet().getTitle())
+                .artists(new HashSet<>(Collections.singletonList(artistMapper.mapYouTubeSearchResultToArtistResponse(video))))
+                .coverUri(video.getSnippet().getThumbnails().getHigh().getUrl())
+                .length(0) // TODO: get this data
+                .platformType(PlatformType.YOUTUBE)
+                .uri(video.getId().getVideoId())
                 .build();
     }
 

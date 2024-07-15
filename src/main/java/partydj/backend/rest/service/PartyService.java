@@ -45,6 +45,9 @@ public class PartyService {
     private SpotifyService spotifyService;
 
     @Autowired
+    private YouTubeService youTubeService;
+
+    @Autowired
     private TrackMapper trackMapper;
 
     @Autowired
@@ -185,8 +188,12 @@ public class PartyService {
         validator.validateOnSearch(loggedInUser, party, platforms);
 
         Collection<TrackSearchResultResponse> results = new ArrayList<>();
+
         if (platforms.contains(PlatformType.SPOTIFY)) {
             results.addAll(spotifyService.search(loggedInUser, query, offset, limit));
+        }
+        if (platforms.contains(PlatformType.YOUTUBE)) {
+            results.addAll(youTubeService.search(query, offset, limit));
         }
 
         return results;
