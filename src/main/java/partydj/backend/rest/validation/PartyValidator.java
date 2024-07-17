@@ -96,6 +96,10 @@ public class PartyValidator {
 
         if (addTrackRequest.getPlatformType() == PlatformType.SPOTIFY) {
             verifyUserIsLoggedInWithSpotify(loggedInUser);
+
+            if(!addTrackRequest.getUri().startsWith("spotify:track:")){
+                throw new RequiredFieldInvalidException("Incorrect URI.");
+            }
         }
     }
 

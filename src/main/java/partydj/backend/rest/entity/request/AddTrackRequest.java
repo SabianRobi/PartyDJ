@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import partydj.backend.rest.entity.enums.PlatformType;
-import partydj.backend.rest.validation.constraint.TrackUri;
 
 @Data
 @Builder
@@ -15,7 +14,6 @@ import partydj.backend.rest.validation.constraint.TrackUri;
 public class AddTrackRequest {
 
     @NotNull
-    @TrackUri
     private String uri;
 
     @NotNull

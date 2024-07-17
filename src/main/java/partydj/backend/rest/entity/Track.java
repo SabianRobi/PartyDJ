@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.validator.constraints.URL;
 import partydj.backend.rest.entity.enums.PlatformType;
-import partydj.backend.rest.validation.constraint.TrackUri;
 
 import java.util.Set;
 
@@ -25,7 +24,6 @@ public class Track {
     private int id;
 
     @NotBlank
-    @TrackUri
     private String uri;
 
     @NotBlank

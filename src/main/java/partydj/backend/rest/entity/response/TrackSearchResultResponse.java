@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Positive;
 import lombok.*;
 import org.hibernate.validator.constraints.URL;
 import partydj.backend.rest.entity.enums.PlatformType;
-import partydj.backend.rest.validation.constraint.TrackUri;
 
 import java.util.Set;
 
@@ -19,7 +18,6 @@ public class TrackSearchResultResponse {
 
     @NotNull
     @NotBlank
-    @TrackUri
     private String uri;
 
     @NotNull
