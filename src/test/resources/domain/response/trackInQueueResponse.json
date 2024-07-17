@@ -1,5 +1,6 @@
 {
   "id" : 1,
+  "uri" : "uri",
   "title" : "title",
   "artists" : [ {
     "name" : "artist"

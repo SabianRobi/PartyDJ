@@ -19,6 +19,9 @@ public class TrackInQueueResponse {
     @NotNull
     private int id;
 
+    @NotBlank
+    private String uri;
+
     @NotNull
     @NotBlank
     private String title;

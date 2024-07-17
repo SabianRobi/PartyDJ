@@ -33,6 +33,7 @@ public class TrackMapper {
     public TrackInQueueResponse mapTrackToTrackInQueueResponse(final TrackInQueue track) {
         return TrackInQueueResponse.builder()
                 .id(track.getId())
+                .uri(track.getUri())
                 .title(track.getTitle())
                 .artists(track.getArtists().stream().map(artist ->
                         artistMapper.mapArtistToArtistResponse(artist)).toList())

@@ -28,6 +28,7 @@ public class TrackInQueueResponseTest {
 
         trackInQueueResponse = TrackInQueueResponse.builder()
                 .id(1)
+                .uri("uri")
                 .title("title")
                 .artists(Set.of(artistResponse))
                 .coverUri("https://cover.uri")
