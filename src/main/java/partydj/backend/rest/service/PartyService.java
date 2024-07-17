@@ -204,7 +204,13 @@ public class PartyService {
 
         validator.validateOnAddTrack(loggedInUser, addTrackRequest, party);
 
-        final TrackInQueue track = spotifyService.fetchAndSafeTrackInfo(loggedInUser, addTrackRequest.getUri(), party);
+        TrackInQueue track = new TrackInQueue();
+        if (addTrackRequest.getPlatformType() == PlatformType.SPOTIFY) {
+             track = spotifyService.fetchAndSafeTrackInfo(loggedInUser, addTrackRequest.getUri(), party);
+        } else if (addTrackRequest.getPlatformType() == PlatformType.YOUTUBE) {
+            track = youTubeService.fetchAndSafeTrackInfo(loggedInUser, addTrackRequest.getUri(), party);
+        }
+
         party.addTrackToQueue(track);
         save(party);
 
