@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.entity.User;
 import partydj.backend.rest.entity.request.DeleteUserRequest;
@@ -78,6 +80,22 @@ public class UserController {
         final User toGetUser = userService.findByUsername(username);
 
         return userService.getUserInfo(toGetUser);
+    }
+
+    // Get user info from cookie
+    @GetMapping("/me")
+    public UserResponse me() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            Object principal = auth.getPrincipal();
+            if (principal instanceof UserDetails user) {
+                final User loggedinUser = userService.findByUsername(user.getUsername());
+
+                return userService.getUserInfo(loggedinUser);
+            }
+        }
+
+        throw new UsernameNotFoundException("User not found");
     }
 
     // Delete

@@ -53,47 +53,48 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers(
-                                AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/v1/user"),
-                                AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/platforms/spotify/callback/**")
-                        ).permitAll()
-                        .requestMatchers(
-                                new AntPathRequestMatcher("/api/v1/user/**"),
-                                new AntPathRequestMatcher("/api/v1/party/**"),
-                                new AntPathRequestMatcher("/api/v1/platforms/**")
-                        ).hasRole("NORMAL")
-                        .anyRequest().authenticated()
-                )
-                .formLogin((form) -> form
-                        .loginProcessingUrl("/api/v1/login")
-                        .successHandler((request, response, authentication) -> {
-                            response.setStatus(HttpStatus.OK.value());
-                            response.setContentType("application/json");
-                            response.setCharacterEncoding("UTF-8");
+            .authorizeHttpRequests((requests) -> requests
+                .requestMatchers(
+                    AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/v1/user"),
+                    AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/v1/user/me"),
+                    AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/v1/platforms/spotify/callback/**")
+                ).permitAll()
+                .requestMatchers(
+                    new AntPathRequestMatcher("/api/v1/user/**"),
+                    new AntPathRequestMatcher("/api/v1/party/**"),
+                    new AntPathRequestMatcher("/api/v1/platforms/**")
+                ).hasRole("NORMAL")
+                .anyRequest().authenticated()
+            )
+            .formLogin((form) -> form
+                .loginProcessingUrl("/api/v1/login")
+                .successHandler((request, response, authentication) -> {
+                    response.setStatus(HttpStatus.OK.value());
+                    response.setContentType("application/json");
+                    response.setCharacterEncoding("UTF-8");
 
-                            User user = userService.findByUsername(authentication.getName());
-                            ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-                            String json = ow.writeValueAsString(userMapper.mapUserToUserResponse(user));
-                            response.getWriter().write(json);
-                        })
-                        .failureHandler((request, response, exception) ->
-                                response.setStatus(HttpStatus.UNAUTHORIZED.value()))
-                        .permitAll()
-                )
-                .logout(logout -> logout
-                        .logoutUrl("/api/v1/logout")
-                        .logoutSuccessHandler((request, response, authentication) ->
-                                response.setStatus(HttpStatus.OK.value()))
-                        .permitAll()
-                )
-//                .csrf(form -> form.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-                .csrf(AbstractHttpConfigurer::disable)
-//                .headers(head -> head.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-                .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) ->
-                        response.setStatus(HttpStatus.UNAUTHORIZED.value())))
-//                .httpBasic(Customizer.withDefaults())
-                .cors(Customizer.withDefaults());
+                    User user = userService.findByUsername(authentication.getName());
+                    ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
+                    String json = ow.writeValueAsString(userMapper.mapUserToUserResponse(user));
+                    response.getWriter().write(json);
+                })
+                .failureHandler((request, response, exception) ->
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value()))
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/api/v1/logout")
+                .logoutSuccessHandler((request, response, authentication) ->
+                    response.setStatus(HttpStatus.OK.value()))
+                .permitAll()
+            )
+    //      .csrf(form -> form.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+            .csrf(AbstractHttpConfigurer::disable)
+    //      .headers(head -> head.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+            .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) ->
+                response.setStatus(HttpStatus.UNAUTHORIZED.value())))
+    //              .httpBasic(Customizer.withDefaults())
+            .cors(Customizer.withDefaults());
         return http.build();
     }
 }
