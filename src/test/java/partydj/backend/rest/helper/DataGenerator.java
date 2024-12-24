@@ -180,6 +180,13 @@ public class DataGenerator {
                 .build();
     }
 
+    public static SetSpotifyTokensRequest generateSetSpotifyTokensRequest() {
+        return SetSpotifyTokensRequest.builder()
+                .code("someCode")
+                .state(UUID.randomUUID())
+                .build();
+    }
+
     public static SetSpotifyDeviceIdRequest generateSpotifyRequest(final Party party) {
         return SetSpotifyDeviceIdRequest.builder()
                 .deviceId(party.getSpotifyDeviceId())

@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import partydj.backend.rest.entity.SpotifyCredential;
 import partydj.backend.rest.entity.User;
+import partydj.backend.rest.entity.request.SetSpotifyTokensRequest;
 import partydj.backend.rest.entity.response.SpotifyCredentialResponse;
 import partydj.backend.rest.entity.response.SpotifyLoginUriResponse;
 import partydj.backend.rest.helper.DataGenerator;
@@ -20,6 +21,7 @@ import java.util.UUID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static partydj.backend.rest.helper.DataGenerator.generateSetSpotifyTokensRequest;
 
 @ExtendWith(MockitoExtension.class)
 public class SpotifyCredentialServiceTest {
@@ -137,14 +139,13 @@ public class SpotifyCredentialServiceTest {
 
     @Test
     void givenSpotifyResponse_whenProcessCallback_thenSuccess() {
-        final String code = "code";
-        final UUID state = UUID.randomUUID();
+        final SetSpotifyTokensRequest request = generateSetSpotifyTokensRequest();
         final SpotifyCredentialResponse credentialResponse =
                 DataGenerator.generateSpotifyCredentialResponse(spotifyCredential);
         when(spotifyCredentialRepository.findByState(any())).thenReturn(spotifyCredential);
         when(spotifyService.processCallback(any(), any())).thenReturn(credentialResponse);
 
-        final SpotifyCredentialResponse response = spotifyCredentialService.processCallback(code, state);
+        final SpotifyCredentialResponse response = spotifyCredentialService.processCallback(request);
 
         assertThat(response.getToken()).isSameAs(spotifyCredential.getToken());
     }

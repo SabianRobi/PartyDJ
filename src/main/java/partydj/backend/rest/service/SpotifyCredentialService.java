@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.entity.SpotifyCredential;
 import partydj.backend.rest.entity.User;
+import partydj.backend.rest.entity.request.SetSpotifyTokensRequest;
 import partydj.backend.rest.entity.response.SpotifyCredentialResponse;
 import partydj.backend.rest.entity.response.SpotifyLoginUriResponse;
 import partydj.backend.rest.mapper.SpotifyCredentialMapper;
@@ -87,10 +88,10 @@ public class SpotifyCredentialService {
         return spotifyService.generateLoginUri(state);
     }
 
-    public SpotifyCredentialResponse processCallback(final String code, final UUID state) {
-        final SpotifyCredential spotifyCredential = findByState(state);
+    public SpotifyCredentialResponse processCallback(final SetSpotifyTokensRequest request) {
+        final SpotifyCredential spotifyCredential = findByState(request.getState());
 
-        return spotifyService.processCallback(spotifyCredential, code);
+        return spotifyService.processCallback(spotifyCredential, request.getCode());
     }
 
     public SpotifyCredentialResponse logout(final User loggedInUser) {

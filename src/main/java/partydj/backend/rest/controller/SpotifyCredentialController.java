@@ -1,17 +1,16 @@
 package partydj.backend.rest.controller;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.entity.User;
+import partydj.backend.rest.entity.request.SetSpotifyTokensRequest;
 import partydj.backend.rest.entity.response.SpotifyCredentialResponse;
 import partydj.backend.rest.entity.response.SpotifyLoginUriResponse;
 import partydj.backend.rest.service.SpotifyCredentialService;
 import partydj.backend.rest.service.UserService;
-import partydj.backend.rest.validation.constraint.UUID;
 
 @RestController
 @CrossOrigin
@@ -31,11 +30,10 @@ public class SpotifyCredentialController {
         return spotifyCredentialService.getLoginUri(loggedInUser);
     }
 
-    @GetMapping("/callback")
+    @PostMapping(value = "/callback", consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public SpotifyCredentialResponse processCallback(@RequestParam @NotNull @NotBlank final String code,
-                                                     @RequestParam @NotNull @UUID final java.util.UUID state) {
-        return spotifyCredentialService.processCallback(code, state);
+    public SpotifyCredentialResponse processCallback(@Valid @RequestBody final SetSpotifyTokensRequest request) {
+        return spotifyCredentialService.processCallback(request);
     }
 
     @PostMapping("/logout")
