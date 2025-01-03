@@ -112,4 +112,10 @@ public class GoogleCredentialService {
         return platformCredentialMapper.mapCredentialToCredentialResponse(
                 findByOwner(loggedInUser));
     }
+
+    public PlatformCredentialResponse refreshToken(final User loggedInUser) {
+        final GoogleCredential googleCredential = findByOwner(loggedInUser);
+
+        return googleService.refreshToken(googleCredential);
+    }
 }

@@ -1,7 +1,9 @@
 package partydj.backend.rest.service;
 
+import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.ClientId;
 import com.google.auth.oauth2.UserAuthorizer;
+import com.google.auth.oauth2.UserCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -92,6 +94,25 @@ public class GoogleService {
             userAuthorizer.revokeAuthorization(String.valueOf(user.getId()));
         } catch (IOException e) {
             throw new ThirdPartyApiException("Failed to disconnect Google: " + e.getMessage());
+        }
+
+        return platformCredentialMapper.mapCredentialToCredentialResponse(googleCredential);
+    }
+
+    public PlatformCredentialResponse refreshToken(final GoogleCredential googleCredential) {
+        UserCredentials credentials = UserCredentials
+                .newBuilder()
+                .setClientId(googleConfigs.get("client-id"))
+                .setClientSecret(googleConfigs.get("client-secret"))
+                .setRefreshToken(googleCredential.getRefreshToken())
+                .build();
+
+        try {
+            final AccessToken accessToken = credentials.refreshAccessToken();
+            googleCredential.setToken(accessToken.getTokenValue());
+            googleCredentialService.save(googleCredential);
+        } catch (IOException e) {
+            throw new ThirdPartyApiException("Failed to refresh Google token: " + e.getMessage());
         }
 
         return platformCredentialMapper.mapCredentialToCredentialResponse(googleCredential);

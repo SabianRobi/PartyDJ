@@ -49,4 +49,11 @@ public class GoogleCredentialController {
 
         return googleCredentialService.getToken(loggedInUser);
     }
+
+    @PatchMapping("/token")
+    public PlatformCredentialResponse refreshToken(final Authentication auth) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
+
+        return googleCredentialService.refreshToken(loggedInUser);
+    }
 }

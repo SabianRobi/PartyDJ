@@ -96,8 +96,10 @@ public class SpotifyService {
 
     public PlatformCredentialResponse refreshToken(final SpotifyCredential spotifyCredential) {
         spotifyApi.setRefreshToken(spotifyCredential.getRefreshToken());
+
         final AuthorizationCodeRefreshRequest authorizationCodeRefreshRequest =
                 spotifyApi.authorizationCodeRefresh().build();
+
         try {
             final AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRefreshRequest.execute();
 
@@ -106,9 +108,9 @@ public class SpotifyService {
         } catch (IOException | SpotifyWebApiException | ParseException ex) {
             throw new ThirdPartyApiException("Failed to refresh Spotify token: " + ex.getMessage());
         }
+
         return platformCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }
-
 
     public Collection<TrackSearchResultResponse> search(final User loggedInUser, final String query,
                                                         final int offset, final int limit) {
