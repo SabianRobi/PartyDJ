@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.entity.*;
 import partydj.backend.rest.entity.error.ThirdPartyApiException;
-import partydj.backend.rest.entity.response.SpotifyCredentialResponse;
-import partydj.backend.rest.entity.response.SpotifyLoginUriResponse;
+import partydj.backend.rest.entity.response.PlatformCredentialResponse;
+import partydj.backend.rest.entity.response.PlatformLoginUriResponse;
 import partydj.backend.rest.entity.response.TrackSearchResultResponse;
-import partydj.backend.rest.mapper.SpotifyCredentialMapper;
+import partydj.backend.rest.mapper.PlatformCredentialMapper;
 import partydj.backend.rest.mapper.TrackMapper;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
@@ -51,7 +51,7 @@ public class SpotifyService {
     private Map<String, String> spotifyConfigs;
 
     @Autowired
-    private SpotifyCredentialMapper spotifyCredentialMapper;
+    private PlatformCredentialMapper platformCredentialMapper;
 
     private final SpotifyApi spotifyApi;
 
@@ -64,17 +64,17 @@ public class SpotifyService {
                 .build();
     }
 
-    public SpotifyLoginUriResponse generateLoginUri(final String state) {
+    public PlatformLoginUriResponse generateLoginUri(final String state) {
         final AuthorizationCodeUriRequest authorizationCodeUriRequest = spotifyApi.authorizationCodeUri()
                 .scope(spotifyConfigs.get("scopes"))
                 .show_dialog(true)
                 .state(state)
                 .build();
 
-        return new SpotifyLoginUriResponse(authorizationCodeUriRequest.execute().toString());
+        return new PlatformLoginUriResponse(authorizationCodeUriRequest.execute().toString());
     }
 
-    public SpotifyCredentialResponse processCallback(final SpotifyCredential spotifyCredential, final String code) {
+    public PlatformCredentialResponse processCallback(final SpotifyCredential spotifyCredential, final String code) {
         final AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(code).build();
 
         try {
@@ -91,10 +91,10 @@ public class SpotifyService {
             throw new ThirdPartyApiException("Failed to log in with Spotify: " + ex.getMessage());
         }
 
-        return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
+        return platformCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }
 
-    public SpotifyCredentialResponse refreshToken(final SpotifyCredential spotifyCredential) {
+    public PlatformCredentialResponse refreshToken(final SpotifyCredential spotifyCredential) {
         spotifyApi.setRefreshToken(spotifyCredential.getRefreshToken());
         final AuthorizationCodeRefreshRequest authorizationCodeRefreshRequest =
                 spotifyApi.authorizationCodeRefresh().build();
@@ -106,7 +106,7 @@ public class SpotifyService {
         } catch (IOException | SpotifyWebApiException | ParseException ex) {
             throw new ThirdPartyApiException("Failed to refresh Spotify token: " + ex.getMessage());
         }
-        return spotifyCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
+        return platformCredentialMapper.mapCredentialToCredentialResponse(spotifyCredential);
     }
 
 

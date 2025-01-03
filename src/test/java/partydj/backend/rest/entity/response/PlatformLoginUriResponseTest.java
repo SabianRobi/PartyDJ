@@ -10,23 +10,23 @@ import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SpotifyCredentialResponseTest {
-    private final SpotifyCredentialResponse spotifyCredentialResponse;
+public class PlatformLoginUriResponseTest {
+    private final PlatformLoginUriResponse platformLoginUriResponse;
     private final ObjectMapper objectMapper;
     private final String path;
 
-    private SpotifyCredentialResponseTest() {
-        spotifyCredentialResponse = SpotifyCredentialResponse.builder()
-                .token("token")
+    private PlatformLoginUriResponseTest() {
+        platformLoginUriResponse = PlatformLoginUriResponse.builder()
+                .uri("https://spotify.test/login")
                 .build();
         objectMapper = new ObjectMapper();
-        path = "classpath:domain/response/spotifyCredentialResponse.json";
+        path = "classpath:domain/response/spotifyLoginUriResponseResponse.json";
     }
 
     @Test
     @SneakyThrows
     void shouldSerialize() {
-        final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(spotifyCredentialResponse);
+        final String actual = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(platformLoginUriResponse);
 
         final File jsonFile = ResourceUtils.getFile(path);
         final String expected = Files.readString(jsonFile.toPath());
@@ -37,9 +37,9 @@ public class SpotifyCredentialResponseTest {
     @Test
     @SneakyThrows
     void shouldDeserialize() {
-        final SpotifyCredentialResponse actual = objectMapper.readValue(
-                ResourceUtils.getFile(path), SpotifyCredentialResponse.class);
+        final PlatformLoginUriResponse actual = objectMapper.readValue(
+                ResourceUtils.getFile(path), PlatformLoginUriResponse.class);
 
-        assertThat(actual).isEqualTo(spotifyCredentialResponse);
+        assertThat(actual).isEqualTo(platformLoginUriResponse);
     }
 }

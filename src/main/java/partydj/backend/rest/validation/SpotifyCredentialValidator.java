@@ -23,6 +23,4 @@ public class SpotifyCredentialValidator {
             throw new EntityNotFoundException("Failed to log in with Spotify. Please try again.");
         }
     }
-
-
 }

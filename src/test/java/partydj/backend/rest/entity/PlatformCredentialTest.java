@@ -10,12 +10,12 @@ import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SpotifyCredentialTest {
+public class PlatformCredentialTest {
     private final SpotifyCredential spotifyCredential;
     private final ObjectMapper objectMapper;
     private final String path;
 
-    private SpotifyCredentialTest() {
+    private PlatformCredentialTest() {
         spotifyCredential = SpotifyCredential.builder()
                 .id(1)
                 .state("1593bead-e671-4a0b-a195-b5165aed6410")

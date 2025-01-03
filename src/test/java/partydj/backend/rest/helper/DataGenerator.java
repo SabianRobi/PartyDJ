@@ -180,8 +180,8 @@ public class DataGenerator {
                 .build();
     }
 
-    public static SetSpotifyTokensRequest generateSetSpotifyTokensRequest() {
-        return SetSpotifyTokensRequest.builder()
+    public static SetPlatformTokensRequest generateSetSpotifyTokensRequest() {
+        return SetPlatformTokensRequest.builder()
                 .code("someCode")
                 .state(UUID.randomUUID())
                 .build();
@@ -274,14 +274,14 @@ public class DataGenerator {
                 .build();
     }
 
-    public static SpotifyCredentialResponse generateSpotifyCredentialResponse(final SpotifyCredential spotifyCredential) {
-        return SpotifyCredentialResponse.builder()
+    public static PlatformCredentialResponse generateSpotifyCredentialResponse(final SpotifyCredential spotifyCredential) {
+        return PlatformCredentialResponse.builder()
                 .token(spotifyCredential.getToken())
                 .build();
     }
 
-    public static SpotifyLoginUriResponse generateSpotifyLoginUriResponse(final URI loginUri) {
-        return new SpotifyLoginUriResponse(loginUri.toString());
+    public static PlatformLoginUriResponse generateSpotifyLoginUriResponse(final URI loginUri) {
+        return new PlatformLoginUriResponse(loginUri.toString());
     }
 
     public static UserResponse generateUserResponse(final User user) {

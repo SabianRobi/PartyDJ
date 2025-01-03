@@ -12,7 +12,7 @@ import partydj.backend.rest.validation.constraint.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SetSpotifyTokensRequest {
+public class SetPlatformTokensRequest {
     @NotNull
     @NotBlank
     private String code;

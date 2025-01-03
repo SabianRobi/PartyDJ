@@ -12,7 +12,7 @@ import org.hibernate.validator.constraints.URL;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SpotifyLoginUriResponse {
+public class PlatformLoginUriResponse {
 
     @NotNull
     @NotBlank

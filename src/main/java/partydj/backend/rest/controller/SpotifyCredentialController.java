@@ -6,9 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import partydj.backend.rest.entity.User;
-import partydj.backend.rest.entity.request.SetSpotifyTokensRequest;
-import partydj.backend.rest.entity.response.SpotifyCredentialResponse;
-import partydj.backend.rest.entity.response.SpotifyLoginUriResponse;
+import partydj.backend.rest.entity.request.SetPlatformTokensRequest;
+import partydj.backend.rest.entity.response.PlatformCredentialResponse;
+import partydj.backend.rest.entity.response.PlatformLoginUriResponse;
 import partydj.backend.rest.service.SpotifyCredentialService;
 import partydj.backend.rest.service.UserService;
 
@@ -24,7 +24,7 @@ public class SpotifyCredentialController {
     private UserService userService;
 
     @GetMapping("/login")
-    public SpotifyLoginUriResponse getLoginURI(final Authentication auth) {
+    public PlatformLoginUriResponse getLoginURI(final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
         return spotifyCredentialService.getLoginUri(loggedInUser);
@@ -32,26 +32,26 @@ public class SpotifyCredentialController {
 
     @PostMapping(value = "/callback", consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)
-    public SpotifyCredentialResponse processCallback(@Valid @RequestBody final SetSpotifyTokensRequest request) {
+    public PlatformCredentialResponse processCallback(@Valid @RequestBody final SetPlatformTokensRequest request) {
         return spotifyCredentialService.processCallback(request);
     }
 
     @PostMapping("/logout")
-    public SpotifyCredentialResponse logout(final Authentication auth) {
+    public PlatformCredentialResponse logout(final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
         return spotifyCredentialService.logout(loggedInUser);
     }
 
     @GetMapping("/token")
-    public SpotifyCredentialResponse getToken(final Authentication auth) {
+    public PlatformCredentialResponse getToken(final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
         return spotifyCredentialService.getToken(loggedInUser);
     }
 
     @PatchMapping("/token")
-    public SpotifyCredentialResponse refreshToken(final Authentication auth) {
+    public PlatformCredentialResponse refreshToken(final Authentication auth) {
         final User loggedInUser = userService.findByUsername(auth.getName());
 
         return spotifyCredentialService.refreshToken(loggedInUser);
