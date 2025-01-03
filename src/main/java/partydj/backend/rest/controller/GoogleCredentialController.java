@@ -42,4 +42,11 @@ public class GoogleCredentialController {
 
         return googleCredentialService.logout(loggedInUser);
     }
+
+    @GetMapping("/token")
+    public PlatformCredentialResponse getToken(final Authentication auth) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
+
+        return googleCredentialService.getToken(loggedInUser);
+    }
 }

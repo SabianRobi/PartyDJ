@@ -7,6 +7,7 @@ import partydj.backend.rest.entity.User;
 import partydj.backend.rest.entity.request.SetPlatformTokensRequest;
 import partydj.backend.rest.entity.response.PlatformCredentialResponse;
 import partydj.backend.rest.entity.response.PlatformLoginUriResponse;
+import partydj.backend.rest.mapper.PlatformCredentialMapper;
 import partydj.backend.rest.repository.GoogleCredentialRepository;
 import partydj.backend.rest.validation.GoogleCredentialValidator;
 
@@ -28,6 +29,9 @@ public class GoogleCredentialService {
 
     @Autowired
     private GoogleService googleService;
+
+    @Autowired
+    private PlatformCredentialMapper platformCredentialMapper;
 
     // Repository handlers
 
@@ -102,5 +106,10 @@ public class GoogleCredentialService {
         delete(googleCredential);
 
         return googleService.revokeTokens(loggedInUser, googleCredential);
+    }
+
+    public PlatformCredentialResponse getToken(final User loggedInUser) {
+        return platformCredentialMapper.mapCredentialToCredentialResponse(
+                findByOwner(loggedInUser));
     }
 }
