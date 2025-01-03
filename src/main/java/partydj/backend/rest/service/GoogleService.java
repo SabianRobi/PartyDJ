@@ -41,6 +41,7 @@ public class GoogleService {
         final ArrayList<String> scopes = new ArrayList<>();
         scopes.add("https://www.googleapis.com/auth/userinfo.email");
         scopes.add("https://www.googleapis.com/auth/userinfo.profile");
+        scopes.add("https://www.googleapis.com/auth/youtube.readonly");
         scopes.add("openid");
 
         final ClientId clientId = ClientId.of(googleConfigs.get("client-id"), googleConfigs.get("client-secret"));

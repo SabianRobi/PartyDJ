@@ -193,7 +193,7 @@ public class PartyService {
             results.addAll(spotifyService.search(loggedInUser, query, offset, limit));
         }
         if (platforms.contains(PlatformType.YOUTUBE)) {
-            results.addAll(youTubeService.search(query, offset, limit));
+            results.addAll(youTubeService.search(loggedInUser, query, offset, limit));
         }
 
         return results;

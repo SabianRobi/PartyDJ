@@ -8,7 +8,6 @@ import com.google.api.services.youtube.model.SearchResult;
 import com.google.api.services.youtube.model.Video;
 import com.google.api.services.youtube.model.VideoListResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import partydj.backend.rest.entity.Artist;
 import partydj.backend.rest.entity.Party;
@@ -34,9 +33,6 @@ public class YouTubeService {
     @Autowired
     private TrackService trackService;
 
-    @Value("${app.platforms.youtube.apiKey}")
-    private String apiKey;
-
     private final YouTube youTube;
 
     public YouTubeService() {
@@ -49,12 +45,12 @@ public class YouTubeService {
     }
 
     public Collection<TrackSearchResultResponse> search(
-            final String query, final int offset, final int limit) {
+            final User loggedInUser, final String query, final int offset, final int limit) {
 
         try {
             YouTube.Search.List search = youTube.search().list(List.of("snippet"));
 
-            search.setKey(apiKey.replace("\"", ""));
+            search.setOauthToken(loggedInUser.getGoogleCredential().getToken());
             search.setQ(query);
             search.setSafeSearch("none");
             search.setType(List.of("video"));
@@ -76,7 +72,7 @@ public class YouTubeService {
     public TrackInQueue fetchAndSafeTrackInfo(final User loggedInUser, final String uri, final Party party) {
         try {
             YouTube.Videos.List searchVideo = youTube.videos().list(List.of("contentDetails"));
-            searchVideo.setKey(apiKey.replace("\"", ""));
+            searchVideo.setOauthToken(loggedInUser.getGoogleCredential().getToken());
             searchVideo.setPart(List.of("snippet", "contentDetails", "id"));
             searchVideo.setId(List.of(uri));
             searchVideo.setFields("items(id,snippet(title,channelTitle,thumbnails(high(url))),contentDetails(duration))");
