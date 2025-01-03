@@ -35,4 +35,11 @@ public class GoogleCredentialController {
     public PlatformCredentialResponse processCallback(@Valid @RequestBody final SetPlatformTokensRequest request) {
         return googleCredentialService.processCallback(request);
     }
+
+    @PostMapping("/logout")
+    public PlatformCredentialResponse logout(final Authentication auth) {
+        final User loggedInUser = userService.findByUsername(auth.getName());
+
+        return googleCredentialService.logout(loggedInUser);
+    }
 }

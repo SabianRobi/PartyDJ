@@ -31,18 +31,32 @@ public class GoogleCredentialService {
 
     // Repository handlers
 
-    public GoogleCredential findByOwnerWithoutExceptionThrowing(final User owner) {
-        return repository.findByOwner(owner);
+    public GoogleCredential findByOwner(final User owner) {
+        final GoogleCredential googleCredential = repository.findByOwner(owner);
+
+        validator.verifyLoggedIn(googleCredential);
+
+        return googleCredential;
     }
 
-    public GoogleCredential save(final GoogleCredential googleCredential) {
-        return repository.save(googleCredential);
+    public GoogleCredential findByOwnerWithoutExceptionThrowing(final User owner) {
+        return repository.findByOwner(owner);
     }
 
     public GoogleCredential findByState(final UUID state) {
         final GoogleCredential googleCredential = repository.findByState(state.toString());
 
         validator.verifyNotNull(googleCredential);
+
+        return googleCredential;
+    }
+
+    public GoogleCredential save(final GoogleCredential googleCredential) {
+        return repository.save(googleCredential);
+    }
+
+    public GoogleCredential delete(final GoogleCredential googleCredential) {
+        repository.delete(googleCredential);
 
         return googleCredential;
     }
@@ -78,5 +92,15 @@ public class GoogleCredentialService {
         final GoogleCredential googleCredential = findByState(request.getState());
 
         return googleService.processCallback(googleCredential, decodedCode);
+    }
+
+    public PlatformCredentialResponse logout(final User loggedInUser) {
+        final GoogleCredential googleCredential = findByOwner(loggedInUser);
+
+        loggedInUser.setGoogleCredential(null);
+        userService.save(loggedInUser);
+        delete(googleCredential);
+
+        return googleService.revokeTokens(loggedInUser, googleCredential);
     }
 }

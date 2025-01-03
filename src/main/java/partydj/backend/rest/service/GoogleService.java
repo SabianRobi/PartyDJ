@@ -85,4 +85,14 @@ public class GoogleService {
             throw new ThirdPartyApiException("Failed to log in with Google: " + e.getMessage());
         }
     }
+
+    public PlatformCredentialResponse revokeTokens(final User user, final GoogleCredential googleCredential) {
+        try {
+            userAuthorizer.revokeAuthorization(String.valueOf(user.getId()));
+        } catch (IOException e) {
+            throw new ThirdPartyApiException("Failed to disconnect Google: " + e.getMessage());
+        }
+
+        return platformCredentialMapper.mapCredentialToCredentialResponse(googleCredential);
+    }
 }
