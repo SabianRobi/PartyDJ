@@ -16,6 +16,9 @@ public class UserMapper {
                 .isSpotifyConnected(
                         user.getSpotifyCredential() != null &&
                         user.getSpotifyCredential().getToken() != null)
+                .isGoogleConnected(
+                        user.getGoogleCredential() != null &&
+                        user.getGoogleCredential().getToken() != null)
                 .partyName(user.getParty() != null ? user.getParty().getName() : null)
                 .build();
     }

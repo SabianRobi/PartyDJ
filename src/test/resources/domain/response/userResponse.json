@@ -3,5 +3,6 @@
   "email" : "e@ma.il",
   "username" : "username",
   "partyName" : null,
+  "googleConnected" : false,
   "spotifyConnected" : false
 }

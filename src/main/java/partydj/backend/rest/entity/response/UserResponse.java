@@ -31,5 +31,8 @@ public class UserResponse {
     private boolean isSpotifyConnected;
 
     @NotNull
+    private boolean isGoogleConnected;
+
+    @NotNull
     private String partyName;
 }

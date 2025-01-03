@@ -6,6 +6,7 @@
   "userType" : "NORMAL",
   "partyRole" : null,
   "spotifyCredential" : null,
+  "googleCredential" : null,
   "party" : null,
   "addedTracks" : [ ]
 }

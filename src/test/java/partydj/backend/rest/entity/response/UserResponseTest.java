@@ -21,6 +21,7 @@ public class UserResponseTest {
                 .email("e@ma.il")
                 .username("username")
                 .isSpotifyConnected(false)
+                .isGoogleConnected(false)
                 .partyName(null)
                 .build();
         objectMapper = new ObjectMapper();

@@ -28,6 +28,7 @@ public class UserTest {
                 .userType(UserType.NORMAL)
                 .partyRole(null)
                 .spotifyCredential(null)
+                .googleCredential(null)
                 .party(null)
                 .addedTracks(new HashSet<>())
                 .build();
