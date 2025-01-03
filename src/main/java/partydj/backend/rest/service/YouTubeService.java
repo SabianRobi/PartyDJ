@@ -1,7 +1,7 @@
 package partydj.backend.rest.service;
 
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class YouTubeService {
@@ -40,11 +39,10 @@ public class YouTubeService {
 
     private final YouTube youTube;
 
-    @Autowired
-    public YouTubeService(final Map<String, String> youTubeConfigs) {
+    public YouTubeService() {
         youTube = new YouTube.Builder(
                 new NetHttpTransport(),
-                new JacksonFactory(),
+                new GsonFactory(),
                 httpRequest -> {})
             .setApplicationName("PartyDJ")
             .build();
@@ -54,12 +52,12 @@ public class YouTubeService {
             final String query, final int offset, final int limit) {
 
         try {
-            YouTube.Search.List search = youTube.search().list("snippet");
+            YouTube.Search.List search = youTube.search().list(List.of("snippet"));
 
             search.setKey(apiKey.replace("\"", ""));
             search.setQ(query);
             search.setSafeSearch("none");
-            search.setType("video");
+            search.setType(List.of("video"));
             search.setFields("items(snippet(title,channelTitle,thumbnails/high/url),id)");
             search.setMaxResults(10L); // TODO: make work with limit & offset params
 
@@ -77,10 +75,10 @@ public class YouTubeService {
 
     public TrackInQueue fetchAndSafeTrackInfo(final User loggedInUser, final String uri, final Party party) {
         try {
-            YouTube.Videos.List searchVideo = youTube.videos().list("contentDetails");
+            YouTube.Videos.List searchVideo = youTube.videos().list(List.of("contentDetails"));
             searchVideo.setKey(apiKey.replace("\"", ""));
-            searchVideo.setPart("snippet,contentDetails,id");
-            searchVideo.setId(uri);
+            searchVideo.setPart(List.of("snippet", "contentDetails", "id"));
+            searchVideo.setId(List.of(uri));
             searchVideo.setFields("items(id,snippet(title,channelTitle,thumbnails(high(url))),contentDetails(duration))");
 
             final VideoListResponse videoList = searchVideo.execute();
